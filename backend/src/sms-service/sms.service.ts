@@ -33,14 +33,13 @@ export class SmsService {
         from: this.configService.get<string>('email.auth.user'),
         to: sendEmailDto.to,
         subject: sendEmailDto.subject,
-        ...(sendEmailDto.format === 'html' 
-          ? { html: sendEmailDto.message } 
-          : { text: sendEmailDto.message }
-        ),
+        ...(sendEmailDto.format === 'html'
+          ? { html: sendEmailDto.message }
+          : { text: sendEmailDto.message }),
       };
 
       const result = await this.transporter.sendMail(mailOptions);
-      
+
       return {
         success: true,
         messageId: result.messageId,
@@ -50,9 +49,12 @@ export class SmsService {
     }
   }
 
-  async sendWelcomeEmail(to: string, name: string): Promise<{ success: boolean; messageId?: string }> {
+  async sendWelcomeEmail(
+    to: string,
+    name: string,
+  ): Promise<{ success: boolean; messageId?: string }> {
     const template = this.getWelcomeTemplate(name);
-    
+
     return this.sendEmail({
       to,
       subject: template.subject,
@@ -61,9 +63,12 @@ export class SmsService {
     });
   }
 
-  async sendPasswordResetEmail(to: string, resetToken: string): Promise<{ success: boolean; messageId?: string }> {
+  async sendPasswordResetEmail(
+    to: string,
+    resetToken: string,
+  ): Promise<{ success: boolean; messageId?: string }> {
     const template = this.getPasswordResetTemplate(resetToken);
-    
+
     return this.sendEmail({
       to,
       subject: template.subject,
@@ -72,9 +77,12 @@ export class SmsService {
     });
   }
 
-  async sendScamAlertEmail(to: string, scamDetails: any): Promise<{ success: boolean; messageId?: string }> {
+  async sendScamAlertEmail(
+    to: string,
+    scamDetails: any,
+  ): Promise<{ success: boolean; messageId?: string }> {
     const template = this.getScamAlertTemplate(scamDetails);
-    
+
     return this.sendEmail({
       to,
       subject: template.subject,
@@ -95,7 +103,7 @@ export class SmsService {
       messageId?: string;
       error?: any;
     }> = [];
-    
+
     for (const recipient of recipients) {
       try {
         const result = await this.sendEmail({
@@ -154,7 +162,7 @@ export class SmsService {
 
   private getPasswordResetTemplate(resetToken: string): EmailTemplate {
     const resetLink = `${this.configService.get<string>('cors.origin')}/reset-password?token=${resetToken}`;
-    
+
     return {
       subject: 'Password Reset - Ndimboni',
       html: `

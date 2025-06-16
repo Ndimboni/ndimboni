@@ -30,8 +30,8 @@ export class PolicyGuard implements CanActivate {
       return true; // No policy specified, allow access
     }
 
-    const request = context.switchToHttp().getRequest() as any;
-    const user = request.user as any;
+    const request = context.switchToHttp().getRequest();
+    const user = request.user;
 
     if (!user) {
       throw new ForbiddenException('User not authenticated');

@@ -18,7 +18,7 @@ async function bootstrap() {
       transformOptions: {
         enableImplicitConversion: true, // Allow conversion of primitive types
       },
-    })
+    }),
   );
 
   // CORS configuration
@@ -48,8 +48,13 @@ async function bootstrap() {
 
   const port = configService.get<number>('port') || 3000;
   await app.listen(port);
-  
+
   logger.log(`🚀 Application is running on: http://localhost:${port}`);
-  logger.log(`📚 Swagger documentation available at: http://localhost:${port}/api/docs`);
+  logger.log(
+    `📚 Swagger documentation available at: http://localhost:${port}/api/docs`,
+  );
 }
-bootstrap();
+bootstrap().catch((error) => {
+  console.error('Error starting the application:', error);
+  process.exit(1);
+});

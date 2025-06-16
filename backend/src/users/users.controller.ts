@@ -1,26 +1,30 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Put, 
-  Delete, 
-  Body, 
-  Param, 
+import {
+  Controller,
+  Get,
+  // Post,
+  Put,
+  Delete,
+  Body,
+  Param,
   UseGuards,
   Request,
   HttpCode,
-  HttpStatus
+  HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { UsersService } from './users.service';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { PolicyGuard } from '../guards/policy.guard';
 import { RequirePolicy } from '../decorators/policy.decorator';
 import { Action, Resource } from '../common/interfaces/policy.interface';
 
 @ApiTags('users')
 @Controller('users')
-@UseGuards(JwtAuthGuard, PolicyGuard)
+@UseGuards(PolicyGuard) // JWT guard is now global, only need policy guard
 @ApiBearerAuth()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

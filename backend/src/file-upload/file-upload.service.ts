@@ -1,49 +1,53 @@
-import { 
-  Injectable, 
-  BadRequestException, 
-  NotFoundException 
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
+import { UploadedFile } from '../entities/uploaded-file.entity';
+import { User } from '../entities/user.entity';
+import { UserRole } from '../common/interfaces/user.interface';
 import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
-export interface UploadedFile {
-  id: string;
-  originalName: string;
-  filename: string;
-  mimetype: string;
-  size: number;
-  path: string;
-  uploadedBy: string;
-  uploadedAt: Date;
-}
-
 @Injectable()
 export class FileUploadService {
-  private files: UploadedFile[] = [];
   private uploadPath: string;
   private maxFileSize: number;
   private allowedMimeTypes: string[];
 
-  constructor(private configService: ConfigService) {
-    this.uploadPath = this.configService.get<string>('upload.destination') || './uploads';
-    this.maxFileSize = this.configService.get<number>('upload.maxFileSize') || 5242880;
-    this.allowedMimeTypes = this.configService.get<string[]>('upload.allowedMimeTypes') || [
+  constructor(
+    @InjectRepository(UploadedFile)
+    private readonly fileRepository: Repository<UploadedFile>,
+    private configService: ConfigService,
+  ) {
+    this.uploadPath =
+      this.configService.get<string>('upload.destination') || './uploads';
+    this.maxFileSize =
+      this.configService.get<number>('upload.maxFileSize') || 5242880;
+    this.allowedMimeTypes = this.configService.get<string[]>(
+      'upload.allowedMimeTypes',
+    ) || [
       'image/jpeg',
       'image/png',
       'image/gif',
       'application/pdf',
       'text/plain',
     ];
-    
+
     // Ensure upload directory exists
     if (!fs.existsSync(this.uploadPath)) {
       fs.mkdirSync(this.uploadPath, { recursive: true });
     }
   }
 
-  async uploadFile(file: Express.Multer.File, userId: string): Promise<UploadedFile> {
+  async uploadFile(
+    file: Express.Multer.File,
+    user?: User,
+  ): Promise<UploadedFile> {
     // Validate file
     this.validateFile(file);
 
@@ -55,26 +59,27 @@ export class FileUploadService {
     // Save file to disk
     fs.writeFileSync(filePath, file.buffer);
 
-    const uploadedFile: UploadedFile = {
-      id: fileId,
-      originalName: file.originalname,
+    const uploadedFile = this.fileRepository.create({
       filename,
-      mimetype: file.mimetype,
+      originalName: file.originalname,
+      mimeType: file.mimetype,
       size: file.size,
       path: filePath,
-      uploadedBy: userId,
-      uploadedAt: new Date(),
-    };
+      uploadedById: user?.id,
+      uploadedBy: user,
+    });
 
-    this.files.push(uploadedFile);
-    return uploadedFile;
+    return this.fileRepository.save(uploadedFile);
   }
 
-  async uploadMultipleFiles(files: Express.Multer.File[], userId: string): Promise<UploadedFile[]> {
+  async uploadMultipleFiles(
+    files: Express.Multer.File[],
+    user?: User,
+  ): Promise<UploadedFile[]> {
     const uploadedFiles: UploadedFile[] = [];
-    
+
     for (const file of files) {
-      const uploadedFile = await this.uploadFile(file, userId);
+      const uploadedFile = await this.uploadFile(file, user);
       uploadedFiles.push(uploadedFile);
     }
 
@@ -82,27 +87,37 @@ export class FileUploadService {
   }
 
   async getFile(fileId: string): Promise<UploadedFile> {
-    const file = this.files.find(f => f.id === fileId);
+    const file = await this.fileRepository.findOne({
+      where: { id: fileId },
+      relations: ['uploadedBy'],
+    });
+
     if (!file) {
       throw new NotFoundException('File not found');
     }
+
     return file;
   }
 
   async getFilesByUser(userId: string): Promise<UploadedFile[]> {
-    return this.files.filter(f => f.uploadedBy === userId);
+    return this.fileRepository.find({
+      where: { uploadedById: userId },
+      order: { createdAt: 'DESC' },
+    });
   }
 
-  async deleteFile(fileId: string, userId: string): Promise<void> {
-    const fileIndex = this.files.findIndex(f => f.id === fileId);
-    if (fileIndex === -1) {
-      throw new NotFoundException('File not found');
-    }
+  async getAllFiles(): Promise<UploadedFile[]> {
+    return this.fileRepository.find({
+      relations: ['uploadedBy'],
+      order: { createdAt: 'DESC' },
+    });
+  }
 
-    const file = this.files[fileIndex];
-    
+  async deleteFile(fileId: string, user: User): Promise<void> {
+    const file = await this.getFile(fileId);
+
     // Check if user owns the file or is admin
-    if (file.uploadedBy !== userId) {
+    if (file.uploadedById !== user.id && user.role !== UserRole.ADMIN) {
       throw new BadRequestException('You can only delete your own files');
     }
 
@@ -111,13 +126,15 @@ export class FileUploadService {
       fs.unlinkSync(file.path);
     }
 
-    // Remove from memory
-    this.files.splice(fileIndex, 1);
+    // Remove from database
+    await this.fileRepository.delete(fileId);
   }
 
-  async getFileStream(fileId: string): Promise<{ stream: fs.ReadStream; file: UploadedFile }> {
+  async getFileStream(
+    fileId: string,
+  ): Promise<{ stream: fs.ReadStream; file: UploadedFile }> {
     const file = await this.getFile(fileId);
-    
+
     if (!fs.existsSync(file.path)) {
       throw new NotFoundException('File not found on disk');
     }
@@ -130,14 +147,14 @@ export class FileUploadService {
     // Check file size
     if (file.size > this.maxFileSize) {
       throw new BadRequestException(
-        `File size exceeds maximum limit of ${this.maxFileSize / (1024 * 1024)}MB`
+        `File size exceeds maximum limit of ${this.maxFileSize / (1024 * 1024)}MB`,
       );
     }
 
     // Check mime type
     if (!this.allowedMimeTypes.includes(file.mimetype)) {
       throw new BadRequestException(
-        `File type ${file.mimetype} is not allowed. Allowed types: ${this.allowedMimeTypes.join(', ')}`
+        `File type ${file.mimetype} is not allowed. Allowed types: ${this.allowedMimeTypes.join(', ')}`,
       );
     }
   }
