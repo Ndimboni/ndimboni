@@ -162,7 +162,7 @@ export default function About() {
         </section>
 
         {/* Problem & Solution Section */}
-        <section className="py-16 bg-gradient-to-br from-[#EBF5FB] to-[#AED6F1]">
+        <section className="py-6 bg-gradient-to-br from-[#EBF5FB] to-[#AED6F1]">
           <div className="container mx-auto px-6">
             <Row gutter={[32, 32]}>
               <Col xs={24} md={12}>
@@ -182,7 +182,7 @@ export default function About() {
                     }}
                   >
                     <div className="text-center mb-6">
-                      <GlobalOutlined className="text-5xl mb-4" style={{ color: '#e74c3c' }} />
+                      <GlobalOutlined className="text-2xl mb-4" style={{ color: '#e74c3c' }} />
                       <Title level={3} style={{ color: '#1A5276' }}>The Problem</Title>
                     </div>
                     <Paragraph className="text-base leading-relaxed" style={{ color: '#1A5276' }}>
@@ -227,7 +227,7 @@ export default function About() {
         </section>
 
         {/* Core Features Section */}
-        <section className="py-16" style={{ backgroundColor: '#f8f9fa' }}>
+        <section className="py-6" style={{ backgroundColor: '#f8f9fa' }}>
           <div className="container mx-auto px-6">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -295,7 +295,7 @@ export default function About() {
         </section>
 
         {/* Team Section */}
-        <section className="py-16 bg-gradient-to-br from-[#EBF5FB] to-[#AED6F1]">
+        <section className="py-6 bg-gradient-to-br from-[#EBF5FB] to-[#AED6F1]">
           <div className="container mx-auto px-6">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -405,7 +405,7 @@ export default function About() {
         </section>
 
         {/* Technical Stack & Timeline */}
-        <section className="py-16" style={{ backgroundColor: '#f8f9fa' }}>
+        <section className="py-6" style={{ backgroundColor: '#f8f9fa' }}>
           <div className="container mx-auto px-6">
             <Row gutter={[32, 32]}>
               <Col xs={24} lg={12}>
@@ -491,7 +491,7 @@ export default function About() {
         </section>
 
         {/* Mission & Impact Section */}
-        <section className="py-16 bg-gradient-to-br from-[#EBF5FB] to-[#AED6F1]">
+        <section className="py-6 bg-gradient-to-br from-[#EBF5FB] to-[#AED6F1]">
           <div className="container mx-auto px-6">
             <motion.div
               initial={{ opacity: 0, y: 30 }}

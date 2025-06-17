@@ -64,7 +64,7 @@ export default function ContactPage() {
       <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
         
         {/* Hero Section */}
-        <section className="bg-white text-dark py-16">
+        <section className="bg-white text-dark py-6">
           <div className="container mx-auto px-6">
             <motion.div
               initial={{ opacity: 0, y: 50 }}
@@ -77,7 +77,7 @@ export default function ContactPage() {
                 Get In Touch
               </div>
               
-              <Title level={1} className="mb-6" style={{ fontSize: '3rem', fontWeight: 'bold', color: '#1A5276' }}>
+              <Title level={1} className="mb-6" style={{ fontSize: '2.2rem', fontWeight: 'bold', color: '#1A5276' }}>
                 Contact <span style={{ color: '#2980B9' }}>Ndimboni</span>
               </Title>
               
@@ -90,7 +90,7 @@ export default function ContactPage() {
         </section>
 
         {/* Contact Information Cards */}
-        <section className="py-12 bg-gradient-to-br from-[#EBF5FB] to-[#AED6F1]">
+        <section className="py-7 bg-gradient-to-br from-[#EBF5FB] to-[#AED6F1]">
           <div className="container mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
               {contactInfo.map((info, index) => (
@@ -143,7 +143,7 @@ export default function ContactPage() {
         </section>
 
         {/* Contact Form and Information */}
-        <section className="py-16">
+        <section className="py-6">
           <div className="container mx-auto px-6">
             <Row gutter={[48, 48]} align="top">
               
@@ -421,7 +421,7 @@ export default function ContactPage() {
         </section>
 
         {/* FAQ Quick Links */}
-        <section className="py-12" style={{ backgroundColor: '#f8f9fa' }}>
+        <section className="py-6" style={{ backgroundColor: '#f8f9fa' }}>
           <div className="container mx-auto px-6">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
