@@ -214,3 +214,79 @@ export class GetStatsQueryDto {
   @Max(365)
   days?: number = 30;
 }
+
+export class GetAllScammerReportsQueryDto {
+  @ApiProperty({
+    description: 'Number of results to return',
+    example: 100,
+    minimum: 1,
+    maximum: 1000,
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(1000)
+  limit?: number = 100;
+
+  @ApiProperty({
+    description: 'Number of results to skip',
+    example: 0,
+    minimum: 0,
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  offset?: number = 0;
+
+  @ApiProperty({
+    description: 'Filter by scammer status',
+    enum: ScammerStatus,
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(ScammerStatus)
+  status?: ScammerStatus;
+
+  @ApiProperty({
+    description: 'Filter by scammer type',
+    enum: ScammerType,
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(ScammerType)
+  type?: ScammerType;
+
+  @ApiProperty({
+    description: 'Filter from date (ISO string)',
+    example: '2024-01-01T00:00:00.000Z',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  fromDate?: string;
+
+  @ApiProperty({
+    description: 'Filter to date (ISO string)',
+    example: '2024-12-31T23:59:59.999Z',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  toDate?: string;
+
+  @ApiProperty({
+    description: 'Search query for identifier or description',
+    example: 'scammer@example.com',
+    required: false,
+    minLength: 1,
+    maxLength: 255,
+  })
+  @IsOptional()
+  @IsString()
+  @Length(1, 255)
+  query?: string;
+}
