@@ -11,6 +11,8 @@ import { UsersModule } from './users/users.module';
 import { FileUploadModule } from './file-upload/file-upload.module';
 import { SmsModule } from './sms-service/sms.module';
 import { ScamReportsModule } from './scam-reports/scam-reports.module';
+import { ScamCheckModule } from './scam-check/scam-check.module';
+import { ScammerReportsModule } from './scammer-reports/scammer-reports.module';
 import { TelegramBotModule } from './telegram-bot/telegram-bot.module';
 import { LoggerMiddleware } from './middleware/logger.middleware';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -35,6 +37,8 @@ import configuration from './config/configuration';
     FileUploadModule,
     SmsModule,
     ScamReportsModule,
+    ScamCheckModule,
+    ScammerReportsModule,
     TelegramBotModule,
   ],
   controllers: [AppController],

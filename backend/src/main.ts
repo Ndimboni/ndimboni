@@ -37,6 +37,9 @@ async function bootstrap() {
     .addTag('users', 'User management endpoints')
     .addTag('file-upload', 'File upload and management endpoints')
     .addTag('email-service', 'Email service endpoints')
+    .addTag('Scam Check', 'Message scam detection and analysis')
+    .addTag('Scammer Reports', 'Report and manage known scammers')
+    .addTag('Telegram Bot', 'Telegram bot management and configuration')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

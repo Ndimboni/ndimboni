@@ -2,7 +2,13 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { User, ScamReport, UploadedFile } from '../entities';
+import {
+  User,
+  ScamReport,
+  UploadedFile,
+  ScamCheck,
+  ScammerReport,
+} from '../entities';
 import { SeedService } from './seed.service';
 
 @Module({
@@ -13,12 +19,18 @@ import { SeedService } from './seed.service';
         const dbConfig = configService.get('database');
         return {
           ...dbConfig,
-          entities: [User, ScamReport, UploadedFile],
+          entities: [User, ScamReport, UploadedFile, ScamCheck, ScammerReport],
         } as TypeOrmModuleOptions;
       },
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([User, ScamReport, UploadedFile]),
+    TypeOrmModule.forFeature([
+      User,
+      ScamReport,
+      UploadedFile,
+      ScamCheck,
+      ScammerReport,
+    ]),
   ],
   providers: [SeedService],
   exports: [TypeOrmModule, SeedService],

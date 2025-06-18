@@ -34,22 +34,47 @@ export class TelegramModerationService {
 
   private readonly scamKeywords = [
     // Financial scams
-    'quick money', 'easy money', 'guaranteed profit', 'double your money',
-    'investment opportunity', 'make money fast', 'passive income',
-    'bitcoin investment', 'forex trading', 'pyramid scheme',
-    
+    'quick money',
+    'easy money',
+    'guaranteed profit',
+    'double your money',
+    'investment opportunity',
+    'make money fast',
+    'passive income',
+    'bitcoin investment',
+    'forex trading',
+    'pyramid scheme',
+
     // Romance/dating scams
-    'lonely', 'widow', 'widower', 'military', 'overseas',
-    'inheritance', 'business trip', 'hospital',
-    
+    'lonely',
+    'widow',
+    'widower',
+    'military',
+    'overseas',
+    'inheritance',
+    'business trip',
+    'hospital',
+
     // Tech support scams
-    'virus detected', 'computer infected', 'microsoft support',
-    'apple support', 'refund', 'suspended account',
-    
+    'virus detected',
+    'computer infected',
+    'microsoft support',
+    'apple support',
+    'refund',
+    'suspended account',
+
     // General scam indicators
-    'urgent', 'act now', 'limited time', 'congratulations',
-    'winner', 'lottery', 'prize', 'gift card',
-    'verification required', 'click here', 'download now'
+    'urgent',
+    'act now',
+    'limited time',
+    'congratulations',
+    'winner',
+    'lottery',
+    'prize',
+    'gift card',
+    'verification required',
+    'click here',
+    'download now',
   ];
 
   private readonly urgencyPatterns = [
@@ -80,18 +105,29 @@ export class TelegramModerationService {
     this.config = telegramConfig;
   }
 
-  async analyzeMessage(text: string, userId?: string): Promise<ModerationResult> {
+  async analyzeMessage(
+    text: string,
+    userId?: string,
+  ): Promise<ModerationResult> {
     const reasons: string[] = [];
     const detectedPatterns: string[] = [];
     let totalScore = 0;
     let confidence = 0;
 
     // Check for scam keywords
-    const keywordScore = this.checkScamKeywords(text, reasons, detectedPatterns);
+    const keywordScore = this.checkScamKeywords(
+      text,
+      reasons,
+      detectedPatterns,
+    );
     totalScore += keywordScore;
 
     // Check for urgency patterns
-    const urgencyScore = this.checkUrgencyPatterns(text, reasons, detectedPatterns);
+    const urgencyScore = this.checkUrgencyPatterns(
+      text,
+      reasons,
+      detectedPatterns,
+    );
     totalScore += urgencyScore;
 
     // Check for suspicious URLs
@@ -99,15 +135,27 @@ export class TelegramModerationService {
     totalScore += urlScore;
 
     // Check for phone number harvesting
-    const phoneScore = this.checkPhoneNumberHarvesting(text, reasons, detectedPatterns);
+    const phoneScore = this.checkPhoneNumberHarvesting(
+      text,
+      reasons,
+      detectedPatterns,
+    );
     totalScore += phoneScore;
 
     // Check for impersonation attempts
-    const impersonationScore = this.checkImpersonation(text, reasons, detectedPatterns);
+    const impersonationScore = this.checkImpersonation(
+      text,
+      reasons,
+      detectedPatterns,
+    );
     totalScore += impersonationScore;
 
     // Check for grammar and spelling issues (common in scams)
-    const grammarScore = this.checkGrammarIssues(text, reasons, detectedPatterns);
+    const grammarScore = this.checkGrammarIssues(
+      text,
+      reasons,
+      detectedPatterns,
+    );
     totalScore += grammarScore;
 
     // Calculate confidence and risk level
@@ -122,7 +170,9 @@ export class TelegramModerationService {
 
     const isScam = totalScore >= 5; // Threshold for considering a message as scam
 
-    this.logger.debug(`Message analysis: score=${totalScore}, confidence=${confidence}, risk=${riskLevel}, isScam=${isScam}`);
+    this.logger.debug(
+      `Message analysis: score=${totalScore}, confidence=${confidence}, risk=${riskLevel}, isScam=${isScam}`,
+    );
 
     return {
       isScam,
@@ -133,7 +183,11 @@ export class TelegramModerationService {
     };
   }
 
-  private checkScamKeywords(text: string, reasons: string[], detectedPatterns: string[]): number {
+  private checkScamKeywords(
+    text: string,
+    reasons: string[],
+    detectedPatterns: string[],
+  ): number {
     let score = 0;
     const lowerText = text.toLowerCase();
 
@@ -150,7 +204,11 @@ export class TelegramModerationService {
     return Math.min(score, 3); // Cap at 3 points
   }
 
-  private checkUrgencyPatterns(text: string, reasons: string[], detectedPatterns: string[]): number {
+  private checkUrgencyPatterns(
+    text: string,
+    reasons: string[],
+    detectedPatterns: string[],
+  ): number {
     let score = 0;
 
     for (const pattern of this.urgencyPatterns) {
@@ -167,7 +225,11 @@ export class TelegramModerationService {
     return Math.min(score, 2); // Cap at 2 points
   }
 
-  private checkSuspiciousUrls(text: string, reasons: string[], detectedPatterns: string[]): number {
+  private checkSuspiciousUrls(
+    text: string,
+    reasons: string[],
+    detectedPatterns: string[],
+  ): number {
     let score = 0;
 
     // Check for shortened URLs
@@ -184,8 +246,14 @@ export class TelegramModerationService {
 
     // Check for suspicious domains
     const suspiciousDomains = [
-      'bit.ly', 'tinyurl.com', 't.co', 'goo.gl', 'short.link',
-      'click.me', 'earn.com', 'money.com'
+      'bit.ly',
+      'tinyurl.com',
+      't.co',
+      'goo.gl',
+      'short.link',
+      'click.me',
+      'earn.com',
+      'money.com',
     ];
 
     for (const domain of suspiciousDomains) {
@@ -201,7 +269,11 @@ export class TelegramModerationService {
     return Math.min(score, 3); // Cap at 3 points
   }
 
-  private checkPhoneNumberHarvesting(text: string, reasons: string[], detectedPatterns: string[]): number {
+  private checkPhoneNumberHarvesting(
+    text: string,
+    reasons: string[],
+    detectedPatterns: string[],
+  ): number {
     let score = 0;
 
     for (const pattern of this.phoneNumberPatterns) {
@@ -209,7 +281,10 @@ export class TelegramModerationService {
       if (matches) {
         score += matches.length;
         detectedPatterns.push(...matches);
-        if (score > 0 && !reasons.includes('Requests personal contact information')) {
+        if (
+          score > 0 &&
+          !reasons.includes('Requests personal contact information')
+        ) {
           reasons.push('Requests personal contact information');
         }
       }
@@ -218,7 +293,11 @@ export class TelegramModerationService {
     return Math.min(score, 2); // Cap at 2 points
   }
 
-  private checkImpersonation(text: string, reasons: string[], detectedPatterns: string[]): number {
+  private checkImpersonation(
+    text: string,
+    reasons: string[],
+    detectedPatterns: string[],
+  ): number {
     let score = 0;
 
     for (const pattern of this.impersonationPatterns) {
@@ -235,7 +314,11 @@ export class TelegramModerationService {
     return Math.min(score, 4); // Cap at 4 points
   }
 
-  private checkGrammarIssues(text: string, reasons: string[], detectedPatterns: string[]): number {
+  private checkGrammarIssues(
+    text: string,
+    reasons: string[],
+    detectedPatterns: string[],
+  ): number {
     let score = 0;
 
     // Check for excessive punctuation
@@ -299,7 +382,11 @@ export class TelegramModerationService {
       }
 
       // Check for suspicious parameters
-      if (url.includes('ref=') || url.includes('affiliate=') || url.includes('promo=')) {
+      if (
+        url.includes('ref=') ||
+        url.includes('affiliate=') ||
+        url.includes('promo=')
+      ) {
         return {
           isSafe: false,
           reason: 'URL contains affiliate/promotional parameters',
@@ -320,7 +407,11 @@ export class TelegramModerationService {
   }
 
   getModerationAction(result: ModerationResult): 'delete' | 'warn' | 'none' {
-    if (result.isScam && result.riskLevel === 'high' && result.confidence > 0.7) {
+    if (
+      result.isScam &&
+      result.riskLevel === 'high' &&
+      result.confidence > 0.7
+    ) {
       return 'delete';
     } else if (result.riskLevel === 'medium' && result.confidence > 0.5) {
       return 'warn';
