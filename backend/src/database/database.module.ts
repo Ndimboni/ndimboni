@@ -10,6 +10,7 @@ import {
   ScammerReport,
 } from '../entities';
 import { SeedService } from './seed.service';
+import { MigrationService } from './migration.service';
 
 @Module({
   imports: [
@@ -32,7 +33,7 @@ import { SeedService } from './seed.service';
       ScammerReport,
     ]),
   ],
-  providers: [SeedService],
-  exports: [TypeOrmModule, SeedService],
+  providers: [SeedService, MigrationService],
+  exports: [TypeOrmModule, SeedService, MigrationService],
 })
 export class DatabaseModule {}

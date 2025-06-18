@@ -11,7 +11,9 @@ export interface DatabaseConfig {
   entities: string[];
   migrations: string[];
   migrationsTableName: string;
+  migrationsRun: boolean;
   autoLoadEntities: boolean;
+  dropSchema?: boolean;
 }
 
 export interface JwtConfig {

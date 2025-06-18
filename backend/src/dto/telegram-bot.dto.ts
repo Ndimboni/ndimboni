@@ -4,7 +4,8 @@ import { IsString, IsNotEmpty, Length } from 'class-validator';
 export class AnalyzeMessageDto {
   @ApiProperty({
     description: 'Message to analyze for scam content',
-    example: 'Congratulations! You have won $1,000,000. Click here to claim your prize.',
+    example:
+      'Congratulations! You have won $1,000,000. Click here to claim your prize.',
     minLength: 1,
     maxLength: 4000,
   })
