@@ -83,3 +83,74 @@ export class GetRecentChecksQueryDto {
   @Max(200)
   limit?: number = 50;
 }
+
+export class GetAllChecksQueryDto {
+  @ApiProperty({
+    description: 'Number of results to return',
+    example: 100,
+    minimum: 1,
+    maximum: 1000,
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(1000)
+  limit?: number = 100;
+
+  @ApiProperty({
+    description: 'Number of results to skip',
+    example: 0,
+    minimum: 0,
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  offset?: number = 0;
+
+  @ApiProperty({
+    description: 'Filter by check status',
+    enum: ['SAFE', 'SUSPICIOUS', 'MALICIOUS', 'UNKNOWN'],
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  status?: string;
+
+  @ApiProperty({
+    description: 'Filter by detected intent',
+    enum: [
+      'PHISHING',
+      'ROMANCE_SCAM',
+      'TECH_SUPPORT',
+      'INVESTMENT_SCAM',
+      'LOTTERY_SCAM',
+      'OTHER',
+    ],
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  intent?: string;
+
+  @ApiProperty({
+    description: 'Filter from date (ISO string)',
+    example: '2024-01-01T00:00:00.000Z',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  fromDate?: string;
+
+  @ApiProperty({
+    description: 'Filter to date (ISO string)',
+    example: '2024-12-31T23:59:59.999Z',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  toDate?: string;
+}

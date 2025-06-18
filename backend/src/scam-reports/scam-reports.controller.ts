@@ -33,13 +33,21 @@ export class ScamReportsController {
   constructor(private readonly scamReportsService: ScamReportsService) {}
 
   @Public()
-  @Get()
+  @Get(':userId')
   @ApiOperation({ summary: 'Get all scam reports' })
   @ApiResponse({ status: 200, description: 'List of scam reports' })
-  async findAll(@Query('userId') userId?: string) {
+  async findByuserId(@Param('userId') userId?: string) {
     if (userId) {
       return this.scamReportsService.findByUser(userId);
     }
+    return this.scamReportsService.findAll();
+  }
+
+  @Public()
+  @Get()
+  @ApiOperation({ summary: 'Get all scam reports' })
+  @ApiResponse({ status: 200, description: 'List of scam reports' })
+  async findAll() {
     return this.scamReportsService.findAll();
   }
 
@@ -49,6 +57,7 @@ export class ScamReportsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get scam reports statistics' })
   @ApiResponse({ status: 200, description: 'Scam reports statistics' })
+  @ApiBearerAuth()
   async getStats() {
     return this.scamReportsService.getStats();
   }
@@ -58,6 +67,7 @@ export class ScamReportsController {
   @ApiOperation({ summary: 'Get a scam report by ID' })
   @ApiResponse({ status: 200, description: 'Scam report details' })
   @ApiResponse({ status: 404, description: 'Scam report not found' })
+  @ApiBearerAuth()
   async findById(@Param('id') id: string) {
     return this.scamReportsService.findById(id);
   }
@@ -99,6 +109,7 @@ export class ScamReportsController {
     status: 403,
     description: 'Forbidden - insufficient permissions',
   })
+  @ApiBearerAuth()
   async updateStatus(
     @Param('id') id: string,
     @Body('status') status: ScamStatus,

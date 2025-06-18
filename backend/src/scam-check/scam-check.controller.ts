@@ -27,7 +27,7 @@ import {
   ScamCheckRequest,
   ScamCheckResponse,
   ScamCheckStats,
-} from '../services/scam-check.service';
+} from './scam-check.service';
 import { CheckMessageDto } from '../dto/scam-check.dto';
 
 export interface CheckMessageResponse {
@@ -334,6 +334,81 @@ export class ScamCheckController {
 
       throw new HttpException(
         'Failed to delete check',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('all')
+  @UseGuards(JwtAuthGuard, PolicyGuard)
+  @RequirePolicy(Action.READ, Resource.BOT_SETTINGS)
+  @ApiOperation({
+    summary: 'Get all scam checks with pagination and filtering (Admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'All checks retrieved successfully',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions',
+  })
+  @ApiBearerAuth()
+  async getAllChecks(
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+    @Query('status') status?: string,
+    @Query('intent') intent?: string,
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string,
+  ): Promise<{
+    success: boolean;
+    data: any[];
+    total: number;
+    limit: number;
+    offset: number;
+    message: string;
+  }> {
+    try {
+      const limitNum = limit ? parseInt(limit, 10) : 100;
+      const offsetNum = offset ? parseInt(offset, 10) : 0;
+
+      if (limitNum > 1000) {
+        throw new HttpException(
+          'Limit cannot exceed 1000',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const fromDateObj = fromDate ? new Date(fromDate) : undefined;
+      const toDateObj = toDate ? new Date(toDate) : undefined;
+
+      const result = await this.scamCheckService.getAllChecks(
+        limitNum,
+        offsetNum,
+        status as any,
+        intent as any,
+        fromDateObj,
+        toDateObj,
+      );
+
+      return {
+        success: true,
+        data: result.data,
+        total: result.total,
+        limit: result.limit,
+        offset: result.offset,
+        message: 'All checks retrieved successfully',
+      };
+    } catch (error) {
+      this.logger.error('Error getting all checks:', error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        'Failed to retrieve all checks',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

@@ -117,4 +117,14 @@ export class TelegramBotController {
       timestamp: new Date().toISOString(),
     };
   }
+
+  @Get('connectivity')
+  @UseGuards(PolicyGuard)
+  @RequirePolicy(Action.READ, Resource.BOT_SETTINGS)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Test Telegram bot connectivity (Admin only)' })
+  @ApiResponse({ status: 200, description: 'Bot connectivity test results' })
+  async testConnectivity(): Promise<any> {
+    return await this.botService.testBotConnectivity();
+  }
 }

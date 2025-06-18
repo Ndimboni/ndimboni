@@ -28,18 +28,28 @@ export class TelegramBotService implements OnModuleInit, OnModuleDestroy {
   ) {
     const telegramConfig = this.configService.get<TelegramConfig>('telegram');
     if (!telegramConfig) {
-      this.logger.warn(
-        'Telegram bot token not configured. Bot will not start.',
-      );
+      this.logger.warn('Telegram configuration not found. Bot will not start.');
       return;
     }
     this.config = telegramConfig;
 
-    if (!this.config.botToken) {
+    if (!this.config.botToken || this.config.botToken.trim() === '') {
       this.logger.warn(
-        'Telegram bot token not configured. Bot will not start.',
+        'Telegram bot token not configured or empty. Bot will not start.',
+      );
+      this.logger.warn(
+        'To enable Telegram bot, set TELEGRAM_BOT_TOKEN in your .env file',
       );
       return;
+    }
+
+    // Validate bot token format (should be numbers:letters)
+    const tokenPattern = /^\d+:[A-Za-z0-9_-]+$/;
+    if (!tokenPattern.test(this.config.botToken)) {
+      this.logger.warn(
+        'Telegram bot token appears to be invalid format. Expected format: 123456789:ABCDEF...',
+      );
+      this.logger.warn('Bot will attempt to start anyway...');
     }
 
     this.bot = new Telegraf(this.config.botToken);
@@ -59,21 +69,48 @@ export class TelegramBotService implements OnModuleInit, OnModuleDestroy {
     if (!this.bot) return;
 
     try {
-      // Add a timeout to prevent indefinite hanging
+      // First, validate the bot token by getting bot info
+      this.logger.log('Validating Telegram bot token...');
+      const botInfo = (await Promise.race([
+        this.bot.telegram.getMe(),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Bot validation timeout')), 5000),
+        ),
+      ])) as any;
+
+      this.logger.log(
+        `Bot token valid. Bot info: @${botInfo.username} (${botInfo.first_name})`,
+      );
+
+      // Add a timeout to prevent indefinite hanging during launch
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('Bot launch timeout')), 10000); // 10 second timeout
       });
 
+      this.logger.log('Starting Telegram bot...');
       await Promise.race([this.bot.launch(), timeoutPromise]);
       this.logger.log('Telegram bot started successfully');
+    } catch (error: any) {
+      console.error(error);
+      let errorMessage = error.message;
 
-      const botInfo = await this.bot.telegram.getMe();
-      this.logger.log(`Bot running as @${botInfo.username}`);
-    } catch (error) {
+      // Provide more specific error messages
+      if (error.message.includes('401')) {
+        errorMessage = 'Invalid bot token (401 Unauthorized)';
+      } else if (error.message.includes('timeout')) {
+        errorMessage = 'Network timeout - check internet connection';
+      } else if (error.message.includes('ENOTFOUND')) {
+        errorMessage = 'DNS resolution failed - check internet connection';
+      } else if (error.message.includes('ECONNREFUSED')) {
+        errorMessage = 'Connection refused - check firewall settings';
+      }
+
+      this.logger.warn('Telegram bot could not start (this is non-critical):');
+      this.logger.warn(`Error: ${errorMessage}`);
       this.logger.warn(
-        'Telegram bot could not start (this is non-critical):',
-        error.message,
+        'The application will continue without Telegram bot functionality',
       );
+
       // Don't throw the error - let the application continue without the bot
     }
   }
@@ -353,5 +390,47 @@ This message contains potentially suspicious content.
 
   getBotInstance(): Telegraf<BotContext> | undefined {
     return this.bot;
+  }
+
+  async testBotConnectivity(): Promise<{
+    isConfigured: boolean;
+    isConnected: boolean;
+    botInfo?: any;
+    error?: string;
+  }> {
+    const result: {
+      isConfigured: boolean;
+      isConnected: boolean;
+      botInfo?: any;
+      error?: string;
+    } = {
+      isConfigured: !!this.bot,
+      isConnected: false,
+    };
+
+    if (!this.bot) {
+      result.error = 'Bot not configured - missing token or configuration';
+      return result;
+    }
+
+    try {
+      this.logger.log('Testing Telegram bot connectivity...');
+      const botInfo = await this.bot.telegram.getMe();
+      result.isConnected = true;
+      result.botInfo = {
+        id: botInfo.id,
+        username: botInfo.username,
+        firstName: botInfo.first_name,
+        canJoinGroups: botInfo.can_join_groups,
+        canReadAllGroupMessages: botInfo.can_read_all_group_messages,
+        supportsInlineQueries: botInfo.supports_inline_queries,
+      };
+      this.logger.log(`Bot connectivity test successful: @${botInfo.username}`);
+    } catch (error: any) {
+      result.error = error.message;
+      this.logger.warn(`Bot connectivity test failed: ${error.message}`);
+    }
+
+    return result;
   }
 }

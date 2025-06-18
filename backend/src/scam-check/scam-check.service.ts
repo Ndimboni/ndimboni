@@ -6,7 +6,10 @@ import {
   CheckStatus,
   IntentType,
 } from '../entities/scam-check.entity';
-import { UrlScanningService, ScanSummary } from './url-scanning.service';
+import {
+  UrlScanningService,
+  ScanSummary,
+} from '../services/url-scanning.service';
 import { TelegramModerationService } from '../telegram-bot/telegram-moderation.service';
 
 export interface ScamCheckRequest {

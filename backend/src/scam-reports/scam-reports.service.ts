@@ -61,7 +61,6 @@ export class ScamReportsService {
 
   async findByUser(userId: string): Promise<ScamReport[]> {
     return this.scamReportRepository.find({
-      where: { userId },
       order: { createdAt: 'DESC' },
     });
   }
@@ -171,6 +170,63 @@ export class ScamReportsService {
       rejected,
       investigating,
       byType,
+    };
+  }
+
+  async getAllReports(
+    limit = 100,
+    offset = 0,
+    status?: ScamStatus,
+    scamType?: ScamType,
+    fromDate?: Date,
+    toDate?: Date,
+    userId?: string,
+  ): Promise<{
+    data: ScamReport[];
+    total: number;
+    limit: number;
+    offset: number;
+  }> {
+    const queryBuilder = this.scamReportRepository
+      .createQueryBuilder('report')
+      .leftJoinAndSelect('report.user', 'user');
+
+    // Apply filters
+    if (status) {
+      queryBuilder.andWhere('report.status = :status', { status });
+    }
+
+    if (scamType) {
+      queryBuilder.andWhere('report.scamType = :scamType', { scamType });
+    }
+
+    if (fromDate) {
+      queryBuilder.andWhere('report.createdAt >= :fromDate', { fromDate });
+    }
+
+    if (toDate) {
+      queryBuilder.andWhere('report.createdAt <= :toDate', { toDate });
+    }
+
+    if (userId) {
+      queryBuilder.andWhere('report.userId = :userId', { userId });
+    }
+
+    // Get total count for pagination
+    const total = await queryBuilder.getCount();
+
+    // Apply pagination and ordering
+    const reports = await queryBuilder
+      .orderBy('report.createdAt', 'DESC')
+      .skip(offset)
+      .take(limit)
+      .getMany();
+
+    return {
+      data: reports,
+      total,
+      limit,
+      offset,
     };
   }
 }

@@ -25,7 +25,7 @@ import {
   ScammerReportResponse,
   ScammerReportStats,
   SearchScammerRequest,
-} from '../services/scammer-report.service';
+} from './scammer-report.service';
 import {
   CreateScammerReportDto,
   CheckScammerDto,
@@ -238,6 +238,45 @@ export class ScammerReportController {
       return {
         success: true,
         data: result,
+        message: 'Report retrieved successfully',
+      };
+    } catch (error) {
+      this.logger.error('Error getting report by ID:', error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        'Failed to retrieve report',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+  @Get('report/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get all scammers' })
+  @ApiResponse({
+    status: 200,
+    description: 'Report retrieved successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Report not found',
+  })
+  async getAll(): Promise<ReportsResponse> {
+    try {
+      const result = await this.scammerReportService.getAllReports();
+
+      if (!result) {
+        throw new HttpException('No reports found', HttpStatus.NOT_FOUND);
+      }
+
+      return {
+        success: true,
+        data: result?.data,
+        total: result?.total || 0,
+
         message: 'Report retrieved successfully',
       };
     } catch (error) {
@@ -518,6 +557,83 @@ export class ScammerReportController {
 
       throw new HttpException(
         'Failed to delete report',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('all')
+  @UseGuards(JwtAuthGuard, PolicyGuard)
+  @RequirePolicy(Action.READ, Resource.BOT_SETTINGS)
+  @ApiOperation({
+    summary:
+      'Get all scammer reports with pagination and filtering (Admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'All scammer reports retrieved successfully',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions',
+  })
+  async getAllReports(
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+    @Query('status') status?: string,
+    @Query('type') type?: string,
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string,
+    @Query('query') query?: string,
+  ): Promise<{
+    success: boolean;
+    data: any[];
+    total: number;
+    limit: number;
+    offset: number;
+    message: string;
+  }> {
+    try {
+      const limitNum = limit ? parseInt(limit, 10) : 100;
+      const offsetNum = offset ? parseInt(offset, 10) : 0;
+
+      if (limitNum > 1000) {
+        throw new HttpException(
+          'Limit cannot exceed 1000',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const fromDateObj = fromDate ? new Date(fromDate) : undefined;
+      const toDateObj = toDate ? new Date(toDate) : undefined;
+
+      const result = await this.scammerReportService.getAllReports(
+        limitNum,
+        offsetNum,
+        status as any,
+        type as any,
+        fromDateObj,
+        toDateObj,
+        query,
+      );
+
+      return {
+        success: true,
+        data: result.data,
+        total: result.total,
+        limit: result.limit,
+        offset: result.offset,
+        message: 'All scammer reports retrieved successfully',
+      };
+    } catch (error) {
+      this.logger.error('Error getting all scammer reports:', error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        'Failed to retrieve all scammer reports',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
