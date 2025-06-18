@@ -35,8 +35,47 @@ export default function AuthPage() {
       if (response.ok) {
         message.success(isLogin ? 'Login successful!' : 'Registration successful!')
         
-        if (data.token) {
-          localStorage.setItem('ndimboni_token', data.token)
+        if (isLogin && data.access_token && data.user) {
+         
+          localStorage.setItem('access_token', data.access_token)
+          
+         
+          const userData = {
+            id: data.user.id,
+            email: data.user.email,
+            name: data.user.name,
+            role: data.user.role
+          }
+          
+       
+          localStorage.setItem('user_email', data.user.email)
+          localStorage.setItem('user_name', data.user.name)
+          localStorage.setItem('user_role', data.user.role)
+          
+         
+          localStorage.setItem('ndimboni_user', JSON.stringify(userData))
+          
+        
+          console.log('User data stored successfully:', {
+            token: data.access_token,
+            email: data.user.email,
+            name: data.user.name,
+            role: data.user.role
+          })
+          
+     
+          setTimeout(() => {
+            if (data.user.role === 'admin') {
+              window.location.href = '/admin/dashboard'
+            } else if (data.user.role === 'moderator') {
+              window.location.href = '/moderator/dashboard'
+            } else {
+              window.location.href = '/'
+            }
+          }, 1000)
+        } else if (!isLogin && data.access_token) {
+         
+          localStorage.setItem('access_token', data.access_token)
         }
         
         form.resetFields()
@@ -176,7 +215,13 @@ export default function AuthPage() {
                 </div>
 
                 {/* Auth Form */}
-                <div className="space-y-4">
+                <Form
+                  form={form}
+                  onFinish={handleSubmit}
+                  layout="vertical"
+                  requiredMark={false}
+                  className="space-y-4"
+                >
                   {!isLogin && (
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
@@ -184,21 +229,33 @@ export default function AuthPage() {
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <div className="mb-3">
+                      <Form.Item
+                        name="name"
+                        rules={[
+                          { required: true, message: 'Please enter your full name' },
+                          { min: 2, message: 'Name must be at least 2 characters' }
+                        ]}
+                        className="mb-3"
+                      >
                         <Input
                           prefix={<UserOutlined style={{ color: '#2980B9' }} />}
                           placeholder="Full Name"
                           className="rounded-lg border-2 py-2"
                           style={{ borderColor: '#AED6F1' }}
                           size="default"
-                          value={form.getFieldValue('name')}
-                          onChange={(e) => form.setFieldsValue({ name: e.target.value })}
                         />
-                      </div>
+                      </Form.Item>
                     </motion.div>
                   )}
 
-                  <div className="mb-3">
+                  <Form.Item
+                    name="email"
+                    rules={[
+                      { required: true, message: 'Please enter your email address' },
+                      { type: 'email', message: 'Please enter a valid email address' }
+                    ]}
+                    className="mb-3"
+                  >
                     <Input
                       prefix={<MailOutlined style={{ color: '#2980B9' }} />}
                       placeholder="Email Address"
@@ -206,12 +263,17 @@ export default function AuthPage() {
                       style={{ borderColor: '#AED6F1' }}
                       size="default"
                       type="email"
-                      value={form.getFieldValue('email')}
-                      onChange={(e) => form.setFieldsValue({ email: e.target.value })}
                     />
-                  </div>
+                  </Form.Item>
 
-                  <div className="mb-3">
+                  <Form.Item
+                    name="password"
+                    rules={[
+                      { required: true, message: 'Please enter your password' },
+                      { min: 6, message: 'Password must be at least 6 characters' }
+                    ]}
+                    className="mb-3"
+                  >
                     <Input.Password
                       prefix={<LockOutlined style={{ color: '#2980B9' }} />}
                       placeholder="Password"
@@ -219,10 +281,8 @@ export default function AuthPage() {
                       style={{ borderColor: '#AED6F1' }}
                       size="default"
                       iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
-                      value={form.getFieldValue('password')}
-                      onChange={(e) => form.setFieldsValue({ password: e.target.value })}
                     />
-                  </div>
+                  </Form.Item>
 
                   {isLogin && (
                     <div className="flex justify-end mb-3">
@@ -232,13 +292,14 @@ export default function AuthPage() {
                     </div>
                   )}
 
-                  <div className="mb-4">
+                  <Form.Item className="mb-4">
                     <motion.div
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >
                       <Button
                         type="primary"
+                        htmlType="submit"
                         loading={loading}
                         icon={<ArrowRightOutlined />}
                         className="w-full font-semibold py-3 h-auto rounded-lg"
@@ -247,10 +308,6 @@ export default function AuthPage() {
                           border: 'none',
                           boxShadow: '0 6px 20px rgba(26, 82, 118, 0.25)'
                         }}
-                        onClick={() => {
-                          const values = form.getFieldsValue();
-                          handleSubmit(values);
-                        }}
                       >
                         {loading 
                           ? (isLogin ? 'Signing In...' : 'Creating Account...') 
@@ -258,8 +315,8 @@ export default function AuthPage() {
                         }
                       </Button>
                     </motion.div>
-                  </div>
-                </div>
+                  </Form.Item>
+                </Form>
 
                 {/* Toggle Between Login/Register */}
                 <div className="text-center pt-3 border-t border-[#AED6F1]">
