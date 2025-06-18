@@ -107,7 +107,7 @@ export class TelegramModerationService {
 
   async analyzeMessage(
     text: string,
-    userId?: string,
+    _userId?: string,
   ): Promise<ModerationResult> {
     const reasons: string[] = [];
     const detectedPatterns: string[] = [];
@@ -394,7 +394,7 @@ export class TelegramModerationService {
       }
 
       return { isSafe: true };
-    } catch (error) {
+    } catch (_error) {
       return {
         isSafe: false,
         reason: 'Invalid URL format',

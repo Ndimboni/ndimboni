@@ -28,19 +28,19 @@ export class TelegramWebhookService {
     }
 
     try {
-      const bot = this.botService.getBotInstance();
-      if (!bot) {
-        this.logger.warn('Bot instance not available. Cannot setup webhook.');
-        return;
-      }
+      // const bot = this.botService.getBotInstance();
+      // if (!bot) {
+      //   this.logger.warn('Bot instance not available. Cannot setup webhook.');
+      //   return;
+      // }
 
       // Set webhook
-      await bot.telegram.setWebhook(this.config.webhookUrl);
-      this.logger.log(`Webhook set to: ${this.config.webhookUrl}`);
+      // await bot.telegram.setWebhook(this.config.webhookUrl);
+      this.logger.log(`Webhook would be set to: ${this.config.webhookUrl}`);
 
       // Get webhook info to verify
-      const webhookInfo = await bot.telegram.getWebhookInfo();
-      this.logger.log('Webhook info:', webhookInfo);
+      // const webhookInfo = await bot.telegram.getWebhookInfo();
+      // this.logger.log('Webhook info:', webhookInfo);
     } catch (error) {
       this.logger.error('Failed to setup webhook:', error);
     }
@@ -48,11 +48,11 @@ export class TelegramWebhookService {
 
   async removeWebhook(): Promise<void> {
     try {
-      const bot = this.botService.getBotInstance();
-      if (!bot) return;
+      // const bot = this.botService.getBotInstance();
+      // if (!bot) return;
 
-      await bot.telegram.deleteWebhook();
-      this.logger.log('Webhook removed');
+      // await bot.telegram.deleteWebhook();
+      this.logger.log('Webhook would be removed');
     } catch (error) {
       this.logger.error('Failed to remove webhook:', error);
     }

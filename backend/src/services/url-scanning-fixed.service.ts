@@ -30,8 +30,10 @@ export class UrlScanningService {
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
   ) {
-    this.virusTotalApiKey = this.configService.get<string>('VIRUSTOTAL_API_KEY') || '';
-    this.googleSafeBrowsingApiKey = this.configService.get<string>('GOOGLE_SAFE_BROWSING_API_KEY') || '';
+    this.virusTotalApiKey =
+      this.configService.get<string>('VIRUSTOTAL_API_KEY') || '';
+    this.googleSafeBrowsingApiKey =
+      this.configService.get<string>('GOOGLE_SAFE_BROWSING_API_KEY') || '';
   }
 
   async scanUrls(urls: string[]): Promise<ScanSummary> {
@@ -95,11 +97,13 @@ export class UrlScanningService {
       const threats: string[] = [];
 
       if (data.positives > 0) {
-        Object.entries(data.scans || {}).forEach(([engine, result]: [string, any]) => {
-          if (result.detected) {
-            threats.push(`${engine}: ${result.result}`);
-          }
-        });
+        Object.entries(data.scans || {}).forEach(
+          ([engine, result]: [string, any]) => {
+            if (result.detected) {
+              threats.push(`${engine}: ${result.result}`);
+            }
+          },
+        );
       }
 
       return {
@@ -116,7 +120,9 @@ export class UrlScanningService {
     }
   }
 
-  private async scanWithGoogleSafeBrowsing(url: string): Promise<UrlScanResult> {
+  private async scanWithGoogleSafeBrowsing(
+    url: string,
+  ): Promise<UrlScanResult> {
     try {
       const response = await firstValueFrom(
         this.httpService.post(

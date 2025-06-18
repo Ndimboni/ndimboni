@@ -7,9 +7,9 @@ import tseslint from 'typescript-eslint';
 export default tseslint.config(
   {
     ignores: [
-      'eslint.config.mjs', 
-      'dist/**', 
-      'node_modules/**', 
+      'eslint.config.mjs',
+      'dist/**',
+      'node_modules/**',
       '*.js',
       'coverage/**',
       'data/**',
@@ -18,7 +18,7 @@ export default tseslint.config(
       '*.log',
       '.DS_Store',
       '.vscode/**',
-      '.git/**'
+      '.git/**',
     ],
   },
   eslint.configs.recommended,
@@ -51,27 +51,33 @@ export default tseslint.config(
       '@typescript-eslint/restrict-template-expressions': 'off', // Allow any in template literals
       '@typescript-eslint/restrict-plus-operands': 'off', // Allow flexible plus operations
       '@typescript-eslint/unbound-method': 'off', // Disable unbound method checks
-      
+
       // General ESLint rules
       'no-unused-vars': 'off', // Use TypeScript version instead
-      '@typescript-eslint/no-unused-vars': ['warn', { 
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-        caughtErrorsIgnorePattern: '^_'
-      }],
-      
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+
       // Allow console for logging in backend
       'no-console': ['warn', { allow: ['log', 'warn', 'error'] }],
-      
+
       // Disable some overly strict rules
       '@typescript-eslint/no-empty-function': 'warn',
       '@typescript-eslint/ban-ts-comment': 'warn',
       '@typescript-eslint/no-non-null-assertion': 'warn',
-      
+
       // Prettier integration
-      'prettier/prettier': ['error', {
-        endOfLine: 'auto',
-      }],
+      'prettier/prettier': [
+        'error',
+        {
+          endOfLine: 'auto',
+        },
+      ],
     },
   },
 );
