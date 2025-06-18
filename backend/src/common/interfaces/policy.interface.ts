@@ -12,6 +12,7 @@ export enum Resource {
   FILE = 'file',
   EMAIL = 'email',
   ADMIN_PANEL = 'admin-panel',
+  BOT_SETTINGS = 'bot-settings',
 }
 
 export interface PolicyRule {

@@ -27,7 +27,7 @@ export class PolicyService {
       ],
       condition: (context) => context.user.role === 'admin',
     },
-    
+
     // Moderator policies
     {
       action: [Action.READ, Action.UPDATE],
@@ -66,37 +66,51 @@ export class PolicyService {
     },
   ];
 
-  canPerformAction(action: Action, resource: Resource, context: PolicyContext): boolean {
-    return this.policies.some(policy => {
+  canPerformAction(
+    action: Action,
+    resource: Resource,
+    context: PolicyContext,
+  ): boolean {
+    return this.policies.some((policy) => {
       // Check if action matches
-      const actionMatches = Array.isArray(policy.action) 
-        ? policy.action.includes(action) 
+      const actionMatches = Array.isArray(policy.action)
+        ? policy.action.includes(action)
         : policy.action === action;
 
       // Check if resource matches
-      const resourceMatches = Array.isArray(policy.resource) 
-        ? policy.resource.includes(resource) 
+      const resourceMatches = Array.isArray(policy.resource)
+        ? policy.resource.includes(resource)
         : policy.resource === resource;
 
       // Check condition if provided
-      const conditionMatches = policy.condition ? policy.condition(context) : true;
+      const conditionMatches = policy.condition
+        ? policy.condition(context)
+        : true;
 
       return actionMatches && resourceMatches && conditionMatches;
     });
   }
 
-  getUserPermissions(context: PolicyContext): { action: Action; resource: Resource }[] {
+  getUserPermissions(
+    context: PolicyContext,
+  ): { action: Action; resource: Resource }[] {
     const permissions: { action: Action; resource: Resource }[] = [];
 
-    this.policies.forEach(policy => {
-      const conditionMatches = policy.condition ? policy.condition(context) : true;
-      
-      if (conditionMatches) {
-        const actions = Array.isArray(policy.action) ? policy.action : [policy.action];
-        const resources = Array.isArray(policy.resource) ? policy.resource : [policy.resource];
+    this.policies.forEach((policy) => {
+      const conditionMatches = policy.condition
+        ? policy.condition(context)
+        : true;
 
-        actions.forEach(action => {
-          resources.forEach(resource => {
+      if (conditionMatches) {
+        const actions = Array.isArray(policy.action)
+          ? policy.action
+          : [policy.action];
+        const resources = Array.isArray(policy.resource)
+          ? policy.resource
+          : [policy.resource];
+
+        actions.forEach((action) => {
+          resources.forEach((resource) => {
             permissions.push({ action, resource });
           });
         });
