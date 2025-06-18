@@ -21,6 +21,7 @@ import { UsersService } from './users.service';
 import { PolicyGuard } from '../common/guards/policy.guard';
 import { RequirePolicy } from '../common/decorators/policy.decorator';
 import { Action, Resource } from '../common/interfaces/policy.interface';
+import { UserIdParamDto, UpdateUserDto } from '../dto/users.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -49,8 +50,8 @@ export class UsersController {
   @ApiOperation({ summary: 'Get user by ID' })
   @ApiResponse({ status: 200, description: 'User retrieved successfully' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async findOne(@Param('id') id: string) {
-    return this.usersService.findById(id);
+  async findOne(@Param() params: UserIdParamDto) {
+    return this.usersService.findById(params.id);
   }
 
   @Put(':id')
@@ -58,8 +59,11 @@ export class UsersController {
   @ApiOperation({ summary: 'Update user' })
   @ApiResponse({ status: 200, description: 'User updated successfully' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async update(@Param('id') id: string, @Body() updateData: any) {
-    return this.usersService.update(id, updateData);
+  async update(
+    @Param() params: UserIdParamDto,
+    @Body() updateData: UpdateUserDto,
+  ) {
+    return this.usersService.update(params.id, updateData as any);
   }
 
   @Delete(':id')
@@ -68,7 +72,7 @@ export class UsersController {
   @ApiResponse({ status: 204, description: 'User deleted successfully' })
   @ApiResponse({ status: 404, description: 'User not found' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id') id: string) {
-    return this.usersService.delete(id);
+  async remove(@Param() params: UserIdParamDto) {
+    return this.usersService.delete(params.id);
   }
 }

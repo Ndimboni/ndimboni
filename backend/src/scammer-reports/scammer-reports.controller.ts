@@ -33,7 +33,10 @@ import {
   SearchScammerReportsQueryDto,
   GetPendingReportsQueryDto,
   GetStatsQueryDto,
+  ScammerReportIdParamDto,
+  GetAllScammerReportsQueryDto,
 } from '../dto/scammer-reports.dto';
+import { GetChecksQueryDto } from '../dto/scam-check.dto';
 import { ScammerType, ScammerStatus } from '../entities/scammer-report.entity';
 
 export interface ReportResponse {
@@ -227,9 +230,11 @@ export class ScammerReportController {
     status: 404,
     description: 'Report not found',
   })
-  async getReportById(@Param('id') id: string): Promise<ReportResponse> {
+  async getReportById(
+    @Param() params: ScammerReportIdParamDto,
+  ): Promise<ReportResponse> {
     try {
-      const result = await this.scammerReportService.getReportById(id);
+      const result = await this.scammerReportService.getReportById(params.id);
 
       if (!result) {
         throw new HttpException('Report not found', HttpStatus.NOT_FOUND);
@@ -310,7 +315,7 @@ export class ScammerReportController {
     description: 'Insufficient permissions',
   })
   async updateReport(
-    @Param('id') id: string,
+    @Param() params: ScammerReportIdParamDto,
     @Body() dto: UpdateScammerReportDto,
     @Request() req: any,
   ): Promise<ReportResponse> {
@@ -325,7 +330,10 @@ export class ScammerReportController {
         verifiedBy: req.user.id,
       };
 
-      const result = await this.scammerReportService.updateReport(id, request);
+      const result = await this.scammerReportService.updateReport(
+        params.id,
+        request,
+      );
 
       if (!result) {
         throw new HttpException('Report not found', HttpStatus.NOT_FOUND);
@@ -354,28 +362,20 @@ export class ScammerReportController {
   @UseGuards(JwtAuthGuard, PolicyGuard)
   @RequirePolicy(Action.READ, Resource.BOT_SETTINGS)
   async searchReports(
-    @Query('query') query?: string,
-    @Query('type') type?: ScammerType,
-    @Query('status') status?: ScammerStatus,
-    @Query('limit') limit?: string,
-    @Query('offset') offset?: string,
+    @Query() queryDto: SearchScammerReportsQueryDto,
   ): Promise<ReportsResponse> {
     try {
-      const limitNum = limit ? parseInt(limit, 10) : 50;
-      const offsetNum = offset ? parseInt(offset, 10) : 0;
-
-      if (limitNum > 200) {
-        throw new HttpException(
-          'Limit cannot exceed 200',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      if (type && !Object.values(ScammerType).includes(type)) {
+      if (
+        queryDto.type &&
+        !Object.values(ScammerType).includes(queryDto.type)
+      ) {
         throw new HttpException('Invalid type filter', HttpStatus.BAD_REQUEST);
       }
 
-      if (status && !Object.values(ScammerStatus).includes(status)) {
+      if (
+        queryDto.status &&
+        !Object.values(ScammerStatus).includes(queryDto.status)
+      ) {
         throw new HttpException(
           'Invalid status filter',
           HttpStatus.BAD_REQUEST,
@@ -383,11 +383,11 @@ export class ScammerReportController {
       }
 
       const searchRequest: SearchScammerRequest = {
-        query,
-        type,
-        status,
-        limit: limitNum,
-        offset: offsetNum,
+        query: queryDto.query,
+        type: queryDto.type,
+        status: queryDto.status,
+        limit: queryDto.limit,
+        offset: queryDto.offset,
       };
 
       const results =
@@ -417,24 +417,13 @@ export class ScammerReportController {
   @UseGuards(JwtAuthGuard)
   async getMyReports(
     @Request() req: any,
-    @Query('limit') limit?: string,
-    @Query('offset') offset?: string,
+    @Query() query: GetChecksQueryDto,
   ): Promise<ReportsResponse> {
     try {
-      const limitNum = limit ? parseInt(limit, 10) : 20;
-      const offsetNum = offset ? parseInt(offset, 10) : 0;
-
-      if (limitNum > 100) {
-        throw new HttpException(
-          'Limit cannot exceed 100',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
       const results = await this.scammerReportService.getReportsByUser(
         req.user.id,
-        limitNum,
-        offsetNum,
+        query.limit,
+        query.offset,
       );
 
       return {
@@ -461,20 +450,12 @@ export class ScammerReportController {
   @UseGuards(JwtAuthGuard, PolicyGuard)
   @RequirePolicy(Action.READ, Resource.BOT_SETTINGS)
   async getPendingReports(
-    @Query('limit') limit?: string,
+    @Query() query: GetPendingReportsQueryDto,
   ): Promise<ReportsResponse> {
     try {
-      const limitNum = limit ? parseInt(limit, 10) : 50;
-
-      if (limitNum > 200) {
-        throw new HttpException(
-          'Limit cannot exceed 200',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      const results =
-        await this.scammerReportService.getPendingReports(limitNum);
+      const results = await this.scammerReportService.getPendingReports(
+        query.limit,
+      );
 
       return {
         success: true,
@@ -499,18 +480,9 @@ export class ScammerReportController {
   @Get('stats')
   @UseGuards(JwtAuthGuard, PolicyGuard)
   @RequirePolicy(Action.READ, Resource.BOT_SETTINGS)
-  async getStats(@Query('days') days?: string): Promise<StatsResponse> {
+  async getStats(@Query() query: GetStatsQueryDto): Promise<StatsResponse> {
     try {
-      const daysNum = days ? parseInt(days, 10) : 30;
-
-      if (daysNum > 365) {
-        throw new HttpException(
-          'Days cannot exceed 365',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      const stats = await this.scammerReportService.getStats(daysNum);
+      const stats = await this.scammerReportService.getStats(query.days);
 
       return {
         success: true,
@@ -535,10 +507,10 @@ export class ScammerReportController {
   @UseGuards(JwtAuthGuard, PolicyGuard)
   @RequirePolicy(Action.DELETE, Resource.BOT_SETTINGS)
   async deleteReport(
-    @Param('id') id: string,
+    @Param() params: ScammerReportIdParamDto,
   ): Promise<{ success: boolean; message: string }> {
     try {
-      const deleted = await this.scammerReportService.deleteReport(id);
+      const deleted = await this.scammerReportService.deleteReport(params.id);
 
       if (!deleted) {
         throw new HttpException('Report not found', HttpStatus.NOT_FOUND);
@@ -578,13 +550,7 @@ export class ScammerReportController {
     description: 'Insufficient permissions',
   })
   async getAllReports(
-    @Query('limit') limit?: string,
-    @Query('offset') offset?: string,
-    @Query('status') status?: string,
-    @Query('type') type?: string,
-    @Query('fromDate') fromDate?: string,
-    @Query('toDate') toDate?: string,
-    @Query('query') query?: string,
+    @Query() queryDto: GetAllScammerReportsQueryDto,
   ): Promise<{
     success: boolean;
     data: any[];
@@ -594,27 +560,19 @@ export class ScammerReportController {
     message: string;
   }> {
     try {
-      const limitNum = limit ? parseInt(limit, 10) : 100;
-      const offsetNum = offset ? parseInt(offset, 10) : 0;
-
-      if (limitNum > 1000) {
-        throw new HttpException(
-          'Limit cannot exceed 1000',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      const fromDateObj = fromDate ? new Date(fromDate) : undefined;
-      const toDateObj = toDate ? new Date(toDate) : undefined;
+      const fromDateObj = queryDto.fromDate
+        ? new Date(queryDto.fromDate)
+        : undefined;
+      const toDateObj = queryDto.toDate ? new Date(queryDto.toDate) : undefined;
 
       const result = await this.scammerReportService.getAllReports(
-        limitNum,
-        offsetNum,
-        status as any,
-        type as any,
+        queryDto.limit,
+        queryDto.offset,
+        queryDto.status as any,
+        queryDto.type as any,
         fromDateObj,
         toDateObj,
-        query,
+        queryDto.query,
       );
 
       return {

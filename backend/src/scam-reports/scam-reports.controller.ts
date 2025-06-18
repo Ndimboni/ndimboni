@@ -8,7 +8,6 @@ import {
   Param,
   UseGuards,
   Request,
-  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -23,9 +22,13 @@ import {
 } from './scam-reports.service';
 import { PolicyGuard } from '../common/guards/policy.guard';
 import { RequirePolicy } from '../common/decorators/policy.decorator';
-import { ScamStatus } from '../entities/scam-report.entity';
 import { Action, Resource } from '../common/interfaces/policy.interface';
 import { Public } from '../common/decorators/public.decorator';
+import {
+  ScamReportIdParamDto,
+  UserIdParamDto,
+  UpdateStatusDto,
+} from '../dto/scam-reports-all.dto';
 
 @ApiTags('scam-reports')
 @Controller('scam-reports')
@@ -36,9 +39,9 @@ export class ScamReportsController {
   @Get(':userId')
   @ApiOperation({ summary: 'Get all scam reports' })
   @ApiResponse({ status: 200, description: 'List of scam reports' })
-  async findByuserId(@Param('userId') userId?: string) {
-    if (userId) {
-      return this.scamReportsService.findByUser(userId);
+  async findByuserId(@Param() params: UserIdParamDto) {
+    if (params.userId) {
+      return this.scamReportsService.findByUser(params.userId);
     }
     return this.scamReportsService.findAll();
   }
@@ -68,8 +71,8 @@ export class ScamReportsController {
   @ApiResponse({ status: 200, description: 'Scam report details' })
   @ApiResponse({ status: 404, description: 'Scam report not found' })
   @ApiBearerAuth()
-  async findById(@Param('id') id: string) {
-    return this.scamReportsService.findById(id);
+  async findById(@Param() params: ScamReportIdParamDto) {
+    return this.scamReportsService.findById(params.id);
   }
 
   @Public()
@@ -92,11 +95,11 @@ export class ScamReportsController {
   })
   @ApiResponse({ status: 404, description: 'Scam report not found' })
   async update(
-    @Param('id') id: string,
+    @Param() params: ScamReportIdParamDto,
     @Body() updateDto: UpdateScamReportDto,
     @Request() req: any,
   ) {
-    return this.scamReportsService.update(id, updateDto, req.user);
+    return this.scamReportsService.update(params.id, updateDto, req.user);
   }
 
   @Put(':id/status')
@@ -111,11 +114,15 @@ export class ScamReportsController {
   })
   @ApiBearerAuth()
   async updateStatus(
-    @Param('id') id: string,
-    @Body('status') status: ScamStatus,
+    @Param() params: ScamReportIdParamDto,
+    @Body() statusDto: UpdateStatusDto,
     @Request() req: any,
   ) {
-    return this.scamReportsService.update(id, { status }, req.user);
+    return this.scamReportsService.update(
+      params.id,
+      { status: statusDto.status },
+      req.user,
+    );
   }
 
   @Delete(':id')
@@ -127,7 +134,7 @@ export class ScamReportsController {
     description: 'Forbidden - insufficient permissions',
   })
   @ApiResponse({ status: 404, description: 'Scam report not found' })
-  async delete(@Param('id') id: string, @Request() req: any) {
-    return this.scamReportsService.delete(id, req.user);
+  async delete(@Param() params: ScamReportIdParamDto, @Request() req: any) {
+    return this.scamReportsService.delete(params.id, req.user);
   }
 }

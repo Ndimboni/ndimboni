@@ -28,7 +28,15 @@ import {
   ScamCheckResponse,
   ScamCheckStats,
 } from './scam-check.service';
-import { CheckMessageDto } from '../dto/scam-check.dto';
+import {
+  CheckMessageDto,
+  GetCheckByIdParamDto,
+  DeleteCheckParamDto,
+  GetChecksQueryDto,
+  GetStatsQueryDto,
+  GetRecentChecksQueryDto,
+  GetAllChecksQueryDto,
+} from '../dto/scam-check.dto';
 
 export interface CheckMessageResponse {
   success: boolean;
@@ -124,9 +132,11 @@ export class ScamCheckController {
     status: 404,
     description: 'Check not found',
   })
-  async getCheckById(@Param('id') id: string): Promise<CheckMessageResponse> {
+  async getCheckById(
+    @Param() params: GetCheckByIdParamDto,
+  ): Promise<CheckMessageResponse> {
     try {
-      const result = await this.scamCheckService.getCheckById(id);
+      const result = await this.scamCheckService.getCheckById(params.id);
 
       if (!result) {
         throw new HttpException('Check not found', HttpStatus.NOT_FOUND);
@@ -161,24 +171,13 @@ export class ScamCheckController {
   @ApiBearerAuth()
   async getMyChecks(
     @Request() req: any,
-    @Query('limit') limit?: string,
-    @Query('offset') offset?: string,
+    @Query() query: GetChecksQueryDto,
   ): Promise<GetChecksResponse> {
     try {
-      const limitNum = limit ? parseInt(limit, 10) : 20;
-      const offsetNum = offset ? parseInt(offset, 10) : 0;
-
-      if (limitNum > 100) {
-        throw new HttpException(
-          'Limit cannot exceed 100',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
       const results = await this.scamCheckService.getChecksByUser(
         req.user.id,
-        limitNum,
-        offsetNum,
+        query.limit,
+        query.offset,
       );
 
       return {
@@ -215,19 +214,10 @@ export class ScamCheckController {
     description: 'Insufficient permissions',
   })
   async getRecentChecks(
-    @Query('limit') limit?: string,
+    @Query() query: GetRecentChecksQueryDto,
   ): Promise<GetChecksResponse> {
     try {
-      const limitNum = limit ? parseInt(limit, 10) : 50;
-
-      if (limitNum > 200) {
-        throw new HttpException(
-          'Limit cannot exceed 200',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      const results = await this.scamCheckService.getRecentChecks(limitNum);
+      const results = await this.scamCheckService.getRecentChecks(query.limit);
 
       return {
         success: true,
@@ -262,18 +252,9 @@ export class ScamCheckController {
     description: 'Insufficient permissions',
   })
   @ApiBearerAuth()
-  async getStats(@Query('days') days?: string): Promise<GetStatsResponse> {
+  async getStats(@Query() query: GetStatsQueryDto): Promise<GetStatsResponse> {
     try {
-      const daysNum = days ? parseInt(days, 10) : 30;
-
-      if (daysNum > 365) {
-        throw new HttpException(
-          'Days cannot exceed 365',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      const stats = await this.scamCheckService.getStats(daysNum);
+      const stats = await this.scamCheckService.getStats(query.days);
 
       return {
         success: true,
@@ -312,10 +293,10 @@ export class ScamCheckController {
   })
   @ApiBearerAuth()
   async deleteCheck(
-    @Param('id') id: string,
+    @Param() params: DeleteCheckParamDto,
   ): Promise<{ success: boolean; message: string }> {
     try {
-      const deleted = await this.scamCheckService.deleteCheck(id);
+      const deleted = await this.scamCheckService.deleteCheck(params.id);
 
       if (!deleted) {
         throw new HttpException('Check not found', HttpStatus.NOT_FOUND);
@@ -354,14 +335,7 @@ export class ScamCheckController {
     description: 'Insufficient permissions',
   })
   @ApiBearerAuth()
-  async getAllChecks(
-    @Query('limit') limit?: string,
-    @Query('offset') offset?: string,
-    @Query('status') status?: string,
-    @Query('intent') intent?: string,
-    @Query('fromDate') fromDate?: string,
-    @Query('toDate') toDate?: string,
-  ): Promise<{
+  async getAllChecks(@Query() query: GetAllChecksQueryDto): Promise<{
     success: boolean;
     data: any[];
     total: number;
@@ -370,24 +344,14 @@ export class ScamCheckController {
     message: string;
   }> {
     try {
-      const limitNum = limit ? parseInt(limit, 10) : 100;
-      const offsetNum = offset ? parseInt(offset, 10) : 0;
-
-      if (limitNum > 1000) {
-        throw new HttpException(
-          'Limit cannot exceed 1000',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      const fromDateObj = fromDate ? new Date(fromDate) : undefined;
-      const toDateObj = toDate ? new Date(toDate) : undefined;
+      const fromDateObj = query.fromDate ? new Date(query.fromDate) : undefined;
+      const toDateObj = query.toDate ? new Date(query.toDate) : undefined;
 
       const result = await this.scamCheckService.getAllChecks(
-        limitNum,
-        offsetNum,
-        status as any,
-        intent as any,
+        query.limit,
+        query.offset,
+        query.status as any,
+        query.intent as any,
         fromDateObj,
         toDateObj,
       );

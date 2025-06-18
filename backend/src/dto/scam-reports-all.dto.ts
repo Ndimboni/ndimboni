@@ -6,6 +6,8 @@ import {
   IsNumber,
   Min,
   Max,
+  IsUUID,
+  IsNotEmpty,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ScamStatus, ScamType } from '../entities/scam-report.entity';
@@ -81,4 +83,37 @@ export class GetAllScamReportsQueryDto {
   @IsOptional()
   @IsString()
   userId?: string;
+}
+
+export class ScamReportIdParamDto {
+  @ApiProperty({
+    description: 'Scam report ID',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @IsUUID()
+  id: string;
+}
+
+export class UserIdParamDto {
+  @ApiProperty({
+    description: 'User ID',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @IsUUID()
+  userId: string;
+}
+
+export class UpdateStatusDto {
+  @ApiProperty({
+    description: 'New status for the scam report',
+    enum: ScamStatus,
+    example: ScamStatus.VERIFIED,
+  })
+  @IsEnum(ScamStatus)
+  @IsNotEmpty()
+  status: ScamStatus;
 }

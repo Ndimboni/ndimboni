@@ -7,6 +7,7 @@ import {
   IsNumber,
   Min,
   Max,
+  IsUUID,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -22,6 +23,28 @@ export class CheckMessageDto {
   @IsNotEmpty()
   @Length(1, 10000)
   message: string;
+}
+
+export class GetCheckByIdParamDto {
+  @ApiProperty({
+    description: 'Check ID',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @IsUUID()
+  id: string;
+}
+
+export class DeleteCheckParamDto {
+  @ApiProperty({
+    description: 'Check ID to delete',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @IsUUID()
+  id: string;
 }
 
 export class GetChecksQueryDto {

@@ -9,6 +9,7 @@ import {
   IsNumber,
   Min,
   Max,
+  IsUUID,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ScammerType, ScammerStatus } from '../entities/scammer-report.entity';
@@ -289,4 +290,15 @@ export class GetAllScammerReportsQueryDto {
   @IsString()
   @Length(1, 255)
   query?: string;
+}
+
+export class ScammerReportIdParamDto {
+  @ApiProperty({
+    description: 'Scammer report ID',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @IsUUID()
+  id: string;
 }
