@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, MoreThanOrEqual } from 'typeorm';
 import {
   ScammerReport,
   ScammerType,
@@ -252,9 +252,7 @@ export class ScammerReportService {
 
     const reports = await this.scammerReportRepository.find({
       where: {
-        createdAt: {
-          gte: startDate,
-        } as any,
+        createdAt: MoreThanOrEqual(startDate),
       },
       order: { createdAt: 'DESC' },
     });

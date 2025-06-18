@@ -52,10 +52,13 @@ async function bootstrap() {
   const port = configService.get<number>('port') || 3000;
   await app.listen(port);
 
+  // Clear startup messages with some spacing
+  console.log('\n'.repeat(2));
+  logger.log('🎉 =================================');
   logger.log(`🚀 Application is running on: http://localhost:${port}`);
-  logger.log(
-    `📚 Swagger documentation available at: http://localhost:${port}/api/docs`,
-  );
+  logger.log(`📚 Swagger docs: http://localhost:${port}/api/docs`);
+  logger.log('🎉 =================================');
+  console.log('\n');
 }
 bootstrap().catch((error) => {
   console.error('Error starting the application:', error);

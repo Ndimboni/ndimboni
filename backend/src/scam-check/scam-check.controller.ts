@@ -11,11 +11,16 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { PolicyGuard } from '../guards/policy.guard';
-import { RequirePolicy } from '../decorators/policy.decorator';
-import { Public } from '../decorators/public.decorator';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { PolicyGuard } from '../common/guards/policy.guard';
+import { RequirePolicy } from '../common/decorators/policy.decorator';
+import { Public } from '../common/decorators/public.decorator';
 import { Action, Resource } from '../common/interfaces/policy.interface';
 import {
   ScamCheckService,
@@ -153,6 +158,7 @@ export class ScamCheckController {
     status: 200,
     description: 'Checks retrieved successfully',
   })
+  @ApiBearerAuth()
   async getMyChecks(
     @Request() req: any,
     @Query('limit') limit?: string,
@@ -203,6 +209,7 @@ export class ScamCheckController {
     status: 200,
     description: 'Recent checks retrieved successfully',
   })
+  @ApiBearerAuth()
   @ApiResponse({
     status: 403,
     description: 'Insufficient permissions',
@@ -254,6 +261,7 @@ export class ScamCheckController {
     status: 403,
     description: 'Insufficient permissions',
   })
+  @ApiBearerAuth()
   async getStats(@Query('days') days?: string): Promise<GetStatsResponse> {
     try {
       const daysNum = days ? parseInt(days, 10) : 30;
@@ -302,6 +310,7 @@ export class ScamCheckController {
     status: 403,
     description: 'Insufficient permissions',
   })
+  @ApiBearerAuth()
   async deleteCheck(
     @Param('id') id: string,
   ): Promise<{ success: boolean; message: string }> {

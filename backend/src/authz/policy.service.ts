@@ -24,6 +24,7 @@ export class PolicyService {
         Resource.FILE,
         Resource.EMAIL,
         Resource.ADMIN_PANEL,
+        Resource.BOT_SETTINGS,
       ],
       condition: (context) => context.user.role === 'admin',
     },

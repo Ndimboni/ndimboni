@@ -49,14 +49,32 @@ export class TelegramBotService implements OnModuleInit, OnModuleDestroy {
   async onModuleInit(): Promise<void> {
     if (!this.bot) return;
 
+    // Start the bot in the background with timeout to prevent blocking app startup
+    void this.startBotWithTimeout().catch((error) => {
+      this.logger.error('Failed to start Telegram bot:', error);
+    });
+  }
+
+  private async startBotWithTimeout(): Promise<void> {
+    if (!this.bot) return;
+
     try {
-      await this.bot.launch();
+      // Add a timeout to prevent indefinite hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Bot launch timeout')), 10000); // 10 second timeout
+      });
+
+      await Promise.race([this.bot.launch(), timeoutPromise]);
       this.logger.log('Telegram bot started successfully');
 
       const botInfo = await this.bot.telegram.getMe();
       this.logger.log(`Bot running as @${botInfo.username}`);
     } catch (error) {
-      this.logger.error('Failed to start Telegram bot:', error);
+      this.logger.warn(
+        'Telegram bot could not start (this is non-critical):',
+        error.message,
+      );
+      // Don't throw the error - let the application continue without the bot
     }
   }
 

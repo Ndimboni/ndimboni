@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
-import { SendEmailDto } from '../dto/email.dto';
+import { SendEmailDto } from '../../dto/email.dto';
 
 export interface EmailTemplate {
   subject: string;
@@ -10,7 +10,7 @@ export interface EmailTemplate {
 }
 
 @Injectable()
-export class SmsService {
+export class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor(private configService: ConfigService) {

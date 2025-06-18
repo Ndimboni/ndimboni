@@ -5,13 +5,13 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { PolicyService } from '../authz/policy.service';
+import { PolicyService } from '../../authz/policy.service';
 import { POLICY_KEY } from '../decorators/policy.decorator';
 import {
   Action,
   Resource,
   PolicyContext,
-} from '../common/interfaces/policy.interface';
+} from '../interfaces/policy.interface';
 
 @Injectable()
 export class PolicyGuard implements CanActivate {

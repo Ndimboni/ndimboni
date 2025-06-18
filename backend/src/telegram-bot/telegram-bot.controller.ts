@@ -16,10 +16,10 @@ import {
 import { TelegramBotService } from './telegram-bot.service';
 import { TelegramWebhookService } from './telegram-webhook.service';
 import { TelegramModerationService } from './telegram-moderation.service';
-import { PolicyGuard } from '../guards/policy.guard';
-import { RequirePolicy } from '../decorators/policy.decorator';
+import { PolicyGuard } from '../common/guards/policy.guard';
+import { RequirePolicy } from '../common/decorators/policy.decorator';
 import { Action, Resource } from '../common/interfaces/policy.interface';
-import { Public } from '../decorators/public.decorator';
+import { Public } from '../common/decorators/public.decorator';
 
 @ApiTags('telegram-bot')
 @Controller('telegram')

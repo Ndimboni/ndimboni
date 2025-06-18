@@ -9,6 +9,7 @@ import { ScamReport } from '../entities/scam-report.entity';
 import { User } from '../entities/user.entity';
 import { ScamReportsModule } from '../scam-reports/scam-reports.module';
 import { AuthzModule } from '../authz/authz.module';
+import { CommonServicesModule } from '../common/services/common-services.module';
 import { TelegramWebhookService } from './telegram-webhook.service';
 import { TelegramBotService } from './telegram-bot.service';
 import { TelegramBotController } from './telegram-bot.controller';
@@ -19,6 +20,7 @@ import { TelegramBotController } from './telegram-bot.controller';
     TypeOrmModule.forFeature([ScamReport, User]),
     ScamReportsModule,
     AuthzModule,
+    CommonServicesModule,
   ],
   providers: [
     TelegramBotService,

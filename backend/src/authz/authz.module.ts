@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PolicyService } from './policy.service';
-import { PolicyGuard } from '../guards/policy.guard';
+import { PolicyGuard } from '../common/guards/policy.guard';
 
 @Module({
   imports: [],

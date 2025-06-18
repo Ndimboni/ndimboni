@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, MoreThanOrEqual } from 'typeorm';
 import {
   ScamCheck,
   CheckStatus,
@@ -191,9 +191,7 @@ export class ScamCheckService {
 
     const checks = await this.scamCheckRepository.find({
       where: {
-        createdAt: {
-          gte: startDate,
-        } as any,
+        createdAt: MoreThanOrEqual(startDate),
       },
       order: { createdAt: 'DESC' },
     });

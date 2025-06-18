@@ -15,7 +15,7 @@ import {
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto } from '../dto/auth.dto';
-import { Public } from '../decorators/public.decorator';
+import { Public } from '../common/decorators/public.decorator';
 
 @ApiTags('authentication')
 @Controller('auth')

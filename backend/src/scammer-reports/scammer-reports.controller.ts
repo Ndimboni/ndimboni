@@ -13,10 +13,10 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { PolicyGuard } from '../guards/policy.guard';
-import { RequirePolicy } from '../decorators/policy.decorator';
-import { Public } from '../decorators/public.decorator';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { PolicyGuard } from '../common/guards/policy.guard';
+import { RequirePolicy } from '../common/decorators/policy.decorator';
+import { Public } from '../common/decorators/public.decorator';
 import { Action, Resource } from '../common/interfaces/policy.interface';
 import {
   ScammerReportService,

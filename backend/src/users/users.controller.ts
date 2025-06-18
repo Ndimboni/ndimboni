@@ -18,8 +18,8 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
-import { PolicyGuard } from '../guards/policy.guard';
-import { RequirePolicy } from '../decorators/policy.decorator';
+import { PolicyGuard } from '../common/guards/policy.guard';
+import { RequirePolicy } from '../common/decorators/policy.decorator';
 import { Action, Resource } from '../common/interfaces/policy.interface';
 
 @ApiTags('users')
