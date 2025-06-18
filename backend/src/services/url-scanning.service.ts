@@ -120,7 +120,9 @@ export class UrlScanningService {
     }
   }
 
-  private async scanWithGoogleSafeBrowsing(url: string): Promise<UrlScanResult> {
+  private async scanWithGoogleSafeBrowsing(
+    url: string,
+  ): Promise<UrlScanResult> {
     try {
       const response = await firstValueFrom(
         this.httpService.post(

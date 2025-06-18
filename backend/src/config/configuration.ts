@@ -8,12 +8,23 @@ export default (): AppConfig => {
 
   // Base database configuration
   const baseConfig = {
-    synchronize: process.env.NODE_ENV !== 'production',
-    logging: process.env.NODE_ENV === 'development',
+    // Use synchronize in development for quick prototyping, migrations in production
+    synchronize:
+      process.env.DB_SYNCHRONIZE === 'true' ||
+      (process.env.NODE_ENV !== 'production' &&
+        process.env.DB_SYNCHRONIZE !== 'false'),
+    logging:
+      process.env.NODE_ENV === 'development' ||
+      process.env.DB_LOGGING === 'true',
     entities: ['dist/**/*.entity{.ts,.js}'],
     migrations: ['dist/migrations/*{.ts,.js}'],
     migrationsTableName: 'migrations',
+    migrationsRun:
+      process.env.DB_MIGRATIONS_RUN === 'true' ||
+      (process.env.NODE_ENV === 'production' &&
+        process.env.DB_MIGRATIONS_RUN !== 'false'),
     autoLoadEntities: true,
+    dropSchema: process.env.DB_DROP_SCHEMA === 'true',
   };
 
   // Database-specific configuration
