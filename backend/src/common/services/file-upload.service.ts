@@ -6,12 +6,11 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
-import { UploadedFile } from '../entities/uploaded-file.entity';
-import { User } from '../entities/user.entity';
-import { UserRole } from '../common/interfaces/user.interface';
 import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { UploadedFile, User } from 'src/entities';
+import { UserRole } from '../interfaces/user.interface';
 
 @Injectable()
 export class FileUploadService {

@@ -12,12 +12,7 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PolicyGuard } from '../common/guards/policy.guard';
 import { RequirePolicy } from '../common/decorators/policy.decorator';
@@ -258,7 +253,6 @@ export class ScammerReportController {
       );
     }
   }
-  @ApiBearerAuth()
   @Get('report/:id')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get all scammers' })
@@ -303,7 +297,6 @@ export class ScammerReportController {
   @UseGuards(JwtAuthGuard, PolicyGuard)
   @RequirePolicy(Action.UPDATE, Resource.BOT_SETTINGS)
   @ApiOperation({ summary: 'Update scammer report (Admin only)' })
-  @ApiBearerAuth()
   @ApiResponse({
     status: 200,
     description: 'Report updated successfully',
@@ -360,7 +353,6 @@ export class ScammerReportController {
   @Get('search')
   @UseGuards(JwtAuthGuard, PolicyGuard)
   @RequirePolicy(Action.READ, Resource.BOT_SETTINGS)
-  @ApiBearerAuth()
   async searchReports(
     @Query('query') query?: string,
     @Query('type') type?: ScammerType,
@@ -422,7 +414,6 @@ export class ScammerReportController {
   }
 
   @Get('my-reports')
-  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   async getMyReports(
     @Request() req: any,
@@ -469,7 +460,6 @@ export class ScammerReportController {
   @Get('pending')
   @UseGuards(JwtAuthGuard, PolicyGuard)
   @RequirePolicy(Action.READ, Resource.BOT_SETTINGS)
-  @ApiBearerAuth()
   async getPendingReports(
     @Query('limit') limit?: string,
   ): Promise<ReportsResponse> {
@@ -509,7 +499,6 @@ export class ScammerReportController {
   @Get('stats')
   @UseGuards(JwtAuthGuard, PolicyGuard)
   @RequirePolicy(Action.READ, Resource.BOT_SETTINGS)
-  @ApiBearerAuth()
   async getStats(@Query('days') days?: string): Promise<StatsResponse> {
     try {
       const daysNum = days ? parseInt(days, 10) : 30;
@@ -576,7 +565,6 @@ export class ScammerReportController {
   @Get('all')
   @UseGuards(JwtAuthGuard, PolicyGuard)
   @RequirePolicy(Action.READ, Resource.BOT_SETTINGS)
-  @ApiBearerAuth()
   @ApiOperation({
     summary:
       'Get all scammer reports with pagination and filtering (Admin only)',

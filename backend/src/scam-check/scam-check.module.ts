@@ -3,10 +3,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { HttpModule } from '@nestjs/axios';
 import { ScamCheckController } from './scam-check.controller';
 import { ScamCheckService } from './scam-check.service';
-import { UrlScanningService } from '../services/url-scanning.service';
 import { ScamCheck } from '../entities/scam-check.entity';
 import { TelegramModerationService } from '../telegram-bot/telegram-moderation.service';
 import { AuthzModule } from '../authz/authz.module';
+import { UrlScanningService } from 'src/common/services/url-scanning.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([ScamCheck]), HttpModule, AuthzModule],

@@ -88,7 +88,29 @@ export class TelegramBotService implements OnModuleInit, OnModuleDestroy {
       });
 
       this.logger.log('Starting Telegram bot...');
-      await Promise.race([this.bot.launch(), timeoutPromise]);
+      // Check if webhook URL is configured
+      if (this.config.webhookUrl) {
+        this.logger.log(`Starting bot with webhook: ${this.config.webhookUrl}`);
+
+        // Extract domain from full URL
+        const webhookUrl = new URL(this.config.webhookUrl);
+        const domain = webhookUrl.origin;
+        const path = webhookUrl.pathname || '/telegram/webhook';
+
+        await Promise.race([
+          this.bot.launch({
+            webhook: {
+              domain: domain,
+              port: parseInt(webhookUrl.port) || 443,
+              hookPath: path,
+            },
+          }),
+          timeoutPromise,
+        ]);
+      } else {
+        this.logger.log('Starting bot with polling mode');
+        await Promise.race([this.bot.launch(), timeoutPromise]);
+      }
       this.logger.log('Telegram bot started successfully');
     } catch (error: any) {
       console.error(error);
@@ -385,6 +407,10 @@ This message contains potentially suspicious content.
           this.logger.error('Error during auto-moderation:', error);
         }
       }
+    } else {
+      // For private chats, always reply with bot capabilities after any message
+      const capabilitiesMessage = `\n🤖 *Ndimboni Digital Scam Protection Bot Capabilities*\n\nYou can:\n• /report [description] — Report a scammer or scam incident\n• /check [message] — Check if a message might be a scam\n• /start — View welcome message and overview\n\nJust type your command or message!`;
+      await ctx.reply(capabilitiesMessage, { parse_mode: 'Markdown' });
     }
   }
 

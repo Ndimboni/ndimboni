@@ -8,15 +8,15 @@ import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { AuthzModule } from './authz/authz.module';
 import { UsersModule } from './users/users.module';
-import { FileUploadModule } from './file-upload/file-upload.module';
 import { ScamReportsModule } from './scam-reports/scam-reports.module';
 import { ScamCheckModule } from './scam-check/scam-check.module';
 import { ScammerReportsModule } from './scammer-reports/scammer-reports.module';
 import { TelegramBotModule } from './telegram-bot/telegram-bot.module';
 import { CommonServicesModule } from './common/services/common-services.module';
-import { LoggerMiddleware } from './middleware/logger.middleware';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import configuration from './config/configuration';
+import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { FileUploadService } from './common/services/file-upload.service';
 
 @Module({
   imports: [
@@ -34,7 +34,6 @@ import configuration from './config/configuration';
     AuthModule,
     AuthzModule,
     UsersModule,
-    FileUploadModule,
     CommonServicesModule,
     ScamReportsModule,
     ScamCheckModule,
