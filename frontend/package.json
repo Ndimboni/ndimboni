@@ -16,10 +16,12 @@
     "antd": "^5.12.8",
     "classnames": "^2.5.1",
     "framer-motion": "^10.18.0",
+    "lucide-react": "^0.517.0",
     "next": "^14.0.4",
     "rc-motion": "^2.9.5",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "recharts": "^2.15.3"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",

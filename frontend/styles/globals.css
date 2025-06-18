@@ -166,22 +166,22 @@ p, span, div, a, button, input, textarea, select,
 
 
 /* Button styling */
-.ant-btn-primary {
-  background-color: #FFFFFF !important;
-  border-color: #FFFFFF !important;
+/* .ant-btn-primary {
+  background-color: #FFFFFF ;
+  border-color: #FFFFFF;
   color: #FFFFFF !important;
   font-weight: 600 !important;
   border-radius: 6px !important;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
-}
+} */
 
-.ant-btn-primary:hover {
+/* .ant-btn-primary:hover {
   background-color: rgba(255, 255, 255, 0.9) !important;
   border-color: #FFFFFF !important;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
-}
+} */
 
-.ant-btn-default {
+/* .ant-btn-default {
   background: rgba(255, 255, 255, 0.1) !important;
   backdrop-filter: blur(5px) !important;
   border-color: #1A5276 !important;
@@ -190,13 +190,13 @@ p, span, div, a, button, input, textarea, select,
   border-radius: 6px !important;
   font-weight: 600 !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-}
-
+} */
+/* 
 .ant-btn-default:hover {
   border-color: #2980B9 !important;
   background: rgba(255, 255, 255, 0.2) !important;
   color: #2980B9 !important;
-}
+} */
 
 
 /* Footer Styles */
