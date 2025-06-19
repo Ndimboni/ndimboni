@@ -69,6 +69,9 @@ export class ScammerReport {
   @Column('datetime', { nullable: true })
   lastReportedAt: Date | null;
 
+  @Column('varchar', { length: 50, default: 'web' })
+  source: string; // Source of the report (web, telegram, api, etc.)
+
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'reportedBy' })
   reporter: User;

@@ -78,6 +78,9 @@ export class ScamCheck {
   @Column('text', { nullable: true })
   userAgent: string | null;
 
+  @Column('varchar', { length: 50, default: 'web' })
+  source: string; // Source of the check (web, telegram, api, etc.)
+
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'checkedBy' })
   user: User;

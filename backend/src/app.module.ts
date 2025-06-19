@@ -8,7 +8,6 @@ import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { AuthzModule } from './authz/authz.module';
 import { UsersModule } from './users/users.module';
-import { ScamReportsModule } from './scam-reports/scam-reports.module';
 import { ScamCheckModule } from './scam-check/scam-check.module';
 import { ScammerReportsModule } from './scammer-reports/scammer-reports.module';
 import { TelegramBotModule } from './telegram-bot/telegram-bot.module';
@@ -35,7 +34,6 @@ import { FileUploadService } from './common/services/file-upload.service';
     AuthzModule,
     UsersModule,
     CommonServicesModule,
-    ScamReportsModule,
     ScamCheckModule,
     ScammerReportsModule,
     TelegramBotModule,

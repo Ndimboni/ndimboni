@@ -1,5 +1,88 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, Length } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  Length,
+  IsOptional,
+  IsEnum,
+  IsNumber,
+  Min,
+  Max,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import { ScammerType } from '../entities/scammer-report.entity';
+
+export class TelegramCheckDto {
+  @ApiProperty({
+    description: 'Message to check for scam patterns',
+    example: 'Click this link to win $1000000!',
+    minLength: 1,
+    maxLength: 4000,
+  })
+  @IsString()
+  @IsNotEmpty()
+  @Length(1, 4000)
+  message: string;
+}
+
+export class TelegramReportDto {
+  @ApiProperty({
+    description: 'Type of scammer',
+    enum: ScammerType,
+    example: ScammerType.EMAIL,
+  })
+  @IsEnum(ScammerType)
+  type: ScammerType;
+
+  @ApiProperty({
+    description: 'Identifier (email, phone, etc.)',
+    example: 'scammer@example.com',
+    minLength: 3,
+    maxLength: 255,
+  })
+  @IsString()
+  @IsNotEmpty()
+  @Length(3, 255)
+  identifier: string;
+
+  @ApiProperty({
+    description: 'Description of the scam attempt',
+    example: 'This person tried to steal my personal information',
+    minLength: 10,
+    maxLength: 1000,
+  })
+  @IsString()
+  @IsNotEmpty()
+  @Length(10, 1000)
+  description: string;
+
+  @ApiProperty({
+    description: 'Additional information',
+    example: 'They contacted me via WhatsApp',
+    required: false,
+    maxLength: 500,
+  })
+  @IsOptional()
+  @IsString()
+  @Length(0, 500)
+  additionalInfo?: string;
+}
+
+export class TelegramStatsQueryDto {
+  @ApiProperty({
+    description: 'Number of days to include in statistics',
+    example: 30,
+    minimum: 1,
+    maximum: 365,
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(365)
+  days?: number = 30;
+}
 
 export class AnalyzeMessageDto {
   @ApiProperty({

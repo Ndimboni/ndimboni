@@ -17,6 +17,7 @@ export interface ScamCheckRequest {
   checkedBy?: string;
   ipAddress?: string;
   userAgent?: string;
+  source?: string; // Source of the check (web, telegram, api, etc.)
 }
 
 export interface ScamCheckResponse {
@@ -30,6 +31,7 @@ export interface ScamCheckResponse {
   urlScanResults?: any;
   message: string;
   extractedUrls?: string[];
+  source: string;
   createdAt: Date;
 }
 
@@ -83,7 +85,7 @@ export class ScamCheckService {
           riskScore = Math.max(riskScore, 0.9);
           analysis.reasons.push('malicious_urls_detected');
         } else if (scanSummary.suspiciousUrls > 0) {
-          riskScore = Math.max(riskScore, 0.6);
+          riskScore = Math.max(riskScore, 0.4);
           analysis.reasons.push('suspicious_urls_detected');
         }
       }
@@ -139,6 +141,7 @@ export class ScamCheckService {
       scamCheck.checkedBy = request.checkedBy || null;
       scamCheck.ipAddress = request.ipAddress || null;
       scamCheck.userAgent = request.userAgent || null;
+      scamCheck.source = request.source || 'web';
 
       const savedCheck = await this.scamCheckRepository.save(scamCheck);
 
@@ -321,6 +324,7 @@ export class ScamCheckService {
         : null,
       message: check.message,
       extractedUrls: check.extractedUrls ? JSON.parse(check.extractedUrls) : [],
+      source: check.source,
       createdAt: check.createdAt,
     };
   }

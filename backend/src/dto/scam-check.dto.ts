@@ -23,6 +23,15 @@ export class CheckMessageDto {
   @IsNotEmpty()
   @Length(1, 10000)
   message: string;
+
+  @ApiProperty({
+    description: 'Source of the check',
+    example: 'web',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  source?: string;
 }
 
 export class GetCheckByIdParamDto {

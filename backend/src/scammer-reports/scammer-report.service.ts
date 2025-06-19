@@ -15,6 +15,7 @@ export interface CreateScammerReportRequest {
   additionalInfo?: string;
   reportedBy?: string;
   ipAddress?: string;
+  source?: string; // Source of the report (web, telegram, api, etc.)
 }
 
 export interface UpdateScammerReportRequest {
@@ -35,6 +36,7 @@ export interface ScammerReportResponse {
   additionalInfo?: string;
   reportCount: number;
   lastReportedAt?: Date;
+  source: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -120,6 +122,7 @@ export class ScammerReportService {
       scammerReport.additionalInfo = request.additionalInfo || null;
       scammerReport.reportedBy = request.reportedBy || null;
       scammerReport.ipAddress = request.ipAddress || null;
+      scammerReport.source = request.source || 'web';
       scammerReport.lastReportedAt = new Date();
 
       const savedReport =
@@ -390,6 +393,7 @@ export class ScammerReportService {
       additionalInfo: report.additionalInfo ?? undefined,
       reportCount: report.reportCount,
       lastReportedAt: report.lastReportedAt ?? undefined,
+      source: report.source,
       createdAt: report.createdAt,
       updatedAt: report.updatedAt,
     };

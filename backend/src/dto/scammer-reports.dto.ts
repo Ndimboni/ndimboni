@@ -66,6 +66,15 @@ export class CreateScammerReportDto {
   @IsString()
   @Length(0, 2000)
   additionalInfo?: string;
+
+  @ApiProperty({
+    description: 'Source of the report',
+    example: 'web',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  source?: string;
 }
 
 export class CheckScammerDto {

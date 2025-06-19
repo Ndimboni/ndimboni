@@ -12,7 +12,12 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PolicyGuard } from '../common/guards/policy.guard';
 import { RequirePolicy } from '../common/decorators/policy.decorator';
@@ -141,6 +146,7 @@ export class ScammerReportController {
         additionalInfo: dto.additionalInfo?.trim(),
         reportedBy: req.user?.id,
         ipAddress: req.ip || req.connection?.remoteAddress,
+        source: dto.source || 'web',
       };
 
       const result = await this.scammerReportService.createReport(request);
@@ -230,6 +236,7 @@ export class ScammerReportController {
     status: 404,
     description: 'Report not found',
   })
+  @ApiBearerAuth()
   async getReportById(
     @Param() params: ScammerReportIdParamDto,
   ): Promise<ReportResponse> {
@@ -314,6 +321,7 @@ export class ScammerReportController {
     status: 403,
     description: 'Insufficient permissions',
   })
+  @ApiBearerAuth()
   async updateReport(
     @Param() params: ScammerReportIdParamDto,
     @Body() dto: UpdateScammerReportDto,
@@ -361,6 +369,7 @@ export class ScammerReportController {
   @Get('search')
   @UseGuards(JwtAuthGuard, PolicyGuard)
   @RequirePolicy(Action.READ, Resource.BOT_SETTINGS)
+  @ApiBearerAuth()
   async searchReports(
     @Query() queryDto: SearchScammerReportsQueryDto,
   ): Promise<ReportsResponse> {
@@ -415,6 +424,7 @@ export class ScammerReportController {
 
   @Get('my-reports')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async getMyReports(
     @Request() req: any,
     @Query() query: GetChecksQueryDto,
@@ -449,6 +459,7 @@ export class ScammerReportController {
   @Get('pending')
   @UseGuards(JwtAuthGuard, PolicyGuard)
   @RequirePolicy(Action.READ, Resource.BOT_SETTINGS)
+  @ApiBearerAuth()
   async getPendingReports(
     @Query() query: GetPendingReportsQueryDto,
   ): Promise<ReportsResponse> {
@@ -480,6 +491,7 @@ export class ScammerReportController {
   @Get('stats')
   @UseGuards(JwtAuthGuard, PolicyGuard)
   @RequirePolicy(Action.READ, Resource.BOT_SETTINGS)
+  @ApiBearerAuth()
   async getStats(@Query() query: GetStatsQueryDto): Promise<StatsResponse> {
     try {
       const stats = await this.scammerReportService.getStats(query.days);
@@ -506,6 +518,7 @@ export class ScammerReportController {
   @Post('report/:id/delete')
   @UseGuards(JwtAuthGuard, PolicyGuard)
   @RequirePolicy(Action.DELETE, Resource.BOT_SETTINGS)
+  @ApiBearerAuth()
   async deleteReport(
     @Param() params: ScammerReportIdParamDto,
   ): Promise<{ success: boolean; message: string }> {
@@ -549,6 +562,7 @@ export class ScammerReportController {
     status: 403,
     description: 'Insufficient permissions',
   })
+  @ApiBearerAuth()
   async getAllReports(
     @Query() queryDto: GetAllScammerReportsQueryDto,
   ): Promise<{
