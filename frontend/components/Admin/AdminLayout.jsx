@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Menu, Avatar, Dropdown, Button } from 'antd';
+import { Layout, Menu, Avatar, Dropdown, Button, Modal, Card, Row, Col, Typography, Divider, message } from 'antd';
 import {
   DashboardOutlined,
   UserOutlined,
@@ -10,12 +10,14 @@ import {
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  MailOutlined,
+  SafetyCertificateOutlined,
 } from '@ant-design/icons';
 import AdminDashboard from './Dashboard';
 
 const { Header, Sider, Content } = Layout;
+const { Title, Text } = Typography;
 
-// Component imports for different pages
 const UsersPage = () => (
   <div style={{ padding: '24px' }}>
     <h2>Users Management</h2>
@@ -49,7 +51,12 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [userName, setUserName] = useState('Admin User');
+  const [userEmail, setUserEmail] = useState('admin@ndimboni.com');
+  const [userRole, setUserRole] = useState('admin');
   const [selectedKey, setSelectedKey] = useState(currentPage);
+  const [profileModalVisible, setProfileModalVisible] = useState(false);
+  const [profileData, setProfileData] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(false);
 
   const getUserInitials = (name) => {
     return name
@@ -59,16 +66,69 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
       .substring(0, 2);
   };
 
+  const getRoleDisplay = (role) => {
+    return role === 'admin' ? 'Administrator' : 'Moderator';
+  };
+
+  const fetchUserProfile = async () => {
+    setProfileLoading(true);
+    try {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        message.error('No access token found');
+        return;
+      }
+
+      const response = await fetch('https://ndimboni-digital-scam-protection.onrender.com/auth/profile', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setProfileData(data);
+        
+        // Update local state with fetched data
+        if (data.user_name) setUserName(data.user_name);
+        if (data.user_email) setUserEmail(data.user_email);
+        if (data.user_role) setUserRole(data.user_role);
+        
+        // Store in localStorage for future use
+        localStorage.setItem('user_name', data.user_name || '');
+        localStorage.setItem('user_email', data.user_email || '');
+        localStorage.setItem('user_role', data.user_role || '');
+      } else {
+        message.error('Failed to fetch profile data');
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      message.error('Error fetching profile data');
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  const handleProfileClick = () => {
+    setProfileModalVisible(true);
+    fetchUserProfile();
+  };
+
   useEffect(() => {
     checkIfMobile();
     window.addEventListener('resize', checkIfMobile);
     
-    const storedUserName = 'John Doe'; 
-    if (storedUserName) {
-      setUserName(storedUserName);
-    }
+    // Load user data from localStorage
+    const storedUserName = localStorage.getItem('user_name') || 'Admin User';
+    const storedUserEmail = localStorage.getItem('user_email') || 'admin@ndimboni.com';
+    const storedUserRole = localStorage.getItem('user_role') || 'admin';
     
-    // Update selected key when currentPage prop changes
+    setUserName(storedUserName);
+    setUserEmail(storedUserEmail);
+    setUserRole(storedUserRole);
+    
     setSelectedKey(currentPage);
     
     return () => {
@@ -114,14 +174,22 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
   };
 
   const handleMenuClick = ({ key }) => {
-    setSelectedKey(key);
+    if (key === 'profile') {
+      handleProfileClick();
+      return;
+    }
     
-    // Close mobile menu when item is selected
+    if (key === 'logout') {
+      handleLogout();
+      return;
+    }
+    
+    setSelectedKey(key);
+
     if (isMobile) {
       setIsOpen(false);
     }
     
-    // Navigate to the appropriate page
     const routes = {
       'dashboard': '/admin/dashboard',
       'users': '/admin/users',
@@ -136,12 +204,10 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
   };
 
   const renderPageContent = () => {
-    // If children prop is provided, use it (for custom page content)
     if (children) {
       return children;
     }
     
-    // Otherwise, render based on selectedKey
     switch (selectedKey) {
       case 'dashboard':
         return <AdminDashboard />;
@@ -163,6 +229,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
       key: 'profile',
       icon: <UserOutlined />,
       label: 'Profile Settings',
+      onClick: handleProfileClick,
     },
     {
       key: 'settings',
@@ -212,6 +279,205 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
 
   return (
     <Layout style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
+      {/* Compact Profile Modal */}
+      <Modal
+        title={null}
+        open={profileModalVisible}
+        onCancel={() => setProfileModalVisible(false)}
+        footer={null}
+        width={380}
+        centered
+        bodyStyle={{ padding: 0 }}
+      >
+        <div
+          style={{
+            background: 'linear-gradient(135deg, #2980B9, #1A5276)',
+            borderRadius: '12px 12px 0 0',
+            padding: '24px',
+            textAlign: 'center',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Background decoration */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '-50px',
+              right: '-50px',
+              width: '100px',
+              height: '100px',
+              background: 'rgba(26, 82, 118, 0.1)',
+              borderRadius: '50%',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '-30px',
+              left: '-30px',
+              width: '60px',
+              height: '60px',
+              background: 'rgba(26, 82, 118, 0.1)',
+              borderRadius: '50%',
+            }}
+          />
+          
+          <Avatar
+            size={70}
+            style={{
+              backgroundColor: 'rgba(26, 82, 118, 0.1)',
+              fontSize: '28px',
+              fontWeight: '600',
+              marginBottom: '12px',
+              border: '3px solid rgba(26, 82, 118, 0.1)',
+              color: '#ffffff',
+              backdropFilter: 'blur(10px)',
+            }}
+          >
+            {profileData ? getUserInitials(profileData.user_name || userName) : getUserInitials(userName)}
+          </Avatar>
+          
+          <Title 
+            level={4} 
+            style={{ 
+              margin: 0, 
+              color: '#ffffff',
+              fontWeight: '600',
+              fontSize: '18px'
+            }}
+          >
+            {profileData?.user_name || userName}
+          </Title>
+          
+          <Text 
+            style={{ 
+              color: 'rgba(255, 255, 255, 0.8)',
+              fontSize: '14px',
+              display: 'block',
+              marginTop: '4px'
+            }}
+          >
+            {getRoleDisplay(profileData?.user_role || userRole)}
+          </Text>
+        </div>
+
+        <div style={{ padding: '20px' }}>
+          {profileLoading ? (
+            <div style={{ textAlign: 'center', padding: '20px' }}>
+              <div
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  border: '3px solid #f3f3f3',
+                  borderTop: '3px solid #667eea',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite',
+                  margin: '0 auto 12px',
+                }}
+              />
+              <Text style={{ color: '#64748b' }}>Loading...</Text>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {/* Email */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '12px',
+                  background: '#f8fafc',
+                  borderRadius: '8px',
+                  border: '1px solid #e2e8f0',
+                }}
+              >
+                <div
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '8px',
+                    background: 'linear-gradient(135deg, #2980B9, #1A5276)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: '12px',
+                  }}
+                >
+                  <MailOutlined style={{ color: '#ffffff', fontSize: '16px' }} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <Text style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>
+                    Email Address
+                  </Text>
+                  <Text style={{ fontSize: '14px', color: '#1e293b', fontWeight: '500' }}>
+                    {profileData?.user_email || userEmail}
+                  </Text>
+                </div>
+              </div>
+
+              {/* Role */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '12px',
+                  background: '#f8fafc',
+                  borderRadius: '8px',
+                  border: '1px solid #e2e8f0',
+                }}
+              >
+                <div
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '8px',
+                    background: 'linear-gradient(135deg, #2980B9, #1A5276)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: '12px',
+                  }}
+                >
+                  <SafetyCertificateOutlined style={{ color: '#ffffff', fontSize: '16px' }} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <Text style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>
+                    Access Level
+                  </Text>
+                  <Text style={{ fontSize: '14px', color: '#1e293b', fontWeight: '500' }}>
+                    {getRoleDisplay(profileData?.user_role || userRole)}
+                  </Text>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div style={{ 
+            marginTop: '20px', 
+            display: 'flex', 
+            gap: '8px',
+            justifyContent: 'center'
+          }}>
+            <Button
+              onClick={() => setProfileModalVisible(false)}
+              style={{
+                borderRadius: '8px',
+                height: '36px',
+                paddingLeft: '20px',
+                paddingRight: '20px',
+                background: 'linear-gradient(135deg, #2980B9, #1A5276)',
+                border: '1px solid #e2e8f0',
+                color: '#fff',
+              }}
+            >
+              Close
+            </Button>
+           
+          </div>
+        </div>
+      </Modal>
+
       {/* Mobile Toggle Button */}
       {isMobile && (
         <Button
@@ -299,7 +565,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
                   fontSize: '0.75rem', 
                   color: '#2980B9'
                 }}>
-                  Administrator
+                  {getRoleDisplay(userRole)}
                 </div>
               </div>
             )}
@@ -368,8 +634,13 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
         </div>
       </Sider>
 
-      {/* Custom Menu Styles */}
+      {/* Custom Styles */}
       <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
         .ant-menu-light .ant-menu-item {
           color: #1A5276 !important;
           display: flex !important;
@@ -463,7 +734,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
                 marginLeft: isMobile ? '0' : '20px',
                 fontSize: '22px', 
                 fontWeight: '700',
-                color: '#fff'
+                color: '#1A5276'
               }}>
                 {navItems.find(item => item.key === selectedKey)?.label || 'Dashboard'}
               </h1>

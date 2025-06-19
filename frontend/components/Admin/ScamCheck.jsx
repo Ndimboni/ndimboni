@@ -316,19 +316,7 @@ const ScamCheckPage = () => {
   };
 
 
-  const applyFilters = () => {
-    fetchChecks(1, filters);
-  };
 
- 
-  const clearFilters = () => {
-    setFilters({
-      status: null,
-      intent: null,
-      dateRange: null
-    });
-    fetchChecks(1, {});
-  };
 
 
   const retryWithAuth = () => {

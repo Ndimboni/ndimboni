@@ -1,12 +1,41 @@
 import { useState, useEffect } from 'react'
-import { Typography, Button, Row, Col, Card, Space } from 'antd'
-import { ArrowRightOutlined, SecurityScanOutlined, BulbOutlined, ExclamationCircleOutlined, UserOutlined } from '@ant-design/icons'
+import { Typography, Button, Row, Col, Card, Space, Modal, Input, Tag, Progress, Alert, Collapse } from 'antd'
+import { ArrowRightOutlined, SecurityScanOutlined, BulbOutlined, ExclamationCircleOutlined, UserOutlined, CheckCircleOutlined,GlobalOutlined, LinkOutlined, SendOutlined } from '@ant-design/icons'
 import { motion } from 'framer-motion'
 
 const { Title, Paragraph, Text } = Typography
+const { TextArea } = Input
+
+
+const API_BASE_URL = 'https://ndimboni-digital-scam-protection.onrender.com/api/scam-check'
+
+
+const CheckStatus = {
+  SAFE: 'SAFE',
+  SUSPICIOUS: 'SUSPICIOUS',
+  MALICIOUS: 'MALICIOUS',
+  UNKNOWN: 'UNKNOWN'
+}
+
+const IntentType = {
+  LEGITIMATE: 'LEGITIMATE',
+  PHISHING: 'PHISHING',
+  ROMANCE_SCAM: 'ROMANCE_SCAM',
+  INVESTMENT_SCAM: 'INVESTMENT_SCAM',
+  LOTTERY_SCAM: 'LOTTERY_SCAM',
+  MONEY_REQUEST: 'MONEY_REQUEST',
+  UNKNOWN: 'UNKNOWN'
+}
 
 export default function Home() {
   const [mounted, setMounted] = useState(false)
+  const [checkModalVisible, setCheckModalVisible] = useState(false)
+  const [resultsModalVisible, setResultsModalVisible] = useState(false)
+  const [messageValue, setMessageValue] = useState('')
+  const [checkLoading, setCheckLoading] = useState(false)
+  const [checkResult, setCheckResult] = useState(null)
+  const [error, setError] = useState(null)
+  
 
   useEffect(() => {
     setMounted(true)
@@ -29,6 +58,130 @@ export default function Home() {
       description: 'Secure channel for reporting scam incidents with WhatsApp API integration, enabling better collaboration between citizens and authorities.',
     },
   ]
+
+  
+  const getStatusIcon = (status) => {
+  const iconMap = {
+    [CheckStatus.SAFE]: '✅',
+    [CheckStatus.SUSPICIOUS]: '⚠️',
+    [CheckStatus.MALICIOUS]: '❌',
+    [CheckStatus.UNKNOWN]: '❓'
+  };
+  return iconMap[status] || '❓';
+};
+
+const getStatusColor = (status) => {
+  const colors = {
+    [CheckStatus.SAFE]: 'green',
+    [CheckStatus.SUSPICIOUS]: 'orange', 
+    [CheckStatus.MALICIOUS]: 'red',
+    [CheckStatus.UNKNOWN]: 'gray'
+  };
+  return colors[status] || 'gray';
+};
+
+const getIntentColor = (intent) => {
+  const colors = {
+    [IntentType.LEGITIMATE]: 'green',
+    [IntentType.PHISHING]: 'red',
+    [IntentType.ROMANCE_SCAM]: 'magenta',
+    [IntentType.INVESTMENT_SCAM]: 'orange',
+    [IntentType.LOTTERY_SCAM]: 'purple',
+    [IntentType.MONEY_REQUEST]: 'volcano',
+    [IntentType.UNKNOWN]: 'gray'
+  };
+  return colors[intent] || 'gray';
+};
+
+ 
+ const checkMessage = async (message) => {
+  try {
+    setCheckLoading(true);
+    setError(null);
+
+    const response = await fetch(`${API_BASE_URL}/check`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+        'X-User-Role': localStorage.getItem('user_role') || 'user'
+      },
+      body: JSON.stringify({ message })
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        setAuthError(true);
+        throw new Error('Unauthorized access. Please login again.');
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.success) {
+     
+      const transformedResult = {
+        status: data.data.status || CheckStatus.UNKNOWN,
+        intent: data.data.detectedIntent || IntentType.UNKNOWN,
+        risk_score: data.data.riskScore || 0,
+        analysis: data.data.analysis || 'Analysis completed successfully.',
+        warning_flags: data.data.reasons || [],
+        recommendations: data.data.recommendations || [],
+        timestamp: new Date().toISOString(),
+        extracted_urls: data.data.extractedUrls || [],
+        confidence: data.data.confidence || 0,
+        detected_patterns: data.data.detectedPatterns || []
+      };
+
+      setCheckResult(transformedResult);
+      setCheckModalVisible(false);
+      setResultsModalVisible(true);
+      setMessageValue('');
+      
+     
+      fetchChecks();
+      fetchStats();
+    } else {
+      throw new Error(data.message || 'Failed to check message');
+    }
+  } catch (error) {
+    console.error('Message check error:', error);
+    if (error.message.includes('Unauthorized')) {
+      setAuthError(true);
+    }
+    setError(error.message || 'Failed to check message. Please try again.');
+  } finally {
+    setCheckLoading(false);
+  }
+};
+const handleCheckMessage = () => {
+  if (!messageValue || messageValue.trim().length < 10) {
+    setError('Please enter a message of at least 10 characters!');
+    return;
+  }
+  checkMessage(messageValue.trim());
+};
+
+const handleOpenCheckModal = () => {
+  setCheckModalVisible(true);
+  setError(null);
+  setMessageValue('');
+};
+
+const handleCloseCheckModal = () => {
+  setCheckModalVisible(false);
+  setError(null);
+  setMessageValue('');
+};
+
+const handleCloseResultsModal = () => {
+  setResultsModalVisible(false);
+  setCheckResult(null);
+};
+const handleTelegramReport = () => {
+  window.open('https://t.me/ndimboni_bot', '_blank');
+};
 
   if (!mounted) {
     return (
@@ -65,22 +218,25 @@ export default function Home() {
             <Button
               type="primary"
               size="large"
-              icon={<ArrowRightOutlined />}
+              icon={<GlobalOutlined />}
               className="font-semibold px-8 py-3 h-auto"
               style={{ 
                 background: 'linear-gradient(135deg, #2980B9, #1A5276)',
+               
               }}
+              onClick={handleOpenCheckModal}
             >
-              Try Scam Detection
+              Check Scam Message
             </Button>
-            <Button
-              type="default"
-              size="large"
-              className="font-semibold px-8 py-3 h-auto"
-            
-            >
-              Learn About Scams
-            </Button>
+           <Button
+  type="default"
+  size="large"
+  icon={<SendOutlined />}
+  className="font-semibold px-8 py-3 h-auto"
+  onClick={handleTelegramReport}
+>
+  Report via Telegram
+</Button>
           </Space>
         </motion.div>
       </Col>
@@ -354,7 +510,8 @@ export default function Home() {
       className="text-center mt-5"
     >
       <div className="inline-flex items-center space-x-2 px-6 py-3 bg-[#FFFFFF] rounded-full hover:bg-[#AED6F1] transition-all duration-300 cursor-pointer group"
-           style={{ boxShadow: '0 4px 10px rgba(26, 82, 118, 0.2)' }}>
+           style={{ boxShadow: '0 4px 10px rgba(26, 82, 118, 0.2)' }}
+           onClick={handleOpenCheckModal}>
         <span className="text-[#1A5276] font-medium group-hover:text-[#FFFFFF] transition-colors duration-200">Ready to get started?</span>
         <motion.div
           whileHover={{ x: 5 }}
@@ -368,6 +525,7 @@ export default function Home() {
     </motion.div>
   </div>
 </section>
+
 {/* Research Team Section */}
 <section className="py-10" style={{ backgroundColor: '#f8f9fa' }}>
   <div className="container mx-auto px-6">
@@ -511,161 +669,500 @@ export default function Home() {
       className="text-center max-w-6xl mx-auto"
     >
       {/* Main CTA Content */}
-      <div 
-        className="rounded-3xl p-8 relative overflow-hidden"
-        style={{
-          background: 'linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 50%, #FFFFFF 100%)',
-          border: '1px solid rgba(26, 82, 118, 0.1)',
-          boxShadow: '0 20px 60px rgba(26, 82, 118, 0.15)'
-        }}
-      >
-        {/* Background Pattern */}
         <div 
-          className="absolute inset-0 opacity-5"
+          className="rounded-3xl p-8 relative overflow-hidden"
           style={{
-            backgroundImage: `radial-gradient(circle at 20% 50%, rgba(26, 82, 118, 0.1) 0%, transparent 50%),
-                             radial-gradient(circle at 80% 20%, rgba(41, 128, 185, 0.1) 0%, transparent 50%),
-                             radial-gradient(circle at 40% 80%, rgba(26, 82, 118, 0.1) 0%, transparent 50%)`
+            background: 'linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 50%, #FFFFFF 100%)',
+            border: '1px solid rgba(26, 82, 118, 0.1)',
+            boxShadow: '0 20px 60px rgba(26, 82, 118, 0.15)'
+          }}
+        >
+          {/* Background Pattern */}
+          <div 
+            className="absolute inset-0 opacity-5"
+            style={{
+              backgroundImage: `radial-gradient(circle at 20% 50%, rgba(26, 82, 118, 0.1) 0%, transparent 50%),
+                               radial-gradient(circle at 80% 20%, rgba(41, 128, 185, 0.1) 0%, transparent 50%),
+                               radial-gradient(circle at 40% 80%, rgba(26, 82, 118, 0.1) 0%, transparent 50%)`
+            }}
+          />
+          
+          <div className="relative z-10">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+            >
+              <Title level={3} className="text-base md:text-5xl font-bold mt-0 leading-tight" style={{ color: '#1A5276' }}>
+                Protect Yourself from 
+                <span className=" ml-2">
+                  <span style={{ color: '#2980B9' }}>Digital Scams</span> Today
+                </span>
+              </Title>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              viewport={{ once: true }}
+            >
+              <Paragraph className="text-base mt-10 max-w-3xl mx-auto leading-relaxed" style={{ color: '#1A5276' }}>
+                Join thousands of Rwandans using <span className="font-semibold" style={{ color: '#2980B9' }}>Ndimboni</span> to stay safe online. 
+                Report scams, learn protection strategies, and contribute to a safer digital Rwanda.
+              </Paragraph>
+            </motion.div>
+
+            {/* Interactive Stats */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              viewport={{ once: true }}
+              className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12"
+            >
+              <motion.div
+                whileHover={{ scale: 1.05, y: -5 }}
+                transition={{ duration: 0.3 }}
+                className="text-center"
+              >
+                <div className="text-4xl font-bold mb-2" style={{ color: '#1A5276' }}>1000+</div>
+                <div className="text-sm" style={{ color: '#2980B9' }}>Protected Users</div>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.05, y: -5 }}
+                transition={{ duration: 0.3 }}
+                className="text-center"
+              >
+                <div className="text-4xl font-bold mb-2" style={{ color: '#1A5276' }}>500+</div>
+                <div className="text-sm" style={{ color: '#2980B9' }}>Scams Detected</div>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.05, y: -5 }}
+                transition={{ duration: 0.3 }}
+                className="text-center"
+              >
+                <div className="text-4xl font-bold mb-2" style={{ color: '#1A5276' }}>24/7</div>
+                <div className="text-sm" style={{ color: '#2980B9' }}>AI Protection</div>
+              </motion.div>
+            </motion.div>
+
+            {/* Action Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+              viewport={{ once: true }}
+            >
+              <Space size="large" className="flex flex-col sm:flex-row justify-center">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Button
+                    type="primary"
+                    size="large"
+                    icon={<ArrowRightOutlined />}
+                    className="font-semibold px-10 py-4 h-auto text-lg rounded-xl"
+                    style={{ 
+                      background: 'linear-gradient(135deg, #2980B9, #1A5276)',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      boxShadow: '0 8px 25px rgba(26, 82, 118, 0.3)'
+                    }}
+                    onClick={handleOpenCheckModal}
+                  >
+                    Start Protection Now
+                  </Button>
+                </motion.div>
+                
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Button
+                    size="large"
+                    className="font-semibold px-10 py-4 h-auto text-lg rounded-xl border-2 hover:bg-blue-600 hover:text-white transition-all duration-300"
+                    style={{ 
+                      backgroundColor: 'transparent',
+                      color: '#1A5276',
+                      borderColor: '#2980B9',
+                      boxShadow: '0 8px 25px rgba(26, 82, 118, 0.1)'
+                    }}
+                    onClick={handleOpenCheckModal}
+                  >
+                    Report a Scam
+                  </Button>
+                </motion.div>
+              </Space>
+            </motion.div>
+
+            {/* Trust Indicators */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 1.0 }}
+              viewport={{ once: true }}
+              className="mt-12 flex flex-wrap justify-center items-center gap-8"
+            >
+              <div className="flex items-center text-sm" style={{ color: '#1A5276' }}>
+                <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                Rwanda Cyber Security Agency Approved
+              </div>
+              <div className="flex items-center text-sm" style={{ color: '#1A5276' }}>
+                <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                100% Free to Use
+              </div>
+              <div className="flex items-center text-sm" style={{ color: '#1A5276' }}>
+                <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                Privacy Protected
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  </section>
+<>
+  {/* Message Check Modal - Compact Design */}
+  <Modal
+    title={
+      <div className="text-center py-1">
+        <SecurityScanOutlined className="text-lg mr-2" style={{ color: '#2980B9' }} />
+        <span className="text-lg font-semibold" style={{ color: '#1A5276' }}>
+          Check Message for Scams
+        </span>
+      </div>
+    }
+    open={checkModalVisible}
+    onCancel={handleCloseCheckModal}
+    footer={null}
+    centered
+    width={480}
+    className="scam-check-modal"
+    styles={{
+      content: {
+        borderRadius: '12px',
+        overflow: 'hidden'
+      }
+    }}
+  >
+    <div className="p-3">
+      <Paragraph className="text-sm mb-4 text-center" style={{ color: '#1A5276' }}>
+        Paste suspicious message below for AI analysis
+      </Paragraph>
+
+      {error && (
+        <Alert
+          message={error}
+          type="error"
+          showIcon
+          className="mb-3"
+          closable
+          onClose={() => setError(null)}
+          size="small"
+        />
+      )}
+
+      <div className="mb-4">
+        <TextArea
+          placeholder="Paste message here... (min 10 characters)"
+          value={messageValue}
+          onChange={(e) => setMessageValue(e.target.value)}
+          rows={4}
+          className="rounded-lg"
+          style={{
+            fontSize: '13px',
+            lineHeight: '1.4'
           }}
         />
-        
-        <div className="relative z-10">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
-            <Title level={3} className="text-base md:text-5xl font-bold mt-0 leading-tight" style={{ color: '#1A5276' }}>
-              Protect Yourself from 
-              <span className=" ml-2">
-                <span style={{ color: '#2980B9' }}>Digital Scams</span> Today
-              </span>
-            </Title>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            viewport={{ once: true }}
-          >
-            <Paragraph className="text-base mt-10 max-w-3xl mx-auto leading-relaxed" style={{ color: '#1A5276' }}>
-              Join thousands of Rwandans using <span className="font-semibold" style={{ color: '#2980B9' }}>Ndimboni</span> to stay safe online. 
-              Report scams, learn protection strategies, and contribute to a safer digital Rwanda.
-            </Paragraph>
-          </motion.div>
-
-          {/* Interactive Stats */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12"
-          >
-            <motion.div
-              whileHover={{ scale: 1.05, y: -5 }}
-              transition={{ duration: 0.3 }}
-              className="text-center"
-            >
-              <div className="text-4xl font-bold mb-2" style={{ color: '#1A5276' }}>1000+</div>
-              <div className="text-sm" style={{ color: '#2980B9' }}>Protected Users</div>
-            </motion.div>
-            <motion.div
-              whileHover={{ scale: 1.05, y: -5 }}
-              transition={{ duration: 0.3 }}
-              className="text-center"
-            >
-              <div className="text-4xl font-bold mb-2" style={{ color: '#1A5276' }}>500+</div>
-              <div className="text-sm" style={{ color: '#2980B9' }}>Scams Detected</div>
-            </motion.div>
-            <motion.div
-              whileHover={{ scale: 1.05, y: -5 }}
-              transition={{ duration: 0.3 }}
-              className="text-center"
-            >
-              <div className="text-4xl font-bold mb-2" style={{ color: '#1A5276' }}>24/7</div>
-              <div className="text-sm" style={{ color: '#2980B9' }}>AI Protection</div>
-            </motion.div>
-          </motion.div>
-
-          {/* Action Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.8 }}
-            viewport={{ once: true }}
-          >
-            <Space size="large" className="flex flex-col sm:flex-row justify-center">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Button
-                  type="primary"
-                  size="large"
-                  icon={<ArrowRightOutlined />}
-                  className="font-semibold px-10 py-4 h-auto text-lg rounded-xl"
-                  style={{ 
-                    background: 'linear-gradient(135deg, #2980B9, #1A5276)',
-                    color: '#FFFFFF',
-                    border: 'none',
-                    boxShadow: '0 8px 25px rgba(26, 82, 118, 0.3)'
-                  }}
-                >
-                  Start Protection Now
-                </Button>
-              </motion.div>
-              
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Button
-                  size="large"
-                  className="font-semibold px-10 py-4 h-auto text-lg rounded-xl border-2 hover:bg-blue-600 hover:text-white transition-all duration-300"
-                  style={{ 
-                    backgroundColor: 'transparent',
-                    color: '#1A5276',
-                    borderColor: '#2980B9',
-                    boxShadow: '0 8px 25px rgba(26, 82, 118, 0.1)'
-                  }}
-                >
-                  Report a Scam
-                </Button>
-              </motion.div>
-            </Space>
-          </motion.div>
-
-          {/* Trust Indicators */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 1.0 }}
-            viewport={{ once: true }}
-            className="mt-12 flex flex-wrap justify-center items-center gap-8"
-          >
-            <div className="flex items-center text-sm" style={{ color: '#1A5276' }}>
-              <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-              Rwanda Cyber Security Agency Approved
-            </div>
-            <div className="flex items-center text-sm" style={{ color: '#1A5276' }}>
-              <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-              100% Free to Use
-            </div>
-            <div className="flex items-center text-sm" style={{ color: '#1A5276' }}>
-              <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-              Privacy Protected
-            </div>
-          </motion.div>
+        <div className="text-right mt-1">
+          <Text type="secondary" className="text-xs">
+            {messageValue.length} characters
+          </Text>
         </div>
       </div>
-    </motion.div>
+
+      <div className="flex justify-center space-x-3">
+        <Button onClick={handleCloseCheckModal} className="px-4">
+          Cancel
+        </Button>
+        <Button
+          type="primary"
+          loading={checkLoading}
+          onClick={handleCheckMessage}
+          icon={<SendOutlined />}
+          className="px-4"
+          style={{
+            background: 'linear-gradient(135deg, #2980B9, #1A5276)',
+            border: 'none',
+            color:'#fff',
+            fontWeight:'500'
+          }}
+          disabled={!messageValue || messageValue.trim().length < 10}
+        >
+          {checkLoading ? 'Analyzing...' : 'Check Message'}
+        </Button>
+      </div>
+    </div>
+  </Modal>
+
+  {/* Results Modal - Compact Design */}
+  <Modal
+    title={null}
+    open={resultsModalVisible}
+    onCancel={handleCloseResultsModal}
+    footer={null}
+    centered
+    width={600}
+    className="results-modal"
+    styles={{
+      content: {
+        borderRadius: '12px',
+        overflow: 'hidden',
+        padding: 0,
+        maxHeight: '85vh'
+      },
+      body: {
+        padding: 0,
+        maxHeight: '75vh',
+        overflowY: 'auto'
+      }
+    }}
+  >
+    {checkResult && (
+      <div>
+        {/* Compact Header */}
+        <div
+          className="p-4 text-center"
+          style={{
+            background: `linear-gradient(135deg, ${
+              checkResult.status === CheckStatus.SAFE ? '#d4edda' :
+              checkResult.status === CheckStatus.SUSPICIOUS ? '#fff3cd' :
+              checkResult.status === CheckStatus.MALICIOUS ? '#f8d7da' : '#e2e3e5'
+            }, #ffffff)`
+          }}
+        >
+          <div className="text-3xl mb-2">
+            {getStatusIcon(checkResult.status || CheckStatus.UNKNOWN)}
+          </div>
+          <Title
+            level={4}
+            className="mb-1"
+            style={{
+              color:
+                (checkResult.status || CheckStatus.UNKNOWN) === CheckStatus.SAFE
+                  ? '#155724'
+                  : (checkResult.status || CheckStatus.UNKNOWN) === CheckStatus.SUSPICIOUS
+                  ? '#856404'
+                  : (checkResult.status || CheckStatus.UNKNOWN) === CheckStatus.MALICIOUS
+                  ? '#721c24'
+                  : '#383d41'
+            }}
+          >
+            Analysis Complete
+          </Title>
+        </div>
+
+        {/* Modal Body */}
+        <div className="p-4 space-y-3">
+          {/* Status Row */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="text-center p-2 bg-gray-50 rounded-lg">
+              <Text className="text-xs text-gray-600 block mb-1">Status</Text>
+              <Tag color={getStatusColor(checkResult.status || CheckStatus.UNKNOWN)} className="text-xs">
+                {checkResult.status || CheckStatus.UNKNOWN}
+              </Tag>
+            </div>
+            <div className="text-center p-2 bg-gray-50 rounded-lg">
+              <Text className="text-xs text-gray-600 block mb-1">Intent</Text>
+              <Tag color={getIntentColor(checkResult.intent || IntentType.UNKNOWN)} className="text-xs">
+                {(checkResult.intent || IntentType.UNKNOWN).replace('_', ' ')}
+              </Tag>
+            </div>
+          </div>
+
+          {/* Risk Score */}
+          <div className="p-3 bg-gray-50 rounded-lg">
+            <div className="flex justify-between items-center mb-2">
+              <Text strong className="text-sm">Risk Assessment</Text>
+              <Text className="text-xs text-gray-600">
+                {((checkResult.risk_score || 0) * 100).toFixed(1)}%
+              </Text>
+            </div>
+            <Progress
+              percent={Math.round((checkResult.risk_score || 0) * 100)}
+              size="small"
+              status={
+                (checkResult.risk_score || 0) < 0.3 ? 'success' :
+                (checkResult.risk_score || 0) < 0.7 ? 'normal' : 'exception'
+              }
+              strokeColor={
+                (checkResult.risk_score || 0) < 0.3 ? '#52c41a' :
+                (checkResult.risk_score || 0) < 0.7 ? '#faad14' : '#ff4d4f'
+              }
+              showInfo={false}
+            />
+          </div>
+
+          {/* Confidence Score */}
+          {checkResult.confidence !== undefined && (
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <Text strong className="text-sm">Confidence</Text>
+                <Text className="text-xs text-gray-600">
+                  {((checkResult.confidence || 0) * 100).toFixed(1)}%
+                </Text>
+              </div>
+              <Progress
+                percent={Math.round((checkResult.confidence || 0) * 100)}
+                size="small"
+                strokeColor="#1890ff"
+                showInfo={false}
+              />
+            </div>
+          )}
+
+          {/* Detailed Analysis */}
+          {checkResult.analysis && (
+            <Collapse
+              size="small"
+              className="bg-gray-50"
+              items={[{
+                key: 'analysis',
+                label: <Text strong className="text-sm">Detailed Analysis</Text>,
+                children: <Text className="text-xs leading-relaxed">{checkResult.analysis}</Text>
+              }]}
+            />
+          )}
+
+          {/* Warning Flags */}
+          {checkResult.warning_flags?.length > 0 && (
+            <div className="p-3 bg-orange-50 rounded-lg">
+              <Text strong className="text-sm text-orange-800 block mb-2">
+                Warning Flags ({checkResult.warning_flags.length})
+              </Text>
+              <div className="space-y-1">
+                {checkResult.warning_flags.slice(0, 3).map((flag, index) => (
+                  <div key={index} className="flex items-center text-xs">
+                    <ExclamationCircleOutlined className="text-orange-500 mr-2 text-xs" />
+                    <Text className="text-xs">{flag.replace('_', ' ')}</Text>
+                  </div>
+                ))}
+                {checkResult.warning_flags.length > 3 && (
+                  <Text className="text-xs text-gray-600">
+                    +{checkResult.warning_flags.length - 3} more...
+                  </Text>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Detected Patterns */}
+          {checkResult.detected_patterns?.length > 0 && (
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <Text strong className="text-sm text-blue-800 block mb-2">
+                Detected Patterns
+              </Text>
+              <div className="flex flex-wrap gap-1">
+                {checkResult.detected_patterns.slice(0, 4).map((pattern, index) => (
+                  <Tag key={index} color="blue" className="text-xs m-0">
+                    {pattern.replace('_', ' ')}
+                  </Tag>
+                ))}
+                {checkResult.detected_patterns.length > 4 && (
+                  <Tag className="text-xs m-0">
+                    +{checkResult.detected_patterns.length - 4}
+                  </Tag>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Extracted URLs */}
+          {checkResult.extracted_urls?.length > 0 && (
+            <div className="p-3 bg-red-50 rounded-lg">
+              <Text strong className="text-sm text-red-800 block mb-2">
+                Extracted URLs ({checkResult.extracted_urls.length})
+              </Text>
+              <div className="space-y-1 max-h-20 overflow-y-auto">
+                {checkResult.extracted_urls.map((url, index) => (
+                  <div key={index} className="flex items-center">
+                    <LinkOutlined className="text-red-500 mr-2 text-xs" />
+                    <Text className="text-xs break-all" code>
+                      {url.length > 40 ? url.substring(0, 40) + '...' : url}
+                    </Text>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Recommendations */}
+          {checkResult.recommendations?.length > 0 && (
+            <div className="p-3 bg-green-50 rounded-lg">
+              <Text strong className="text-sm text-green-800 block mb-2">
+                Recommendations
+              </Text>
+              <div className="space-y-1">
+                {checkResult.recommendations.slice(0, 2).map((rec, index) => (
+                  <div key={index} className="flex items-start">
+                    <CheckCircleOutlined className="text-green-500 mr-2 text-xs mt-0.5" />
+                    <Text className="text-xs leading-relaxed">{rec}</Text>
+                  </div>
+                ))}
+                {checkResult.recommendations.length > 2 && (
+                  <Text className="text-xs text-gray-600">
+                    +{checkResult.recommendations.length - 2} more recommendations...
+                  </Text>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Timestamp */}
+          {checkResult.timestamp && (
+            <div className="text-center pt-2 border-t border-gray-200">
+              <Text type="secondary" className="text-xs">
+                {new Date(checkResult.timestamp).toLocaleString()}
+              </Text>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-4 pb-4 flex justify-center space-x-3 border-t border-gray-200 pt-3">
+          <Button
+            onClick={() => {
+              handleCloseResultsModal();
+              handleOpenCheckModal();
+            }}
+            icon={<SecurityScanOutlined />}
+            className="text-xs"
+          >
+            Check Another
+          </Button>
+          <Button
+            type="primary"
+            onClick={handleCloseResultsModal}
+            style={{
+              background: 'linear-gradient(135deg, #2980B9, #1A5276)',
+              border: 'none'
+            }}
+            className="text-xs"
+          >
+            Close
+          </Button>
+        </div>
+      </div>
+    )}
+  </Modal>
+</>
+
   </div>
-</section>
-</div>
-</div>
-)}
+  </div>
+  )
+}
