@@ -37,7 +37,7 @@ const Footer = () => {
     { name: 'Next Js', description: 'Cross-platform Web development', color: 'blue' },
     { name: 'FastAPI', description: 'High-performance Python backend', color: 'green' },
     { name: 'Machine Learning', description: 'NLP & anomaly detection', color: 'purple' },
-    { name: 'WhatsApp API', description: 'Seamless reporting integration', color: 'yellow' },
+    { name: 'Telegram API', description: 'Seamless reporting integration', color: 'yellow' },
   ]
 
   return (
