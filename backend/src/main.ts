@@ -18,7 +18,7 @@ async function bootstrap() {
       transformOptions: {
         enableImplicitConversion: true, // Allow conversion of primitive types
       },
-    })
+    }),
   );
 
   // CORS configuration
@@ -37,6 +37,9 @@ async function bootstrap() {
     .addTag('users', 'User management endpoints')
     .addTag('file-upload', 'File upload and management endpoints')
     .addTag('email-service', 'Email service endpoints')
+    .addTag('Scam Check', 'Message scam detection and analysis')
+    .addTag('Scammer Reports', 'Report and manage known scammers')
+    .addTag('Telegram Bot', 'Telegram bot management and configuration')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
@@ -48,8 +51,16 @@ async function bootstrap() {
 
   const port = configService.get<number>('port') || 3000;
   await app.listen(port);
-  
+
+  // Clear startup messages with some spacing
+  console.log('\n'.repeat(2));
+  logger.log('🎉 =================================');
   logger.log(`🚀 Application is running on: http://localhost:${port}`);
-  logger.log(`📚 Swagger documentation available at: http://localhost:${port}/api/docs`);
+  logger.log(`📚 Swagger docs: http://localhost:${port}/api/docs`);
+  logger.log('🎉 =================================');
+  console.log('\n');
 }
-bootstrap();
+bootstrap().catch((error) => {
+  console.error('Error starting the application:', error);
+  process.exit(1);
+});

@@ -1,9 +1,11 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AppService } from './app.service';
+import { Public } from './common/decorators/public.decorator';
 
 @ApiTags('application')
 @Controller()
+@Public() // Make the entire controller public (health checks shouldn't require auth)
 export class AppController {
   constructor(private readonly appService: AppService) {}
 

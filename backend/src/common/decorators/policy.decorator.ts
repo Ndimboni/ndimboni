@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { Action, Resource } from '../common/interfaces/policy.interface';
+import { Action, Resource } from '../interfaces/policy.interface';
 
 export const POLICY_KEY = 'policy';
 
