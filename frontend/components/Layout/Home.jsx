@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Typography, Button, Row, Col, Card, Space, Modal, Input, Tag, Progress, Alert, Collapse } from 'antd'
-import { ArrowRightOutlined, SecurityScanOutlined, BulbOutlined, ExclamationCircleOutlined, UserOutlined, CheckCircleOutlined, CloseCircleOutlined, QuestionCircleOutlined, LinkOutlined, SendOutlined } from '@ant-design/icons'
+import { ArrowRightOutlined, SecurityScanOutlined, BulbOutlined, ExclamationCircleOutlined, UserOutlined, CheckCircleOutlined,GlobalOutlined, LinkOutlined, SendOutlined } from '@ant-design/icons'
 import { motion } from 'framer-motion'
 
 const { Title, Paragraph, Text } = Typography
@@ -179,7 +179,9 @@ const handleCloseResultsModal = () => {
   setResultsModalVisible(false);
   setCheckResult(null);
 };
-
+const handleTelegramReport = () => {
+  window.open('https://t.me/ndimboni_bot', '_blank');
+};
 
   if (!mounted) {
     return (
@@ -216,22 +218,25 @@ const handleCloseResultsModal = () => {
             <Button
               type="primary"
               size="large"
-              icon={<ArrowRightOutlined />}
+              icon={<GlobalOutlined />}
               className="font-semibold px-8 py-3 h-auto"
               style={{ 
                 background: 'linear-gradient(135deg, #2980B9, #1A5276)',
+               
               }}
               onClick={handleOpenCheckModal}
             >
               Check Scam Message
             </Button>
-            <Button
-              type="default"
-              size="large"
-              className="font-semibold px-8 py-3 h-auto"
-            >
-              Learn About Scams
-            </Button>
+           <Button
+  type="default"
+  size="large"
+  icon={<SendOutlined />}
+  className="font-semibold px-8 py-3 h-auto"
+  onClick={handleTelegramReport}
+>
+  Report via Telegram
+</Button>
           </Space>
         </motion.div>
       </Col>
