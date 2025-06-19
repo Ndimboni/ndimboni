@@ -46,17 +46,6 @@ export class CreateScammerReportDto {
   description: string;
 
   @ApiProperty({
-    description: 'Evidence URLs or descriptions',
-    example: ['screenshot1.jpg', 'email_thread.pdf'],
-    required: false,
-    type: [String],
-  })
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  evidence?: string[];
-
-  @ApiProperty({
     description: 'Additional information about the report',
     example: 'This scammer has been active for weeks',
     required: false,
@@ -66,6 +55,15 @@ export class CreateScammerReportDto {
   @IsString()
   @Length(0, 2000)
   additionalInfo?: string;
+
+  @ApiProperty({
+    description: 'Source of the report',
+    example: 'web',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  source?: string;
 }
 
 export class CheckScammerDto {

@@ -96,6 +96,7 @@ export class ScamCheckController {
         checkedBy: req.user?.id,
         ipAddress: req.ip || req.connection?.remoteAddress,
         userAgent: req.headers['user-agent'],
+        source: dto.source || 'web',
       };
 
       const result = await this.scamCheckService.checkMessage(request);
