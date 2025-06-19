@@ -142,7 +142,6 @@ export class ScammerReportController {
         type: dto.type,
         identifier: dto.identifier.trim(),
         description: dto.description.trim(),
-        evidence: dto.evidence,
         additionalInfo: dto.additionalInfo?.trim(),
         reportedBy: req.user?.id,
         ipAddress: req.ip || req.connection?.remoteAddress,

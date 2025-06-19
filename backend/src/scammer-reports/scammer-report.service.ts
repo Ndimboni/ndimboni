@@ -11,7 +11,6 @@ export interface CreateScammerReportRequest {
   type: ScammerType;
   identifier: string;
   description: string;
-  evidence?: string[];
   additionalInfo?: string;
   reportedBy?: string;
   ipAddress?: string;
@@ -91,14 +90,6 @@ export class ScammerReportService {
         existingReport.lastReportedAt = new Date();
         existingReport.description = request.description; // Update with latest description
 
-        if (request.evidence && request.evidence.length > 0) {
-          const existingEvidence = existingReport.evidence
-            ? JSON.parse(existingReport.evidence)
-            : [];
-          const combinedEvidence = [...existingEvidence, ...request.evidence];
-          existingReport.evidence = JSON.stringify(combinedEvidence);
-        }
-
         if (request.additionalInfo) {
           const existingInfo = existingReport.additionalInfo || '';
           existingReport.additionalInfo =
@@ -116,9 +107,7 @@ export class ScammerReportService {
       scammerReport.type = request.type;
       scammerReport.identifier = request.identifier.toLowerCase();
       scammerReport.description = request.description;
-      scammerReport.evidence = request.evidence
-        ? JSON.stringify(request.evidence)
-        : null;
+
       scammerReport.additionalInfo = request.additionalInfo || null;
       scammerReport.reportedBy = request.reportedBy || null;
       scammerReport.ipAddress = request.ipAddress || null;
