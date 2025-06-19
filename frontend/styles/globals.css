@@ -64,6 +64,70 @@ p, span, div, a, button, input, textarea, select,
   font-family: var(--font-family) !important;
 }
 
+
+.header .ant-menu-item,
+.header .ant-menu-item a,
+.header .ant-menu-item span,
+.header .ant-menu-submenu-title,
+.header .ant-menu-submenu-title a,
+.header .ant-menu-submenu-title span {
+  color: white !important;
+  font-family: var(--font-family) !important;
+  font-weight: 500 !important;
+}
+
+
+.header .desktop-nav-item {
+  color: white !important;
+  font-family: var(--font-family) !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+}
+
+.header .desktop-nav-item:hover {
+  color: #AED6F1 !important;
+}
+
+.header .desktop-nav-item.active {
+  color: #AED6F1 !important;
+  border-bottom: 2px solid #AED6F1 !important;
+}
+
+
+.header .ant-menu-horizontal,
+.header .ant-menu-horizontal > .ant-menu-item,
+.header .ant-menu-horizontal > .ant-menu-submenu > .ant-menu-submenu-title {
+  color: white !important;
+  background: transparent !important;
+  border-bottom: none !important;
+}
+
+/* Mobile Menu Styling */
+.mobile-menu .ant-menu-item,
+.mobile-menu .ant-menu-item a,
+.mobile-menu .ant-menu-item span {
+  color: white !important;
+  font-family: var(--font-family) !important;
+}
+
+.mobile-menu .ant-menu-item:hover {
+  color: #AED6F1 !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.mobile-menu .ant-menu-item-selected {
+  color: #AED6F1 !important;
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.header a,
+.header a:hover,
+.header a:focus,
+.header a:visited {
+  color: inherit !important;
+  text-decoration: none !important;
+}
+
 /* Header Styles */
 .header {
   background: var(--gradient-primary);
