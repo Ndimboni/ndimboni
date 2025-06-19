@@ -139,7 +139,7 @@ const getIntentColor = (intent) => {
       setResultsModalVisible(true);
       setMessageValue('');
       
-      // Refresh the main data
+     
       fetchChecks();
       fetchStats();
     } else {
