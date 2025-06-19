@@ -898,7 +898,9 @@ const handleTelegramReport = () => {
           className="px-4"
           style={{
             background: 'linear-gradient(135deg, #2980B9, #1A5276)',
-            border: 'none'
+            border: 'none',
+            color:'#fff',
+            fontWeight:'500'
           }}
           disabled={!messageValue || messageValue.trim().length < 10}
         >
