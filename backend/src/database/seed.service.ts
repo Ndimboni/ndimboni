@@ -19,6 +19,7 @@ export class SeedService implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     await this.seedAdminUser();
+    await this.seedModeratorUser();
   }
 
   private async seedAdminUser(): Promise<void> {
@@ -55,6 +56,48 @@ export class SeedService implements OnModuleInit {
       }
     } catch (error) {
       this.logger.error('Failed to seed admin user:', (error as Error).message);
+    }
+  }
+
+  private async seedModeratorUser(): Promise<void> {
+    try {
+      const moderatorConfig = this.configService.get<AdminConfig>('moderator');
+      if (!moderatorConfig) {
+        this.logger.error('Moderator configuration not found');
+        return;
+      }
+
+      const existingModerator = await this.userRepository.findOne({
+        where: { role: UserRole.MODERATOR },
+      });
+
+      if (!existingModerator) {
+        this.logger.log(
+          'No moderator user found. Creating default moderator user...',
+        );
+
+        const hashedPassword = await bcrypt.hash(moderatorConfig.password, 10);
+
+        const moderatorUser = this.userRepository.create({
+          email: moderatorConfig.email,
+          name: moderatorConfig.name,
+          password: hashedPassword,
+          role: UserRole.MODERATOR,
+          isActive: true,
+        });
+
+        await this.userRepository.save(moderatorUser);
+        this.logger.log(
+          `Moderator user created successfully with email: ${moderatorConfig.email}`,
+        );
+      } else {
+        this.logger.log('Moderator user already exists');
+      }
+    } catch (error) {
+      this.logger.error(
+        'Failed to seed moderator user:',
+        (error as Error).message,
+      );
     }
   }
 }

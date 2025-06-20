@@ -65,5 +65,6 @@ export interface AppConfig {
   upload: UploadConfig;
   cors: CorsConfig;
   admin: AdminConfig;
+  moderator: AdminConfig; // Add this line
   telegram: TelegramConfig;
 }
