@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react'
 import { Layout, Menu, Button, Drawer } from 'antd'
-import { MenuOutlined, HomeOutlined, UserOutlined, MailOutlined, LogoutOutlined } from '@ant-design/icons'
+import { MenuOutlined, HomeOutlined, UserOutlined, MailOutlined, LogoutOutlined, AuditOutlined } from '@ant-design/icons'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 const { Header: AntHeader } = Layout
 
 const Header = () => {
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,21 +27,31 @@ const Header = () => {
       key: 'home',
       icon: <HomeOutlined />,
       label: <Link href="/">Home</Link>,
+      href: '/'
     },
     {
       key: 'about',
       icon: <UserOutlined />,
       label: <Link href="/about">About</Link>,
+      href: '/about'
     },
     {
       key: 'contact',
       icon: <MailOutlined />,
       label: <Link href="/contact">Contact</Link>,
+      href: '/contact'
+    },
+    {
+      key: 'report',
+      icon: <AuditOutlined />,
+      label: <Link href="/report">Report</Link>,
+      href: '/report'
     },
     {
       key: 'auth',
       icon: <LogoutOutlined />,
       label: <Link href="/auth">Login</Link>,
+      href: '/auth'
     },
   ]
 
@@ -49,6 +61,10 @@ const Header = () => {
 
   const closeMobileMenu = () => {
     setMobileMenuVisible(false)
+  }
+
+  const isActiveRoute = (href) => {
+    return router.pathname === href
   }
 
   return (
@@ -98,25 +114,32 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Desktop Navigation - Fixed overflow issue */}
-        <div className="hidden lg:flex flex-shrink-0" style={{ minWidth: '500px' }}>
-          <Menu
-            mode="horizontal"
-            items={menuItems}
-            overflowedIndicator={null}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: 'white',
-              width: '100%',
-              display: 'flex',
-              justifyContent: 'flex-end',
-              lineHeight: '70px',
-              overflow: 'visible',
-              marginRight:'65px'
-            }}
-            className="bg-transparent border-none desktop-menu"
-          />
+        {/* Desktop Navigation - Enhanced with active state and hover effects */}
+        <div className="hidden lg:flex items-center">
+          <div className="flex items-center space-x-6">
+            {menuItems.map((item) => (
+              <div 
+                key={item.key} 
+                className={`
+                  flex items-center cursor-pointer transition-all duration-200 
+                  text-white font-medium relative group
+                  ${isActiveRoute(item.href) 
+                    ? 'text-blue-300 border-b-2 border-blue-300 pb-1' 
+                    : 'hover:text-blue-300'
+                  }
+                `}
+              >
+                <span className="mr-2">{item.icon}</span>
+                <span className="relative">
+                  {item.label}
+                  {/* Underline effect on hover for non-active items */}
+                  {!isActiveRoute(item.href) && (
+                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-300 transition-all duration-200 group-hover:w-full"></span>
+                  )}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Header Actions */}
@@ -144,6 +167,7 @@ const Header = () => {
           body: {
             background: 'linear-gradient(135deg, #2980B9, #1A5276)',
             padding: 0,
+            
           },
           header: {
             background: 'linear-gradient(135deg, #2980B9, #1A5276)',
@@ -156,6 +180,7 @@ const Header = () => {
           mode="vertical"
           items={menuItems}
           onClick={closeMobileMenu}
+          selectedKeys={[menuItems.find(item => item.href === router.pathname)?.key]}
           style={{
             background: 'transparent',
             border: 'none',

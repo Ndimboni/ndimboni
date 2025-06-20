@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Typography, Button, Row, Col, Card, Space, Modal, Input, Tag, Progress, Alert, Collapse } from 'antd'
+import { Typography, Button, Row, Col, Card, Space, Modal, Input, Select,Drawer,Tag, Progress, Alert, Collapse,Form,message } from 'antd'
 import { ArrowRightOutlined, SecurityScanOutlined, BulbOutlined, ExclamationCircleOutlined, UserOutlined, CheckCircleOutlined,GlobalOutlined, LinkOutlined, SendOutlined } from '@ant-design/icons'
 import { motion } from 'framer-motion'
 
@@ -8,6 +8,8 @@ const { TextArea } = Input
 
 
 const API_BASE_URL = 'https://ndimboni-digital-scam-protection.onrender.com/api/scam-check'
+
+const API_BASE_URL1 = 'https://ndimboni-digital-scam-protection.onrender.com/api/scammer-reports';
 
 
 const CheckStatus = {
@@ -27,6 +29,15 @@ const IntentType = {
   UNKNOWN: 'UNKNOWN'
 }
 
+
+const ScammerType = {
+  EMAIL: 'email',
+  PHONE: 'phone',
+  SOCIAL_MEDIA: 'social_media',
+  WEBSITE: 'website',
+  OTHER: 'other'
+};
+
 export default function Home() {
   const [mounted, setMounted] = useState(false)
   const [checkModalVisible, setCheckModalVisible] = useState(false)
@@ -35,7 +46,169 @@ export default function Home() {
   const [checkLoading, setCheckLoading] = useState(false)
   const [checkResult, setCheckResult] = useState(null)
   const [error, setError] = useState(null)
-  
+
+
+   
+    const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+    const [checkaModalVisible, setCheckaModalVisible] = useState(false)
+    const [isCheckingScammer, setIsCheckingScammer] = useState(false);
+    const [reportModalVisible, setReportModalVisible] = useState(false);
+    const [reportFormData, setReportFormData] = useState({
+    type: '',
+    identifier: '',
+    description: '',
+    additionalInfo: '',
+    source: 'web'
+  });
+
+
+  const [checkFormData, setCheckFormData] = useState({
+    type: '',
+    identifier: ''
+  });
+
+  const [reportForm] = Form.useForm();
+  const [checkForm] = Form.useForm();
+
+
+  const apiCalls = async (endpoint, options = {}) => {
+  try {
+    const url = `${API_BASE_URL1}${endpoint}`;
+    
+    const config = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      ...options
+    };
+
+    if (options.body && (config.method === 'POST' || config.method === 'PUT')) {
+      config.body = JSON.stringify(options.body);
+    }
+
+    console.log('API Call:', {
+      url,
+      method: config.method,
+      headers: config.headers,
+      body: config.body
+    });
+
+    const response = await fetch(url, config);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', errorText);
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('API Call Error:', error);
+    throw error;
+  }
+};
+
+  const submitReport = async (formData) => {
+    setIsSubmittingReport(true);
+    try {
+   
+      if (!formData.type || !formData.identifier || !formData.description) {
+        message.error('Please fill in all required fields');
+        return;
+      }
+
+      if (formData.description.length < 10) {
+        message.error('Description must be at least 10 characters');
+        return;
+      }
+
+     
+      const requestData = {
+        type: formData.type,
+        identifier: formData.identifier.trim(),
+        description: formData.description.trim(),
+        additionalInfo: formData.additionalInfo ? formData.additionalInfo.trim() : undefined,
+        source: formData.source || 'web'
+      };
+
+      
+      Object.keys(requestData).forEach(key => {
+        if (requestData[key] === undefined || requestData[key] === '') {
+          delete requestData[key];
+        }
+      });
+
+      console.log('Submitting report:', requestData);
+
+      const response = await apiCalls('/report', {
+        method: 'POST',
+        body: requestData
+      });
+      
+      if (response.success || response.data) {
+        message.success('Scammer reported successfully');
+        setReportModalVisible(false);
+        setReportFormData({
+          type: '',
+          identifier: '',
+          description: '',
+          additionalInfo: '',
+          source: 'web'
+        });
+        reportForm.resetFields();
+        
+       
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (error) {
+      console.error('Submit report error:', error);
+      message.error(`Failed to report scammer: ${error.message}`);
+    }
+    finally {
+    setIsSubmittingReport(false);
+  }
+  };
+
+  const checkScammer = async (formData) => {
+   setIsCheckingScammer(true);
+    try {
+      
+      if (!formData.type || !formData.identifier) {
+        message.error('Please fill in all required fields');
+        return;
+      }
+
+      const requestData = {
+        type: formData.type,
+        identifier: formData.identifier.trim()
+      };
+
+      console.log('Checking scammer:', requestData);
+
+      const response = await apiCalls('/check', {
+        method: 'POST',
+        body: requestData
+      });
+      
+      if (response.success || response.data) {
+        setCheckResult(response);
+        message.success('Check completed');
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (error) {
+      console.error('Check scammer error:', error);
+      message.error(`Failed to check scammer: ${error.message}`);
+    }
+     finally {
+    setIsCheckingScammer(false);
+  }
+  };
+
+
+  //scam Report end
 
   useEffect(() => {
     setMounted(true)
@@ -190,6 +363,39 @@ const handleTelegramReport = () => {
       </div>
     )
   }
+
+
+  
+// Function to handle opening the report scammer modal
+const handleOpenReportModal = () => {
+
+  setReportFormData({
+    type: '',
+    identifier: '',
+    description: '',
+    additionalInfo: '',
+    source: 'web'
+  });
+  
+
+  setReportModalVisible(true);
+};
+
+
+// Function to handle opening the check scammer modal
+const handleOpenScamModal = () => {
+  
+  setCheckFormData({
+    type: '',
+    identifier: ''
+  });
+  
+
+  setCheckResult(null);
+  
+ 
+  setCheckaModalVisible(true);
+};
 
   return (
   <div className="min-h-screen bg-gray-100 p-2">
@@ -761,21 +967,21 @@ const handleTelegramReport = () => {
                   whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <Button
-                    type="primary"
-                    size="large"
-                    icon={<ArrowRightOutlined />}
-                    className="font-semibold px-10 py-4 h-auto text-lg rounded-xl"
-                    style={{ 
-                      background: 'linear-gradient(135deg, #2980B9, #1A5276)',
-                      color: '#FFFFFF',
-                      border: 'none',
-                      boxShadow: '0 8px 25px rgba(26, 82, 118, 0.3)'
-                    }}
-                    onClick={handleOpenCheckModal}
-                  >
-                    Start Protection Now
-                  </Button>
+                <Button
+  type="primary"
+  size="large"
+  icon={<ArrowRightOutlined />}
+  className="font-semibold px-10 py-4 h-auto text-lg rounded-xl"
+  style={{ 
+    background: 'linear-gradient(135deg, #2980B9, #1A5276)',
+    color: '#FFFFFF',
+    border: 'none',
+    boxShadow: '0 8px 25px rgba(26, 82, 118, 0.3)'
+  }}
+  onClick={handleOpenReportModal}
+>
+  Report a Scam
+</Button>
                 </motion.div>
                 
                 <motion.div
@@ -783,19 +989,19 @@ const handleTelegramReport = () => {
                   whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <Button
-                    size="large"
-                    className="font-semibold px-10 py-4 h-auto text-lg rounded-xl border-2 hover:bg-blue-600 hover:text-white transition-all duration-300"
-                    style={{ 
-                      backgroundColor: 'transparent',
-                      color: '#1A5276',
-                      borderColor: '#2980B9',
-                      boxShadow: '0 8px 25px rgba(26, 82, 118, 0.1)'
-                    }}
-                    onClick={handleOpenCheckModal}
-                  >
-                    Report a Scam
-                  </Button>
+                 <Button
+  size="large"
+  className="font-semibold px-10 py-4 h-auto text-lg rounded-xl border-2 hover:bg-blue-600 hover:text-white transition-all duration-300"
+  style={{ 
+    backgroundColor: 'transparent',
+    color: '#1A5276',
+    borderColor: '#2980B9',
+    boxShadow: '0 8px 25px rgba(26, 82, 118, 0.1)'
+  }}
+  onClick={handleOpenScamModal}
+>
+  Check Scammer
+</Button>
                 </motion.div>
               </Space>
             </motion.div>
@@ -827,7 +1033,7 @@ const handleTelegramReport = () => {
     </div>
   </section>
 <>
-  {/* Message Check Modal - Compact Design */}
+  {/* Message Check Modal */}
   <Modal
     title={
       <div className="text-center py-1">
@@ -910,7 +1116,7 @@ const handleTelegramReport = () => {
     </div>
   </Modal>
 
-  {/* Results Modal - Compact Design */}
+  {/* Results Modal*/}
   <Modal
     title={null}
     open={resultsModalVisible}
@@ -1162,7 +1368,188 @@ const handleTelegramReport = () => {
   </Modal>
 </>
 
+
   </div>
-  </div>
+  
+      {/* Report Scammer Modal  */}
+      <Modal
+        title="Report a Scammer"
+        open={reportModalVisible}
+        onCancel={() => {
+          setReportModalVisible(false);
+          setReportFormData({
+            type: '',
+            identifier: '',
+            description: '',
+            additionalInfo: '',
+            source: 'web'
+          });
+        }}
+        footer={null}
+        width={600}
+      >
+        <div>
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+              Scam Type *
+            </label>
+            <Select 
+              placeholder="Select scam type" 
+              style={{ width: '100%' }}
+              value={reportFormData.type}
+              onChange={(value) => setReportFormData(prev => ({ ...prev, type: value }))}
+            >
+              <Option value={ScammerType.EMAIL}>Email</Option>
+              <Option value={ScammerType.PHONE}>Phone</Option>
+              <Option value={ScammerType.SOCIAL_MEDIA}>Social Media</Option>
+              <Option value={ScammerType.WEBSITE}>Website</Option>
+              <Option value={ScammerType.OTHER}>Other</Option>
+            </Select>
+          </div>
+
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+              Contact Information *
+            </label>
+            <Input 
+              placeholder="Enter email, phone, username, or website"
+              value={reportFormData.identifier}
+              onChange={(e) => setReportFormData(prev => ({ ...prev, identifier: e.target.value }))}
+            />
+          </div>
+
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+              Description *
+            </label>
+            <TextArea
+              rows={4}
+              placeholder="Describe how this scammer tried to deceive you..."
+              value={reportFormData.description}
+              onChange={(e) => setReportFormData(prev => ({ ...prev, description: e.target.value }))}
+            />
+          </div>
+
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+              Additional Information
+            </label>
+            <TextArea
+              rows={3}
+              placeholder="Any additional details about this scammer..."
+              value={reportFormData.additionalInfo}
+              onChange={(e) => setReportFormData(prev => ({ ...prev, additionalInfo: e.target.value }))}
+            />
+          </div>
+
+          <div style={{ textAlign: 'right' }}>
+            <Space>
+              <Button onClick={() => {
+                setReportModalVisible(false);
+                setReportFormData({
+                  type: '',
+                  identifier: '',
+                  description: '',
+                  additionalInfo: '',
+                  source: 'web'
+                });
+              }}>
+                Cancel
+              </Button>
+              <Button 
+                type="primary" 
+                onClick={() => submitReport(reportFormData)}
+                  loading={isSubmittingReport} 
+                  disabled={isSubmittingReport}
+                
+              >
+                Report Scammer
+              </Button>
+            </Space>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Check Scammer Modal  */}
+      <Modal
+        title="Check if Scammer"
+        open={checkaModalVisible}
+        onCancel={() => {
+          setCheckaModalVisible(false);
+          setCheckResult(null);
+          setCheckFormData({
+            type: '',
+            identifier: ''
+          });
+        }}
+        footer={null}
+        width={500}
+      >
+        <div>
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+              Type *
+            </label>
+            <Select 
+              placeholder="Select type to check" 
+              style={{ width: '100%' }}
+              value={checkFormData.type}
+              onChange={(value) => setCheckFormData(prev => ({ ...prev, type: value }))}
+            >
+              <Option value={ScammerType.EMAIL}>Email</Option>
+              <Option value={ScammerType.PHONE}>Phone</Option>
+              <Option value={ScammerType.SOCIAL_MEDIA}>Social Media</Option>
+              <Option value={ScammerType.WEBSITE}>Website</Option>
+              <Option value={ScammerType.OTHER}>Other</Option>
+            </Select>
+          </div>
+
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+              Contact Information *
+            </label>
+            <Input 
+              placeholder="Enter email, phone, username, or website to check"
+              value={checkFormData.identifier}
+              onChange={(e) => setCheckFormData(prev => ({ ...prev, identifier: e.target.value }))}
+            />
+          </div>
+
+          <div style={{ textAlign: 'right', marginBottom: '16px' }}>
+            <Space>
+              <Button onClick={() => {
+                setCheckaModalVisible(false);
+                setCheckResult(null);
+                setCheckFormData({
+                  type: '',
+                  identifier: ''
+                });
+              }}
+              
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="primary" 
+                onClick={() => checkScammer(checkFormData)}
+                loading={isCheckingScammer}
+        
+              >
+                Check Now
+              </Button>
+            </Space>
+          </div>
+
+          {checkResult && (
+            <Alert
+              message={checkResult.isScammer ? "⚠️ Scammer Found!" : "✅ No Scammer Record"}
+              description={checkResult.message}
+              type={checkResult.isScammer ? "error" : "success"}
+              showIcon
+            />
+          )}
+        </div>
+      </Modal>
+    </div>
   )
 }

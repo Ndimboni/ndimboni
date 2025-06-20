@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Menu, Avatar, Dropdown, Button, Modal, Card, Row, Col, Typography, Divider, message } from 'antd';
+import { Layout, Menu, Avatar, Dropdown, Button, Modal,  Typography,  message } from 'antd';
 import {
   DashboardOutlined,
   UserOutlined,
@@ -39,12 +39,7 @@ const ScamCheckPage = () => (
   </div>
 );
 
-const NumberEmailReportsPage = () => (
-  <div style={{ padding: '24px' }}>
-    <h2>Number/Email Reports</h2>
-    <p>Number and email reports content will be displayed here...</p>
-  </div>
-);
+
 
 const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -91,12 +86,12 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
         const data = await response.json();
         setProfileData(data);
         
-        // Update local state with fetched data
+        
         if (data.user_name) setUserName(data.user_name);
         if (data.user_email) setUserEmail(data.user_email);
         if (data.user_role) setUserRole(data.user_role);
         
-        // Store in localStorage for future use
+       
         localStorage.setItem('user_name', data.user_name || '');
         localStorage.setItem('user_email', data.user_email || '');
         localStorage.setItem('user_role', data.user_role || '');
@@ -120,7 +115,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
     checkIfMobile();
     window.addEventListener('resize', checkIfMobile);
     
-    // Load user data from localStorage
+   
     const storedUserName = localStorage.getItem('user_name') || 'Admin User';
     const storedUserEmail = localStorage.getItem('user_email') || 'admin@ndimboni.com';
     const storedUserRole = localStorage.getItem('user_role') || 'admin';
@@ -195,7 +190,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
       'users': '/admin/users',
       'scam-reports': '/admin/scam-reports',
       'scam-check': '/admin/scam-check',
-      'number-email-reports': '/admin/number-email-reports'
+     
     };
     
     if (routes[key]) {
@@ -217,8 +212,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
         return <ScamReportsPage />;
       case 'scam-check':
         return <ScamCheckPage />;
-      case 'number-email-reports':
-        return <NumberEmailReportsPage />;
+      
       default:
         return <AdminDashboard />;
     }
@@ -268,11 +262,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
       icon: <SecurityScanOutlined />,
       label: 'Scam Check',
     },
-    {
-      key: 'number-email-reports',
-      icon: <PhoneOutlined />,
-      label: 'Number/Email Reports',
-    },
+    
   ];
 
   const sidebarCollapsed = isMobile ? !isOpen : collapsed;
@@ -307,7 +297,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
               right: '-50px',
               width: '100px',
               height: '100px',
-              background: 'rgba(26, 82, 118, 0.1)',
+              background: 'rgba(255, 255, 255, 0.1)',
               borderRadius: '50%',
             }}
           />
@@ -318,7 +308,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
               left: '-30px',
               width: '60px',
               height: '60px',
-              background: 'rgba(26, 82, 118, 0.1)',
+              background: 'rgba(255, 255, 255, 0.08)',
               borderRadius: '50%',
             }}
           />
@@ -326,11 +316,11 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
           <Avatar
             size={70}
             style={{
-              backgroundColor: 'rgba(26, 82, 118, 0.1)',
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
               fontSize: '28px',
               fontWeight: '600',
               marginBottom: '12px',
-              border: '3px solid rgba(26, 82, 118, 0.1)',
+              border: '3px solid rgba(255, 255, 255, 0.3)',
               color: '#ffffff',
               backdropFilter: 'blur(10px)',
             }}
@@ -473,7 +463,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
             >
               Close
             </Button>
-           
+            
           </div>
         </div>
       </Modal>

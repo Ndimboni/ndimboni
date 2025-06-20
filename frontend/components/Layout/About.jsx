@@ -1,59 +1,90 @@
 import { useState, useEffect } from 'react'
-import { Typography, Button, Row, Col, Card, Space, Timeline, Progress } from 'antd'
+import { Typography, Button, Row, Col, Card, Space } from 'antd'
 import { 
-  UserOutlined, 
-  CodeOutlined, 
-  BulbOutlined, 
-  TeamOutlined,
-  AimOutlined,
-  HeartOutlined,
-  TrophyOutlined,
-  RocketOutlined,
+  AlertOutlined,
+  PhoneOutlined,
+  MailOutlined,
+  MessageOutlined,
+  FileTextOutlined,
   SafetyOutlined,
-  ExperimentOutlined,
-  GlobalOutlined,
-  BookOutlined
+  WhatsAppOutlined,
+  ExclamationCircleOutlined,
+  BugOutlined,
+  DollarOutlined,
+  UserOutlined,
+  GlobalOutlined
 } from '@ant-design/icons'
 import { motion } from 'framer-motion'
 
 const { Title, Paragraph, Text } = Typography
 
-export default function About() {
+export default function ReportPage() {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  const skills = [
-    { name: 'AI & Machine Learning', level: 95 },
-    { name: 'Natural Language Processing', level: 90 },
-    
-    { name: 'FastAPI & Python', level: 88 },
-    { name: 'Cybersecurity', level: 85 },
-    { name: 'Cloud Computing (AWS)', level: 83 }
-  ]
-
-  const timeline = [
+  const reportCards = [
     {
-      title: 'Research & Problem Identification',
-      description: 'Identified the growing threat of digital scams in Rwanda and conducted extensive research on AI-powered detection methods',
-      date: '2024 '
+      icon: <AlertOutlined className="text-4xl" style={{ color: '#e74c3c' }} />,
+      title: 'Report Phishing Attempt',
+      description: 'Have you received suspicious emails, messages, or links asking for personal information? Report phishing attempts to help protect yourself and others from identity theft and financial fraud.',
+      details: 'Phishing scams often impersonate legitimate organizations like banks, government agencies, or popular services. They may ask for passwords, credit card numbers, or personal details through fake websites or messages.',
+      buttonText: 'Report Phishing',
+      buttonIcon: <ExclamationCircleOutlined />,
+      gradient: 'from-red-500 to-red-600',
+      bgColor: '#ffebee'
     },
     {
-      title: 'Literature Review & Methodology',
-      description: 'Analyzed existing cybersecurity solutions and developed comprehensive research methodology with local context focus',
-      date: '2024 '
+      icon: <DollarOutlined className="text-4xl" style={{ color: '#f39c12' }} />,
+      title: 'Report Investment Scam',
+      description: 'Encountered fake investment opportunities, cryptocurrency scams, or get-rich-quick schemes? Help us track and prevent fraudulent investment platforms that target unsuspecting victims.',
+      details: 'Investment scams promise unrealistic returns with little to no risk. They often use fake testimonials, pressure tactics, and sophisticated websites to appear legitimate while stealing your money.',
+      buttonText: 'Report Investment Fraud',
+      buttonIcon: <DollarOutlined />,
+      gradient: 'from-orange-500 to-orange-600',
+      bgColor: '#fff3e0'
     },
     {
-      title: 'Platform Development',
-      description: 'Built the Ndimboni platform using React Native, FastAPI, and advanced AI algorithms for scam detection',
-      date: '2024 '
+      icon: <MessageOutlined className="text-4xl" style={{ color: '#9b59b6' }} />,
+      title: 'Report SMS/WhatsApp Scam',
+      description: 'Received fraudulent text messages or WhatsApp scams claiming prizes, fake job offers, or requesting money transfers? Report these mobile-based scams to prevent their spread.',
+      details: 'Mobile scams often use urgent language, fake prize notifications, or impersonate friends and family members in distress. They may ask you to click malicious links or send money immediately.',
+      buttonText: 'Report Mobile Scam',
+      buttonIcon: <WhatsAppOutlined />,
+      gradient: 'from-purple-500 to-purple-600',
+      bgColor: '#f3e5f5'
     },
     {
-      title: 'Testing & Community Launch',
-      description: 'Conducted prototype testing and launched the platform to protect Rwandan citizens from digital threats',
-      date: '2025'
+      icon: <UserOutlined className="text-4xl" style={{ color: '#2980b9' }} />,
+      title: 'Report Identity Theft',
+      description: 'Suspect someone is using your personal information fraudulently or impersonating you online? Report identity theft incidents to protect your reputation and financial security.',
+      details: 'Identity thieves may use your personal information to open accounts, make purchases, or commit crimes in your name. Early reporting is crucial to minimize damage and restore your identity.',
+      buttonText: 'Report Identity Theft',
+      buttonIcon: <UserOutlined />,
+      gradient: 'from-blue-500 to-blue-600',
+      bgColor: '#e3f2fd'
+    },
+    {
+      icon: <PhoneOutlined className="text-4xl" style={{ color: '#27ae60' }} />,
+      title: 'Report Phone Scam',
+      description: 'Received suspicious phone calls claiming to be from banks, government agencies, or tech support asking for sensitive information? Report these voice-based scams immediately.',
+      details: 'Phone scammers often use caller ID spoofing to appear legitimate. They may claim your account is compromised, threaten legal action, or offer fake technical support to gain access to your information.',
+      buttonText: 'Report Phone Scam',
+      buttonIcon: <PhoneOutlined />,
+      gradient: 'from-green-500 to-green-600',
+      bgColor: '#e8f5e8'
+    },
+    {
+      icon: <GlobalOutlined className="text-4xl" style={{ color: '#34495e' }} />,
+      title: 'Report Other Scams',
+      description: 'Encountered any other type of digital fraud or suspicious online activity not covered above? Use this option to report any other scam attempts or cybersecurity threats.',
+      details: 'This includes online shopping scams, fake charity requests, romance scams, business email compromise, or any other fraudulent activity you\'ve encountered online or through digital channels.',
+      buttonText: 'Report Other Scam',
+      buttonIcon: <BugOutlined />,
+      gradient: 'from-gray-500 to-gray-600',
+      bgColor: '#f5f5f5'
     }
   ]
 
@@ -70,164 +101,60 @@ export default function About() {
       <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
         
         {/* Hero Section */}
-        <section className="bg-white text-dark py-20">
+        <section className="bg-white text-dark py-16">
           <div className="container mx-auto px-6">
-            <Row gutter={[32, 32]} align="middle">
-              <Col xs={24} lg={12}>
-                <motion.div
-                  initial={{ opacity: 0, x: -50 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.8 }}
-                >
-                  <Title level={1} className="mb-6" style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#2980B9' }}>
-                    About <span style={{ color: '#1A5276' }}>Ndimboni</span>
-                  </Title>
-                  <Paragraph className="text-lg mb-8 leading-relaxed" style={{ color: '#1A5276' }}>
-                    Ndimboni is an innovative AI-powered platform specifically designed to combat digital scams in Rwanda. 
-                    Our comprehensive solution combines machine learning detection, interactive educational simulations, 
-                    and centralized reporting to protect Rwandans from the growing threat of cyber fraud.
-                  </Paragraph>
-                  <Space size="large" className="flex flex-col sm:flex-row">
-                    <Button
-                      type="primary"
-                      size="large"
-                      icon={<SafetyOutlined />}
-                      className="font-semibold px-8 py-3 h-auto"
-                      style={{ 
-                        background: 'linear-gradient(135deg, #2980B9, #1A5276)',
-                      }}
-                    >
-                      Learn More
-                    </Button>
-                    <Button
-                      type="default"
-                      size="large"
-                      icon={<ExperimentOutlined />}
-                      className="font-semibold px-8 py-3 h-auto"
-                    >
-                      Try Simulation
-                    </Button>
-                  </Space>
-                </motion.div>
-              </Col>
-              <Col xs={24} lg={12}>
-                <motion.div
-                  initial={{ opacity: 0, x: 50 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
-                  className="text-center"
-                >
-                  <div 
-                    className="rounded-2xl p-8"
-                    style={{
-                      backgroundColor: '#EBF5FB',
-                      boxShadow: '0 4px 10px rgba(26, 82, 118, 0.2)'
-                    }}
+            <motion.div
+              initial={{ opacity: 0, y: -30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-8"
+            >
+              <Title level={1} className="mb-6" style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#2980B9' }}>
+                Report <span style={{ color: '#1A5276' }}>Digital Scams</span>
+              </Title>
+              <Paragraph className="text-lg mb-8 leading-relaxed max-w-4xl mx-auto" style={{ color: '#1A5276' }}>
+                Help protect the Rwandan digital community by reporting scams and fraudulent activities. 
+                Your reports help us improve our AI detection systems and warn others about emerging threats. 
+                All reports are handled confidentially and contribute to building a safer digital environment for everyone.
+              </Paragraph>
+              
+              <div 
+                className="rounded-2xl p-6 max-w-2xl mx-auto"
+                style={{
+                  backgroundColor: '#EBF5FB',
+                  boxShadow: '0 4px 10px rgba(26, 82, 118, 0.2)'
+                }}
+              >
+                <div className="grid grid-cols-3 gap-4">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="text-center"
                   >
-                    <div className="grid grid-cols-2 gap-6">
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        className="text-center"
-                      >
-                        <div className="text-4xl font-bold mb-2" style={{ color: '#1A5276' }}>AI</div>
-                        <div className="text-sm" style={{ color: '#2980B9' }}>Powered Detection</div>
-                      </motion.div>
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        className="text-center"
-                      >
-                        <div className="text-4xl font-bold mb-2" style={{ color: '#1A5276' }}>3</div>
-                        <div className="text-sm" style={{ color: '#2980B9' }}>Core Features</div>
-                      </motion.div>
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        className="text-center"
-                      >
-                        <div className="text-4xl font-bold mb-2" style={{ color: '#1A5276' }}>24/7</div>
-                        <div className="text-sm" style={{ color: '#2980B9' }}>Protection</div>
-                      </motion.div>
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        className="text-center"
-                      >
-                        <div className="text-4xl font-bold mb-2" style={{ color: '#1A5276' }}>RW</div>
-                        <div className="text-sm" style={{ color: '#2980B9' }}>Local Focus</div>
-                      </motion.div>
-                    </div>
-                  </div>
-                </motion.div>
-              </Col>
-            </Row>
+                    <div className="text-3xl font-bold mb-1" style={{ color: '#1A5276' }}>24/7</div>
+                    <div className="text-sm" style={{ color: '#2980B9' }}>Reporting Available</div>
+                  </motion.div>
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="text-center"
+                  >
+                    <div className="text-3xl font-bold mb-1" style={{ color: '#1A5276' }}>100%</div>
+                    <div className="text-sm" style={{ color: '#2980B9' }}>Confidential</div>
+                  </motion.div>
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="text-center"
+                  >
+                    <div className="text-3xl font-bold mb-1" style={{ color: '#1A5276' }}>AI</div>
+                    <div className="text-sm" style={{ color: '#2980B9' }}>Enhanced Detection</div>
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </section>
 
-        {/* Problem & Solution Section */}
-        <section className="py-6 bg-gradient-to-br from-[#EBF5FB] to-[#AED6F1]">
-          <div className="container mx-auto px-6">
-            <Row gutter={[32, 32]}>
-              <Col xs={24} md={12}>
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8 }}
-                  viewport={{ once: true }}
-                >
-                  <Card
-                    className="h-full"
-                    style={{ 
-                      borderRadius: '20px',
-                      backgroundColor: '#FFFFFF',
-                      border: '1px solid rgba(174, 214, 241, 0.3)',
-                      boxShadow: '0 4px 10px rgba(26, 82, 118, 0.2)'
-                    }}
-                  >
-                    <div className="text-center mb-6">
-                      <GlobalOutlined className="text-2xl mb-4" style={{ color: '#e74c3c' }} />
-                      <Title level={3} style={{ color: '#1A5276' }}>The Problem</Title>
-                    </div>
-                    <Paragraph className="text-base leading-relaxed" style={{ color: '#1A5276' }}>
-                      Digital scams are increasingly targeting Rwandans through phishing, fake investment schemes, 
-                      fraudulent money transfers, and false job offers. Current measures are fragmented, leaving 
-                      users vulnerable to financial losses and psychological distress due to lack of awareness 
-                      and centralized reporting systems.
-                    </Paragraph>
-                  </Card>
-                </motion.div>
-              </Col>
-              <Col xs={24} md={12}>
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
-                  viewport={{ once: true }}
-                >
-                  <Card
-                    className="h-full"
-                    style={{ 
-                      borderRadius: '20px',
-                      backgroundColor: '#FFFFFF',
-                      border: '1px solid rgba(174, 214, 241, 0.3)',
-                      boxShadow: '0 4px 10px rgba(26, 82, 118, 0.2)'
-                    }}
-                  >
-                    <div className="text-center mb-6">
-                      <BulbOutlined className="text-5xl mb-4" style={{ color: '#2980B9' }} />
-                      <Title level={3} style={{ color: '#1A5276' }}>Our Solution</Title>
-                    </div>
-                    <Paragraph className="text-base leading-relaxed" style={{ color: '#1A5276' }}>
-                      Ndimboni integrates AI-powered scam detection using machine learning and NLP, interactive 
-                      educational simulations to raise awareness, and a centralized reporting system. Our platform 
-                      is specifically tailored for the Rwandan context with local language support and cultural relevance.
-                    </Paragraph>
-                  </Card>
-                </motion.div>
-              </Col>
-            </Row>
-          </div>
-        </section>
-
-        {/* Core Features Section */}
-        <section className="py-6" style={{ backgroundColor: '#f8f9fa' }}>
+        {/* Report Cards Section */}
+        <section className="py-16" style={{ backgroundColor: '#f8f9fa' }}>
           <div className="container mx-auto px-6">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -237,55 +164,80 @@ export default function About() {
               className="text-center mb-12"
             >
               <Title level={2} className="text-4xl font-bold mb-6" style={{ color: '#1A5276' }}>
-                Core Features
+                Choose Report Type
               </Title>
               <Paragraph className="text-lg max-w-3xl mx-auto" style={{ color: '#1A5276' }}>
-                Our platform combines three essential components to provide comprehensive protection against digital scams.
+                Select the type of scam or fraudulent activity you want to report. Each category helps us better understand and combat specific threats.
               </Paragraph>
             </motion.div>
 
             <Row gutter={[32, 32]}>
-              {[
-                {
-                  icon: <ExperimentOutlined className="text-4xl" style={{ color: '#2980B9' }} />,
-                  title: 'AI-Powered Detection',
-                  description: 'Advanced machine learning algorithms and Natural Language Processing to identify and classify various types of digital scams in real-time.'
-                },
-                {
-                  icon: <BookOutlined className="text-4xl" style={{ color: '#2980B9' }} />,
-                  title: 'Interactive Education',
-                  description: 'Engaging simulations and educational resources designed to raise awareness about different scam tactics and prevention strategies.'
-                },
-                {
-                  icon: <SafetyOutlined className="text-4xl" style={{ color: '#2980B9' }} />,
-                  title: 'Centralized Reporting',
-                  description: 'Secure reporting system integrated with WhatsApp API and optional USSD for easy scam reporting and threat notifications.'
-                }
-              ].map((feature, index) => (
-                <Col xs={24} md={8} key={index}>
+              {reportCards.map((card, index) => (
+                <Col xs={24} lg={12} key={index}>
                   <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
                     viewport={{ once: true }}
-                    whileHover={{ y: -5 }}
+                    whileHover={{ y: -8, transition: { duration: 0.3 } }}
                   >
                     <Card
-                      className="text-center h-full"
+                      className="h-full"
                       style={{
                         borderRadius: '20px',
-                        backgroundColor: '#EBF5FB',
+                        backgroundColor: card.bgColor,
                         border: '1px solid rgba(174, 214, 241, 0.3)',
-                        boxShadow: '0 4px 10px rgba(26, 82, 118, 0.2)'
+                        boxShadow: '0 6px 20px rgba(26, 82, 118, 0.15)'
                       }}
                     >
-                      <div className="mb-4">{feature.icon}</div>
-                      <Title level={4} className="mb-3" style={{ color: '#1A5276' }}>
-                        {feature.title}
-                      </Title>
-                      <Paragraph className="text-sm" style={{ color: '#1A5276' }}>
-                        {feature.description}
-                      </Paragraph>
+                      <div className="text-center mb-6">
+                        <motion.div
+                          whileHover={{ scale: 1.1, rotate: 5 }}
+                          transition={{ duration: 0.3 }}
+                          className="mb-4"
+                        >
+                          {card.icon}
+                        </motion.div>
+                        <Title level={3} className="mb-4" style={{ color: '#1A5276' }}>
+                          {card.title}
+                        </Title>
+                      </div>
+
+                      <div className="mb-6">
+                        <Paragraph className="text-base leading-relaxed mb-4" style={{ color: '#1A5276' }}>
+                          {card.description}
+                        </Paragraph>
+                        <Paragraph className="text-sm leading-relaxed" style={{ color: '#5D6D7E' }}>
+                          {card.details}
+                        </Paragraph>
+                      </div>
+
+                      <div className="text-center">
+                        <motion.div
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <Button
+                            type="primary"
+                            size="large"
+                            icon={card.buttonIcon}
+                            className="font-semibold px-8 py-3 h-auto w-full"
+                            style={{ 
+                              background: `linear-gradient(135deg, ${card.gradient.split(' ')[0].replace('from-', '')}, ${card.gradient.split(' ')[2].replace('to-', '')})`,
+                              border: 'none',
+                              borderRadius: '12px',
+                              fontSize: '16px',
+                              fontWeight: '600'
+                            }}
+                            onClick={() => {
+                              // Handle report action here
+                              console.log(`Reporting: ${card.title}`)
+                            }}
+                          >
+                            {card.buttonText}
+                          </Button>
+                        </motion.div>
+                      </div>
                     </Card>
                   </motion.div>
                 </Col>
@@ -294,303 +246,76 @@ export default function About() {
           </div>
         </section>
 
-        {/* Team Section */}
-        <section className="py-6 bg-gradient-to-br from-[#EBF5FB] to-[#AED6F1]">
+        {/* Emergency Contact Section */}
+        <section className="py-16 bg-gradient-to-br from-[#EBF5FB] to-[#AED6F1]">
           <div className="container mx-auto px-6">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className="text-center mb-12"
+              className="text-center"
             >
-              <Title level={2} className="text-4xl font-bold mb-6" style={{ color: '#1A5276' }}>
-                Meet Our Team
+              <Title level={2} className="text-3xl font-bold mb-6" style={{ color: '#1A5276' }}>
+                Need Immediate Help?
               </Title>
-              <Paragraph className="text-lg max-w-3xl mx-auto" style={{ color: '#1A5276' }}>
-                Computer and Software Engineering students from the University of Rwanda, College of Science and Technology, 
-                passionate about leveraging AI to protect Rwanda's digital future.
+              <Paragraph className="text-lg mb-8 max-w-2xl mx-auto" style={{ color: '#1A5276' }}>
+                If you're currently being targeted by a scam or have already been victimized, 
+                contact the authorities immediately or reach out to our emergency support channels.
               </Paragraph>
+              
+              <Space size="large" className="flex flex-col sm:flex-row justify-center">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    type="primary"
+                    size="large"
+                    icon={<PhoneOutlined />}
+                    className="font-semibold px-8 py-3 h-auto"
+                    style={{ 
+                      background: 'linear-gradient(135deg, #e74c3c, #c0392b)',
+                      border: 'none',
+                      borderRadius: '12px'
+                    }}
+                  >
+                    Emergency: 112
+                  </Button>
+                </motion.div>
+                
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    type="default"
+                    size="large"
+                    icon={<WhatsAppOutlined />}
+                    className="font-semibold px-8 py-3 h-auto"
+                    style={{ 
+                      backgroundColor: '#25D366',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '12px'
+                    }}
+                  >
+                    WhatsApp Support
+                  </Button>
+                </motion.div>
+                
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    type="default"
+                    size="large"
+                    icon={<SafetyOutlined />}
+                    className="font-semibold px-8 py-3 h-auto"
+                    style={{ 
+                      backgroundColor: '#2980B9',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '12px'
+                    }}
+                  >
+                    Cyber Crime Unit
+                  </Button>
+                </motion.div>
+              </Space>
             </motion.div>
-
-            <Row gutter={[32, 32]} justify="center">
-              <Col xs={24} md={12}>
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
-                  viewport={{ once: true }}
-                  whileHover={{ y: -5 }}
-                >
-                  <Card
-                    className="text-center h-full"
-                    style={{
-                      borderRadius: '20px',
-                      backgroundColor: '#FFFFFF',
-                      border: '1px solid rgba(174, 214, 241, 0.3)',
-                      boxShadow: '0 4px 10px rgba(26, 82, 118, 0.2)'
-                    }}
-                  >
-                    <div className="mb-6">
-                      <div 
-                        className="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center"
-                        style={{ backgroundColor: '#2980B9' }}
-                      >
-                        <UserOutlined className="text-3xl text-white" />
-                      </div>
-                      <Title level={4} style={{ color: '#1A5276' }}>MUNEZERO BAGIRA Sostene</Title>
-                      <Text className="block mb-2" style={{ color: '#2980B9', fontSize: '1rem', fontWeight: 600 }}>
-                        AI/ML Engineer & Backend Developer
-                      </Text>
-                       <Text className="block mb-2" style={{ color: '#2980B9', fontSize: '1rem', fontWeight: 600 }}>
-                        (Full Stack Engineer)
-                      </Text>
-                      <Text className="block mb-4" style={{ color: '#1A5276' }}>
-                        Phone: +250784310609
-                      </Text>
-                      <Paragraph className="text-sm" style={{ color: '#1A5276' }}>
-                        Specializes in machine learning algorithms, AI-powered scam detection systems, and FastAPI backend development. 
-                        Focuses on implementing NLP and anomaly detection for cybersecurity applications.
-                      </Paragraph>
-                    </div>
-                  </Card>
-                </motion.div>
-              </Col>
-              <Col xs={24} md={12}>
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.1 }}
-                  viewport={{ once: true }}
-                  whileHover={{ y: -5 }}
-                >
-                  <Card
-                    className="text-center h-full"
-                    style={{
-                      borderRadius: '20px',
-                      backgroundColor: '#FFFFFF',
-                      border: '1px solid rgba(174, 214, 241, 0.3)',
-                      boxShadow: '0 4px 10px rgba(26, 82, 118, 0.2)'
-                    }}
-                  >
-                    <div className="mb-6">
-                      <div 
-                        className="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center"
-                        style={{ backgroundColor: '#2980B9' }}
-                      >
-                        <CodeOutlined className="text-3xl text-white" />
-                      </div>
-                      <Title level={4} style={{ color: '#1A5276' }}>DUSHIME Gabriel</Title>
-                      <Text className="block mb-2" style={{ color: '#2980B9', fontSize: '1rem', fontWeight: 600 }}>
-                        Frontend Engineer & UX Designer
-                      </Text>
-                        <Text className="block mb-2" style={{ color: '#2980B9', fontSize: '1rem', fontWeight: 600 }}>
-                        (Full Stack Engineer)
-                      </Text>
-                      <Text className="block mb-4" style={{ color: '#1A5276' }}>
-                        Phone: +250783447260
-                      </Text>
-                      <Paragraph className="text-sm" style={{ color: '#1A5276' }}>
-                        Expert in React Native cross-platform development and creating intuitive user interfaces. 
-                        Specializes in designing interactive educational simulations and user-friendly reporting systems.
-                      </Paragraph>
-                    </div>
-                  </Card>
-                </motion.div>
-              </Col>
-            </Row>
-
-           
-          </div>
-        </section>
-
-        {/* Technical Stack & Timeline */}
-        <section className="py-6" style={{ backgroundColor: '#f8f9fa' }}>
-          <div className="container mx-auto px-6">
-            <Row gutter={[32, 32]}>
-              <Col xs={24} lg={12}>
-                <motion.div
-                  initial={{ opacity: 0, x: -30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.8 }}
-                  viewport={{ once: true }}
-                >
-                  <Card
-                    style={{
-                      borderRadius: '20px',
-                      backgroundColor: '#FFFFFF',
-                      border: '1px solid rgba(174, 214, 241, 0.3)',
-                      boxShadow: '0 4px 10px rgba(26, 82, 118, 0.2)'
-                    }}
-                  >
-                    <Title level={3} className="mb-6" style={{ color: '#1A5276' }}>Technical Expertise</Title>
-                    {skills.map((skill, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, x: -20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: index * 0.1 }}
-                        viewport={{ once: true }}
-                        className="mb-4"
-                      >
-                        <div className="flex justify-between mb-2">
-                          <Text style={{ color: '#1A5276', fontWeight: 600 }}>{skill.name}</Text>
-                          <Text style={{ color: '#2980B9', fontWeight: 600 }}>{skill.level}%</Text>
-                        </div>
-                        <Progress 
-                          percent={skill.level} 
-                          showInfo={false}
-                          strokeColor={{
-                            '0%': '#2980B9',
-                            '100%': '#1A5276',
-                          }}
-                          trailColor="#EBF5FB"
-                        />
-                      </motion.div>
-                    ))}
-                  </Card>
-                </motion.div>
-              </Col>
-              <Col xs={24} lg={12}>
-                <motion.div
-                  initial={{ opacity: 0, x: 30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.8 }}
-                  viewport={{ once: true }}
-                >
-                  <Card
-                    style={{
-                      borderRadius: '20px',
-                      backgroundColor: '#FFFFFF',
-                      border: '1px solid rgba(174, 214, 241, 0.3)',
-                      boxShadow: '0 4px 10px rgba(26, 82, 118, 0.2)'
-                    }}
-                  >
-                    <Title level={3} className="mb-6" style={{ color: '#1A5276' }}>Project Timeline</Title>
-                    <Timeline>
-                      {timeline.map((item, index) => (
-                        <Timeline.Item
-                          key={index}
-                          dot={<TrophyOutlined style={{ color: '#2980B9' }} />}
-                        >
-                          <div className="mb-2">
-                            <Text strong style={{ color: '#1A5276' }}>{item.title}</Text>
-                            <Text className="ml-2" style={{ color: '#2980B9' }}>({item.date})</Text>
-                          </div>
-                          <Paragraph className="text-sm mb-0" style={{ color: '#1A5276' }}>
-                            {item.description}
-                          </Paragraph>
-                        </Timeline.Item>
-                      ))}
-                    </Timeline>
-                  </Card>
-                </motion.div>
-              </Col>
-            </Row>
-          </div>
-        </section>
-
-        {/* Mission & Impact Section */}
-        <section className="py-6 bg-gradient-to-br from-[#EBF5FB] to-[#AED6F1]">
-          <div className="container mx-auto px-6">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              className="text-center mb-12"
-            >
-              <Title level={2} className="text-4xl font-bold mb-6" style={{ color: '#1A5276' }}>
-                Our Mission & Impact
-              </Title>
-            </motion.div>
-
-            <Row gutter={[32, 32]}>
-              <Col xs={24} md={8}>
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
-                  viewport={{ once: true }}
-                  whileHover={{ y: -5 }}
-                >
-                  <Card
-                    className="text-center h-full"
-                    style={{
-                      borderRadius: '20px',
-                      backgroundColor: '#FFFFFF',
-                      border: '1px solid rgba(174, 214, 241, 0.3)',
-                      boxShadow: '0 4px 10px rgba(26, 82, 118, 0.2)'
-                    }}
-                  >
-                    <AimOutlined className="text-4xl mb-4" style={{ color: '#2980B9' }} />
-                    <Title level={4} className="mb-3" style={{ color: '#1A5276' }}>
-                      Targeted Protection
-                    </Title>
-                    <Paragraph className="text-sm" style={{ color: '#1A5276' }}>
-                      Specifically designed for Rwanda's digital ecosystem, addressing local scam trends and 
-                      supporting multiple demographic groups including youth, entrepreneurs, and the general public.
-                    </Paragraph>
-                  </Card>
-                </motion.div>
-              </Col>
-              <Col xs={24} md={8}>
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.1 }}
-                  viewport={{ once: true }}
-                  whileHover={{ y: -5 }}
-                >
-                  <Card
-                    className="text-center h-full"
-                    style={{
-                      borderRadius: '20px',
-                      backgroundColor: '#FFFFFF',
-                      border: '1px solid rgba(174, 214, 241, 0.3)',
-                      boxShadow: '0 4px 10px rgba(26, 82, 118, 0.2)'
-                    }}
-                  >
-                    <HeartOutlined className="text-4xl mb-4" style={{ color: '#2980B9' }} />
-                    <Title level={4} className="mb-3" style={{ color: '#1A5276' }}>
-                      Community Impact
-                    </Title>
-                    <Paragraph className="text-sm" style={{ color: '#1A5276' }}>
-                      Reducing financial losses and psychological distress caused by digital scams while building 
-                      trust in digital platforms through education and proactive protection measures.
-                    </Paragraph>
-                  </Card>
-                </motion.div>
-              </Col>
-              <Col xs={24} md={8}>
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                  viewport={{ once: true }}
-                  whileHover={{ y: -5 }}
-                >
-                  <Card
-                    className="text-center h-full"
-                    style={{
-                      borderRadius: '20px',
-                      backgroundColor: '#FFFFFF',
-                      border: '1px solid rgba(174, 214, 241, 0.3)',
-                      boxShadow: '0 4px 10px rgba(26, 82, 118, 0.2)'
-                    }}
-                  >
-                    <TeamOutlined className="text-4xl mb-4" style={{ color: '#2980B9' }} />
-                    <Title level={4} className="mb-3" style={{ color: '#1A5276' }}>
-                      Collaborative Approach
-                    </Title>
-                    <Paragraph className="text-sm" style={{ color: '#1A5276' }}>
-                      Bridging the gap between citizens and authorities through centralized reporting and 
-                      improving collaboration in combating cybercrime across Rwanda.
-                    </Paragraph>
-                  </Card>
-                </motion.div>
-              </Col>
-            </Row>
           </div>
         </section>
       </div>
