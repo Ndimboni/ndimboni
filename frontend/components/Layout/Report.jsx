@@ -629,7 +629,7 @@ const reportCards = [
           </div>
         </section>
         {/* Emergency Contact Section */}
-        <section className="py-16 bg-gradient-to-br from-[#EBF5FB] to-[#AED6F1]">
+        <section className="py-6 bg-gradient-to-br from-[#EBF5FB] to-[#AED6F1]">
           <div className="container mx-auto px-6">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -638,10 +638,10 @@ const reportCards = [
               viewport={{ once: true }}
               className="text-center"
             >
-              <Title level={2} className="text-3xl font-bold mb-6" style={{ color: '#1A5276' }}>
+              <Title level={2} className="text-lg font-bold mb-6" style={{ color: '#1A5276' }}>
                 Need Immediate Help?
               </Title>
-              <Paragraph className="text-lg mb-8 max-w-2xl mx-auto" style={{ color: '#1A5276' }}>
+              <Paragraph className="text-sm mb-8 max-w-2xl mx-auto" style={{ color: '#1A5276' }}>
                 If you're currently being targeted by a scam or have already been victimized, 
                 contact the authorities immediately or reach out to our emergency support channels.
               </Paragraph>

@@ -1,30 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Menu, Avatar, Dropdown, Button, Modal, Typography, message, Badge } from 'antd';
+import { Layout, Menu, Avatar, Dropdown, Button, Modal,  Typography,  message } from 'antd';
 import {
   DashboardOutlined,
   UserOutlined,
   ExclamationCircleOutlined,
   SecurityScanOutlined,
-  PhoneOutlined,
   SettingOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   MailOutlined,
   SafetyCertificateOutlined,
-  MessageOutlined,
 } from '@ant-design/icons';
 import AdminDashboard from './Dashboard';
 
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
 
-const UsersPage = () => (
-  <div style={{ padding: '24px' }}>
-    <h2>Users Management</h2>
-    <p>Users page content will be displayed here...</p>
-  </div>
-);
+
 
 const ScamReportsPage = () => (
   <div style={{ padding: '24px' }}>
@@ -40,20 +33,19 @@ const ScamCheckPage = () => (
   </div>
 );
 
-const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
+
+
+const ModeratorLayout = ({ children, currentPage = 'dashboard' }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [userName, setUserName] = useState('Admin User');
-  const [userEmail, setUserEmail] = useState('admin@ndimboni.com');
-  const [userRole, setUserRole] = useState('admin');
+  const [userName, setUserName] = useState('Moderator User');
+  const [userEmail, setUserEmail] = useState('moderator@ndimboni.com');
+  const [userRole, setUserRole] = useState('moderator');
   const [selectedKey, setSelectedKey] = useState(currentPage);
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [profileData, setProfileData] = useState(null);
   const [profileLoading, setProfileLoading] = useState(false);
-  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
-
-  const API_BASE_URL = 'https://ndimboni-digital-scam-protection.onrender.com';
 
   const getUserInitials = (name) => {
     return name
@@ -64,30 +56,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
   };
 
   const getRoleDisplay = (role) => {
-    return role === 'admin' ? 'Administrator' : 'Moderator';
-  };
-
-  // Fetch unread messages count
-  const fetchUnreadMessagesCount = async () => {
-    try {
-      const token = localStorage.getItem('access_token');
-      if (!token) return;
-
-      const response = await fetch(`${API_BASE_URL}/contact/unread-count`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUnreadMessagesCount(data.count || 0);
-      }
-    } catch (error) {
-      console.error('Error fetching unread messages count:', error);
-    }
+    return role === 'moderator' ? 'Moderator' : 'Admin';
   };
 
   const fetchUserProfile = async () => {
@@ -99,7 +68,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
         return;
       }
 
-      const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+      const response = await fetch('https://ndimboni-digital-scam-protection.onrender.com/auth/profile', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -111,10 +80,12 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
         const data = await response.json();
         setProfileData(data);
         
+        
         if (data.user_name) setUserName(data.user_name);
         if (data.user_email) setUserEmail(data.user_email);
         if (data.user_role) setUserRole(data.user_role);
         
+       
         localStorage.setItem('user_name', data.user_name || '');
         localStorage.setItem('user_email', data.user_email || '');
         localStorage.setItem('user_role', data.user_role || '');
@@ -138,6 +109,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
     checkIfMobile();
     window.addEventListener('resize', checkIfMobile);
     
+   
     const storedUserName = localStorage.getItem('user_name') || 'Admin User';
     const storedUserEmail = localStorage.getItem('user_email') || 'admin@ndimboni.com';
     const storedUserRole = localStorage.getItem('user_role') || 'admin';
@@ -148,15 +120,8 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
     
     setSelectedKey(currentPage);
     
-    // Fetch unread messages count on component mount
-    fetchUnreadMessagesCount();
-    
-    // Set up interval to fetch unread count periodically (every 30 seconds)
-    const interval = setInterval(fetchUnreadMessagesCount, 30000);
-    
     return () => {
       window.removeEventListener('resize', checkIfMobile);
-      clearInterval(interval);
     };
   }, [currentPage]);
 
@@ -214,17 +179,12 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
       setIsOpen(false);
     }
     
-    // Mark messages as read when navigating to messages page
-    if (key === 'messages') {
-      setUnreadMessagesCount(0);
-    }
-    
     const routes = {
-      'dashboard': '/admin/dashboard',
-      'users': '/admin/users',
-      'scam-reports': '/admin/scam-reports',
-      'scam-check': '/admin/scam-check',
-      'messages': '/admin/messages',
+      'dashboard': '/moderator/dashboard',
+  
+      'scam-reports': '/moderator/scam-reports',
+      'scam-check': '/moderator/scam-check',
+     
     };
     
     if (routes[key]) {
@@ -240,17 +200,12 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
     switch (selectedKey) {
       case 'dashboard':
         return <AdminDashboard />;
-      case 'users':
-        return <UsersPage />;
+     
       case 'scam-reports':
         return <ScamReportsPage />;
       case 'scam-check':
         return <ScamCheckPage />;
-      case 'messages':
-        return <div style={{ padding: '24px' }}>
-          <h2>Contact Messages</h2>
-          <p>Contact messages content will be displayed here...</p>
-        </div>;
+      
       default:
         return <AdminDashboard />;
     }
@@ -285,11 +240,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
       icon: <DashboardOutlined />,
       label: 'Dashboard',
     },
-    {
-      key: 'users',
-      icon: <UserOutlined />,
-      label: 'Users',
-    },
+  
     {
       key: 'scam-reports',
       icon: <ExclamationCircleOutlined />,
@@ -300,37 +251,14 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
       icon: <SecurityScanOutlined />,
       label: 'Scam Check',
     },
-    {
-      key: 'messages',
-      icon: <MessageOutlined />,
-      label: (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-          <span>Messages</span>
-          {unreadMessagesCount > 0 && !collapsed && (
-            <Badge 
-              count={unreadMessagesCount} 
-              size="small"
-              style={{ 
-                backgroundColor: '#ff4d4f',
-                fontSize: '10px',
-                minWidth: '16px',
-                height: '16px',
-                lineHeight: '16px',
-                borderRadius: '8px',
-                marginLeft: '8px'
-              }}
-            />
-          )}
-        </div>
-      ),
-    },
+    
   ];
 
   const sidebarCollapsed = isMobile ? !isOpen : collapsed;
 
   return (
     <Layout style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
-      {/* Profile Modal */}
+      {/* Compact Profile Modal */}
       <Modal
         title={null}
         open={profileModalVisible}
@@ -350,6 +278,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
             overflow: 'hidden',
           }}
         >
+          {/* Background decoration */}
           <div
             style={{
               position: 'absolute',
@@ -430,6 +359,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {/* Email */}
               <div
                 style={{
                   display: 'flex',
@@ -464,6 +394,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
                 </div>
               </div>
 
+              {/* Role */}
               <div
                 style={{
                   display: 'flex',
@@ -500,6 +431,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
             </div>
           )}
 
+          {/* Action Buttons */}
           <div style={{ 
             marginTop: '20px', 
             display: 'flex', 
@@ -520,6 +452,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
             >
               Close
             </Button>
+            
           </div>
         </div>
       </Modal>
@@ -674,29 +607,9 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
                 alignItems: 'center',
                 justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
                 minHeight: '48px',
-                position: 'relative',
               }
             }))}
           />
-          
-          {/* Collapsed state badge for messages */}
-          {sidebarCollapsed && unreadMessagesCount > 0 && (
-            <div style={{
-              position: 'absolute',
-              top: '280px', // Adjust based on Messages menu position
-              right: '10px',
-              zIndex: 1001,
-            }}>
-              <Badge 
-                count={unreadMessagesCount} 
-                size="small"
-                style={{ 
-                  backgroundColor: '#ff4d4f',
-                  fontSize: '10px',
-                }}
-              />
-            </div>
-          )}
         </div>
       </Sider>
 
@@ -739,10 +652,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
           color: #2980B9 !important;
         }
         .ant-menu-light .ant-menu-item .ant-menu-title-content {
-          display: ${sidebarCollapsed ? 'none' : 'flex'} !important;
-          align-items: center !important;
-          justify-content: space-between !important;
-          width: 100% !important;
+          display: ${sidebarCollapsed ? 'none' : 'inline'} !important;
           margin-left: ${sidebarCollapsed ? '0' : '8px'} !important;
         }
       `}</style>
@@ -805,8 +715,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
                 fontWeight: '700',
                 color: '#1A5276'
               }}>
-                {navItems.find(item => item.key === selectedKey)?.label?.props?.children?.[0] || 
-                 navItems.find(item => item.key === selectedKey)?.label || 'Dashboard'}
+                {navItems.find(item => item.key === selectedKey)?.label || 'Dashboard'}
               </h1>
             </div>
           </div>
@@ -831,4 +740,4 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
   );
 };
 
-export default AdminLayout;
+export default ModeratorLayout;
