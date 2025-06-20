@@ -15,7 +15,6 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { TelegramWebhookService } from './telegram-webhook.service';
-import { TelegramModerationService } from './telegram-moderation.service';
 import { PolicyGuard } from '../common/guards/policy.guard';
 import { RequirePolicy } from '../common/decorators/policy.decorator';
 import { Action, Resource } from '../common/interfaces/policy.interface';

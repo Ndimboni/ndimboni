@@ -59,6 +59,21 @@ export class ScamReport {
   @Column({ nullable: true })
   reporterPhone: string;
 
+  @Column({ nullable: true })
+  verifiedBy: string;
+
+  @Column({ nullable: true })
+  verifiedAt: Date;
+
+  @Column({ nullable: true })
+  moderatedBy: string;
+
+  @Column({ nullable: true })
+  moderatedAt: Date;
+
+  @Column('text', { nullable: true })
+  moderationNotes: string;
+
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'userId' })
   user: User;

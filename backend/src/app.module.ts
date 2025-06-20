@@ -10,12 +10,13 @@ import { AuthzModule } from './authz/authz.module';
 import { UsersModule } from './users/users.module';
 import { ScamCheckModule } from './scam-check/scam-check.module';
 import { ScammerReportsModule } from './scammer-reports/scammer-reports.module';
+import { ContactModule } from './contact/contact.module';
 import { TelegramBotModule } from './telegram-bot/telegram-bot.module';
+import { HttpSmsModule } from './http-sms/http-sms.module';
 import { CommonServicesModule } from './common/services/common-services.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import configuration from './config/configuration';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
-import { FileUploadService } from './common/services/file-upload.service';
 
 @Module({
   imports: [
@@ -36,7 +37,9 @@ import { FileUploadService } from './common/services/file-upload.service';
     CommonServicesModule,
     ScamCheckModule,
     ScammerReportsModule,
+    ContactModule,
     TelegramBotModule,
+    HttpSmsModule,
   ],
   controllers: [AppController],
   providers: [

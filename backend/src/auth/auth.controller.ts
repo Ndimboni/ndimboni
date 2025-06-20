@@ -49,4 +49,26 @@ export class AuthController {
   async getProfile(@Request() req) {
     return this.authService.getProfile(req.user.id);
   }
+
+  @Get('role-capabilities')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current user role capabilities' })
+  @ApiResponse({
+    status: 200,
+    description: 'Role capabilities retrieved successfully',
+  })
+  async getRoleCapabilities(@Request() req) {
+    return this.authService.getRoleCapabilities(req.user.role);
+  }
+
+  @Get('permissions')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current user permissions' })
+  @ApiResponse({
+    status: 200,
+    description: 'User permissions retrieved successfully',
+  })
+  async getUserPermissions(@Request() req) {
+    return this.authService.getUserPermissions(req.user);
+  }
 }

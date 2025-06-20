@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
+import { PolicyService } from './policy.service';
 import { RegisterDto, LoginDto } from '../dto/auth.dto';
 import { JwtPayload } from '../common/interfaces/user.interface';
 // import * as bcrypt from 'bcrypt';
@@ -10,6 +11,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private policyService: PolicyService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
@@ -56,5 +58,29 @@ export class AuthService {
 
   async getProfile(userId: string) {
     return this.usersService.findById(userId);
+  }
+
+  async getRoleCapabilities(role: string) {
+    return this.policyService.getRoleCapabilities(role);
+  }
+
+  async getUserPermissions(user: any) {
+    const context = {
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+    };
+    return {
+      permissions: this.policyService.getUserPermissions(context),
+      capabilities: this.policyService.getRoleCapabilities(user.role),
+      workflow: this.policyService.getScamReportWorkflow(user.role),
+      roleChecks: {
+        canModerate: this.policyService.canModerate(user.role),
+        canAnalyze: this.policyService.canAnalyze(user.role),
+        canAccessAdmin: this.policyService.canAccessAdmin(user.role),
+      },
+    };
   }
 }

@@ -117,3 +117,41 @@ export class UpdateStatusDto {
   @IsNotEmpty()
   status: ScamStatus;
 }
+
+export class VerifyScamReportDto {
+  @ApiProperty({
+    description: 'Status to set for verification',
+    enum: ScamStatus,
+    example: ScamStatus.VERIFIED,
+  })
+  @IsEnum(ScamStatus)
+  @IsNotEmpty()
+  status: ScamStatus;
+
+  @ApiProperty({
+    description: 'Notes from the analyst about the verification',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  verificationNotes?: string;
+}
+
+export class ModerateScamReportDto {
+  @ApiProperty({
+    description: 'Status to set for moderation',
+    enum: ScamStatus,
+    example: ScamStatus.VERIFIED,
+  })
+  @IsEnum(ScamStatus)
+  @IsNotEmpty()
+  status: ScamStatus;
+
+  @ApiProperty({
+    description: 'Notes from the moderator',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  moderationNotes?: string;
+}

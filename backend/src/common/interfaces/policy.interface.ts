@@ -13,6 +13,7 @@ export enum Resource {
   EMAIL = 'email',
   ADMIN_PANEL = 'admin-panel',
   BOT_SETTINGS = 'bot-settings',
+  CONTACT = 'contact',
 }
 
 export interface PolicyRule {
