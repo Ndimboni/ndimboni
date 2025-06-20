@@ -499,58 +499,70 @@ const ScammerReportPage = () => {
         </Col>
       </Row>
 
-      {/* Main Table */}
-      <Card>
-        <Row justify="space-between" style={{ marginBottom: '16px' }}>
-          <Col>
-            <Title level={4}>Reported Scammers</Title>
-          </Col>
-          <Col>
-            <Space>
-              <Button
-                icon={<SearchOutlined />}
-                onClick={() => setCheckModalVisible(true)}
-              >
-                Check Scammer
-              </Button>
-              <Button
-                icon={<ReloadOutlined />}
-                onClick={() => fetchReports()}
-                loading={loading}
-              >
-                Refresh
-              </Button>
-              <Button
-                type="primary"
-                icon={<UserAddOutlined />}
-                onClick={() => setReportModalVisible(true)}
-              >
-                Report Scammer
-              </Button>
-            </Space>
-          </Col>
-        </Row>
+     {/* Main Table */}
+<Card>
+  <div style={{ marginBottom: '16px' }}>
+   
+    <Row justify="space-between" align="middle" gutter={[16, 8]}>
+      <Col xs={24} sm={12}>
+        <Title level={4} style={{ marginBottom: 0 }}>Reported Scammers</Title>
+      </Col>
+      
+      <Col xs={24} sm={12}>
+        <div style={{ 
+          display: 'flex', 
+          flexWrap: 'wrap', 
+          gap: '10px',
+          justifyContent: 'flex-start'
+        }}>
+          <Button
+            icon={<SearchOutlined />}
+            onClick={() => setCheckModalVisible(true)}
+            style={{ flex: '1 1 auto', minWidth: '120px', maxWidth: '150px' }}
+          >
+            Check
+          </Button>
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={() => fetchReports()}
+            loading={loading}
+            style={{ flex: '0 0 auto', minWidth: '80px' }}
+          >
+            Refresh
+          </Button>
+          <Button
+            type="primary"
+            icon={<UserAddOutlined />}
+            onClick={() => setReportModalVisible(true)}
+            style={{ flex: '1 1 auto', minWidth: '120px', maxWidth: '150px' }}
+          >
+            Report
+          </Button>
+        </div>
+      </Col>
+    </Row>
+  </div>
 
-        <Table
-          columns={columns}
-          dataSource={reports}
-          loading={loading}
-          rowKey="id"
-          pagination={{
-            ...pagination,
-            showSizeChanger: true,
-            showTotal: (total, range) =>
-              `${range[0]}-${range[1]} of ${total} reports`,
-            onChange: (page, pageSize) => {
-              setPagination(prev => ({ ...prev, pageSize }));
-              fetchReports(page);
-            }
-          }}
-          scroll={{ x: 800 }}
-        />
-      </Card>
+  <Table
+    columns={columns}
+    dataSource={reports}
+    loading={loading}
+    rowKey="id"
+    pagination={{
+      ...pagination,
+      showSizeChanger: true,
+      showTotal: (total, range) =>
+        `${range[0]}-${range[1]} of ${total} reports`,
+      onChange: (page, pageSize) => {
+        setPagination(prev => ({ ...prev, pageSize }));
+        fetchReports(page);
+      }
+    }}
+    scroll={{ x: 800 }}
+  />
+</Card>
 
-      {/* Report Scammer Modal - FIXED: Using correct field names */}
+      {/* Report Scammer Modal  */}
       <Modal
         title="Report a Scammer"
         open={reportModalVisible}
