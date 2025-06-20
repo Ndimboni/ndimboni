@@ -19,8 +19,26 @@ const { Title, Paragraph, Text } = Typography
 const { TextArea } = Input
 const { Option } = Select
 
+
+const ContactCategory = {
+  GENERAL_INQUIRY: 'general_inquiry',
+  TECHNICAL_SUPPORT: 'technical_support',
+  SCAM_REPORT: 'scam_report',
+  FEATURE_REQUEST: 'feature_request',
+  BUG_REPORT: 'bug_report',
+  OTHER: 'other'
+}
+
 export default function ContactPage() {
   const [loading, setLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    subject: '',
+    message: '',
+    category: ContactCategory.GENERAL_INQUIRY
+  })
 
   const contactInfo = [
     {
@@ -58,6 +76,97 @@ export default function ContactPage() {
     { day: 'Saturday', hours: '9:00 AM - 4:00 PM' },
     { day: 'Sunday', hours: 'Emergency Only' }
   ]
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const validateForm = () => {
+    const errors = []
+    
+    if (!formData.name.trim()) errors.push('Name is required')
+    if (!formData.email.trim()) errors.push('Email is required')
+    if (!formData.subject.trim()) errors.push('Subject is required')
+    if (!formData.message.trim()) errors.push('Message is required')
+    
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (formData.email && !emailRegex.test(formData.email)) {
+      errors.push('Please enter a valid email address')
+    }
+    
+   
+    if (formData.name.length > 100) errors.push('Name must be less than 100 characters')
+    if (formData.phone && formData.phone.length > 20) errors.push('Phone must be less than 20 characters')
+    if (formData.subject.length > 200) errors.push('Subject must be less than 200 characters')
+    if (formData.message.length > 2000) errors.push('Message must be less than 2000 characters')
+    
+    return errors
+  }
+
+  const submitForm = async () => {
+    const errors = validateForm()
+    
+    if (errors.length > 0) {
+      errors.forEach(error => message.error(error))
+      return
+    }
+
+    setLoading(true)
+    
+    try {
+   
+      const submitData = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim() || undefined, 
+        subject: formData.subject.trim(),
+        message: formData.message.trim(),
+        category: formData.category
+      }
+
+      if (!submitData.phone) {
+        delete submitData.phone
+      }
+
+   
+      const response = await fetch('https://ndimboni-digital-scam-protection.onrender.com/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(submitData)
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to submit contact form')
+      }
+
+      const result = await response.json()
+      
+      message.success('Your message has been sent successfully! We will get back to you soon.')
+      
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: '',
+        category: ContactCategory.GENERAL_INQUIRY
+      })
+      
+    } catch (error) {
+      console.error('Contact form submission error:', error)
+      message.error(error.message || 'Failed to send message. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 p-2">
@@ -173,32 +282,22 @@ export default function ContactPage() {
                     </div>
 
                     <div className="space-y-6">
-                      <Row gutter={16}>
-                        <Col xs={24} md={12}>
-                          <div>
-                            <label className="block text-sm font-medium mb-2" style={{ color: '#1A5276' }}>
-                              First Name *
-                            </label>
-                            <Input 
-                              prefix={<UserOutlined style={{ color: '#2980B9' }} />}
-                              placeholder="Enter your first name"
-                              style={{ borderRadius: '12px' }}
-                            />
-                          </div>
-                        </Col>
-                        <Col xs={24} md={12}>
-                          <div>
-                            <label className="block text-sm font-medium mb-2" style={{ color: '#1A5276' }}>
-                              Last Name *
-                            </label>
-                            <Input 
-                              prefix={<UserOutlined style={{ color: '#2980B9' }} />}
-                              placeholder="Enter your last name"
-                              style={{ borderRadius: '12px' }}
-                            />
-                          </div>
-                        </Col>
-                      </Row>
+                      <div>
+                        <label className="block text-sm font-medium mb-2" style={{ color: '#1A5276' }}>
+                          Full Name *
+                        </label>
+                        <Input 
+                          prefix={<UserOutlined style={{ color: '#2980B9' }} />}
+                          placeholder="Enter your full name"
+                          value={formData.name}
+                          onChange={(e) => handleInputChange('name', e.target.value)}
+                          maxLength={100}
+                          style={{ borderRadius: '12px' }}
+                        />
+                        <Text type="secondary" className="text-xs">
+                          {formData.name.length}/100 characters
+                        </Text>
+                      </div>
 
                       <div>
                         <label className="block text-sm font-medium mb-2" style={{ color: '#1A5276' }}>
@@ -207,35 +306,60 @@ export default function ContactPage() {
                         <Input 
                           prefix={<MailOutlined style={{ color: '#2980B9' }} />}
                           placeholder="Enter your email address"
+                          type="email"
+                          value={formData.email}
+                          onChange={(e) => handleInputChange('email', e.target.value)}
                           style={{ borderRadius: '12px' }}
                         />
                       </div>
 
                       <div>
                         <label className="block text-sm font-medium mb-2" style={{ color: '#1A5276' }}>
-                          Phone Number
+                          Phone Number (Optional)
                         </label>
                         <Input 
                           prefix={<PhoneOutlined style={{ color: '#2980B9' }} />}
                           placeholder="Enter your phone number"
+                          value={formData.phone}
+                          onChange={(e) => handleInputChange('phone', e.target.value)}
+                          maxLength={20}
                           style={{ borderRadius: '12px' }}
                         />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-2" style={{ color: '#1A5276' }}>
+                          Category *
+                        </label>
+                        <Select 
+                          placeholder="Select a category"
+                          value={formData.category}
+                          onChange={(value) => handleInputChange('category', value)}
+                          style={{ borderRadius: '12px', width: '100%' }}
+                        >
+                          <Option value={ContactCategory.SCAM_REPORT}>Report a Scam</Option>
+                          <Option value={ContactCategory.GENERAL_INQUIRY}>General Inquiry</Option>
+                          <Option value={ContactCategory.TECHNICAL_SUPPORT}>Technical Support</Option>
+                          <Option value={ContactCategory.FEATURE_REQUEST}>Feature Request</Option>
+                          <Option value={ContactCategory.BUG_REPORT}>Bug Report</Option>
+                          <Option value={ContactCategory.OTHER}>Other</Option>
+                        </Select>
                       </div>
 
                       <div>
                         <label className="block text-sm font-medium mb-2" style={{ color: '#1A5276' }}>
                           Subject *
                         </label>
-                        <Select 
-                          placeholder="Select a subject"
-                          style={{ borderRadius: '12px', width: '100%' }}
-                        >
-                          <Option value="scam-report">Report a Scam</Option>
-                          <Option value="general-inquiry">General Inquiry</Option>
-                          <Option value="technical-support">Technical Support</Option>
-                          <Option value="partnership">Partnership</Option>
-                          <Option value="feedback">Feedback</Option>
-                        </Select>
+                        <Input 
+                          placeholder="Enter the subject of your message"
+                          value={formData.subject}
+                          onChange={(e) => handleInputChange('subject', e.target.value)}
+                          maxLength={200}
+                          style={{ borderRadius: '12px' }}
+                        />
+                        <Text type="secondary" className="text-xs">
+                          {formData.subject.length}/200 characters
+                        </Text>
                       </div>
 
                       <div>
@@ -245,7 +369,11 @@ export default function ContactPage() {
                         <TextArea 
                           rows={6}
                           placeholder="Tell us how we can help you..."
+                          value={formData.message}
+                          onChange={(e) => handleInputChange('message', e.target.value)}
+                          maxLength={2000}
                           style={{ borderRadius: '12px' }}
+                          showCount
                         />
                       </div>
 
@@ -264,13 +392,7 @@ export default function ContactPage() {
                             borderRadius: '12px',
                             border: 'none'
                           }}
-                          onClick={() => {
-                            setLoading(true)
-                            setTimeout(() => {
-                              setLoading(false)
-                              message.success('Your message has been sent successfully! We will get back to you soon.')
-                            }, 2000)
-                          }}
+                          onClick={submitForm}
                         >
                           Send Message
                         </Button>
