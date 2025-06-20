@@ -87,6 +87,11 @@ export default (): AppConfig => {
       password: process.env.ADMIN_PASSWORD || 'admin123',
       name: process.env.ADMIN_NAME || 'Admin User',
     },
+    moderator: {
+      email: process.env.MODERATOR_EMAIL || 'moderator@ndimboni.com',
+      password: process.env.MODERATOR_PASSWORD || 'moderator123',
+      name: process.env.MODERATOR_NAME || 'Moderator User',
+    },
     telegram: {
       botToken: process.env.TELEGRAM_BOT_TOKEN || '',
       webhookUrl: process.env.TELEGRAM_WEBHOOK_URL,
