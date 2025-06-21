@@ -30,25 +30,29 @@ export class PolicyService {
       condition: (context) => context.user.role === 'admin',
     },
 
-    // Moderator policies - can review, approve/reject reports and manage contacts
+    // Moderator policies - same as admin except user management
     {
-      action: [Action.READ, Action.UPDATE, Action.DELETE],
-      resource: [Resource.SCAM_REPORT, Resource.CONTACT],
+      action: [
+        Action.CREATE,
+        Action.READ,
+        Action.UPDATE,
+        Action.DELETE,
+        Action.MANAGE,
+      ],
+      resource: [
+        Resource.SCAM_REPORT,
+        Resource.FILE,
+        Resource.EMAIL,
+        Resource.ADMIN_PANEL,
+        Resource.BOT_SETTINGS,
+        Resource.CONTACT,
+      ],
       condition: (context) => context.user.role === 'moderator',
     },
-    {
-      action: [Action.READ, Action.UPDATE],
-      resource: [Resource.USER],
-      condition: (context) => context.user.role === 'moderator',
-    },
-    {
-      action: [Action.CREATE, Action.READ, Action.UPDATE],
-      resource: [Resource.FILE, Resource.EMAIL],
-      condition: (context) => context.user.role === 'moderator',
-    },
+    // Moderator can only read user information (not create/update/delete users)
     {
       action: [Action.READ],
-      resource: [Resource.ADMIN_PANEL],
+      resource: [Resource.USER],
       condition: (context) => context.user.role === 'moderator',
     },
 
@@ -196,22 +200,26 @@ export class PolicyService {
       case 'moderator':
         return {
           name: 'Moderator',
-          description: 'Content moderation and community management',
+          description:
+            'Content moderation and system management (except users)',
           capabilities: [
-            'Review and approve/reject scam reports',
-            'Communicate with analysts and admins',
+            'View user information (read-only)',
+            'Full management of scam reports',
             'Manage contact messages',
-            'Update user information',
+            'Configure bot settings',
             'Upload and manage files',
             'Send system emails',
-            'Access moderation dashboard',
+            'Access admin dashboard',
+            'View analytics and reports',
+            'Delete scam reports and content',
           ],
           dashboardSections: [
-            'Pending Reports Review',
+            'Scam Reports Management',
             'Contact Messages',
-            'User Management',
-            'Moderation Queue',
-            'Communication Tools',
+            'User Information (Read-only)',
+            'Bot Configuration',
+            'System Analytics',
+            'Content Management',
           ],
         };
 
@@ -284,6 +292,13 @@ export class PolicyService {
    * Check if a role can access admin features
    */
   canAccessAdmin(role: string): boolean {
+    return ['admin', 'moderator'].includes(role);
+  }
+
+  /**
+   * Check if a role can manage users
+   */
+  canManageUsers(role: string): boolean {
     return role === 'admin';
   }
 
@@ -301,7 +316,7 @@ export class PolicyService {
       canView: ['admin', 'moderator', 'analyst', 'user'].includes(role),
       canVerify: ['admin', 'analyst'].includes(role),
       canModerate: ['admin', 'moderator'].includes(role),
-      canDelete: ['admin'].includes(role),
+      canDelete: ['admin', 'moderator'].includes(role),
       canUpdateStatus: ['admin', 'moderator', 'analyst'].includes(role),
     };
   }
