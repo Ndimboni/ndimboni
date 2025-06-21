@@ -207,7 +207,7 @@ export class ScammerReportController {
         isScammer: !!result,
         data: result || undefined,
         message: result
-          ? 'Scammer found in database'
+          ? 'This is a scammer'
           : 'No scammer record found',
       };
     } catch (error) {
