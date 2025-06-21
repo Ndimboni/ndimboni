@@ -18,17 +18,17 @@ const Footer = () => {
     { title: 'Home', href: '/' },
     { title: 'About Us', href: '/about' },
     { title: 'Contact', href: '/contact' },
-    { title: 'Documentation', href: '/' },
+    { title: 'Report', href: '/report' },
   ]
 
   const socialLinks = [
-    { icon: <GithubOutlined />, href: 'https://github.com', label: 'GitHub' },
+    { icon: <GithubOutlined />, href: 'https://github.com/GabrielDushime', label: 'GitHub' },
     { icon: <LinkedinOutlined />, href: 'https://linkedin.com', label: 'LinkedIn' },
     { icon: <TwitterOutlined />, href: 'https://twitter.com', label: 'Twitter' },
   ]
 
   const contactInfo = [
-    { icon: <MailOutlined />, text: 'project@university.edu', href: 'mailto:project@university.edu' },
+    { icon: <MailOutlined />, text: 'admin@ndimboni.com', href: 'mailto:project@university.edu' },
     { icon: <PhoneOutlined />, text: '+250 783447260 / 784310609', href: 'tel:+250XXXXXXXXX' },
     { icon: <EnvironmentOutlined />, text: 'Kigali, Rwanda', href: '#' },
   ]
@@ -37,7 +37,7 @@ const Footer = () => {
     { name: 'Next Js', description: 'Cross-platform Web development', color: 'blue' },
     { name: 'FastAPI', description: 'High-performance Python backend', color: 'green' },
     { name: 'Machine Learning', description: 'NLP & anomaly detection', color: 'purple' },
-    { name: 'Telegram API', description: 'Seamless reporting integration', color: 'yellow' },
+    { name: 'Whatsap & Telegram API', description: 'Seamless reporting integration', color: 'yellow' },
   ]
 
   return (

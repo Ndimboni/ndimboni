@@ -24,7 +24,6 @@ import {
   UserAddOutlined,
   SearchOutlined,
   EyeOutlined,
-  DeleteOutlined,
   ReloadOutlined,
   CheckCircleOutlined,
   ExclamationCircleOutlined,
@@ -75,6 +74,11 @@ const ScammerReportPage = () => {
     current: 1,
     pageSize: 10,
     total: 0
+  });
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+  status: '',
+  additionalInfo: ''
   });
 
 
@@ -353,6 +357,63 @@ const ScammerReportPage = () => {
     return displayNames[type] || type;
   };
 
+
+
+  const updateReport = async (id, formData) => {
+  try {
+    if (!formData.status) {
+      message.error('Please select a status');
+      return;
+    }
+
+    const requestData = {
+      status: formData.status,
+      additionalInfo: formData.additionalInfo ? formData.additionalInfo.trim() : undefined
+    };
+
+   
+    Object.keys(requestData).forEach(key => {
+      if (requestData[key] === undefined || requestData[key] === '') {
+        delete requestData[key];
+      }
+    });
+
+    console.log('Updating report:', requestData);
+
+    const response = await apiCall(`/report/${id}`, {
+      method: 'PUT',
+      body: requestData
+    });
+    
+    if (response.success || response.data) {
+      message.success('Report updated successfully');
+      setEditModalVisible(false);
+      setEditFormData({
+        status: '',
+        additionalInfo: ''
+      });
+      setSelectedReport(null);
+      fetchReports();
+      fetchStats();
+    } else {
+      throw new Error('Invalid response format');
+    }
+  } catch (error) {
+    console.error('Update report error:', error);
+    message.error(`Failed to update report: ${error.message}`);
+  }
+};
+
+const openEditModal = (record) => {
+  setSelectedReport(record);
+  setEditFormData({
+    status: record.status || '',
+    additionalInfo: record.additionalInfo || ''
+  });
+  setEditModalVisible(true);
+};
+
+
   const columns = [
     {
       title: 'Type',
@@ -414,20 +475,11 @@ const ScammerReportPage = () => {
             icon={<EyeOutlined />}
             onClick={() => fetchReportDetails(record.id)}
           />
-          <Popconfirm
-            title="Delete this report?"
-            onConfirm={() => deleteReport(record.id)}
-          >
-            <Button
-              type="text"
-              danger
-              icon={<DeleteOutlined />}
-            />
-          </Popconfirm>
+        
           <Button
           type='text'
           icon={<EditOutlined/>}
-           //onClick={() => fetchReportDetails(record.id)}
+          onClick={() => openEditModal(record)}
 
           />
         </Space>
@@ -733,7 +785,7 @@ const ScammerReportPage = () => {
 
           {checkResult && (
             <Alert
-              message={checkResult.isScammer ? "⚠️ Scammer Found!" : "✅ No Scammer Record"}
+              message={checkResult.isScammer ? "⚠️This is Scammer Found!" : "✅ No Scammer Record"}
               description={checkResult.message}
               type={checkResult.isScammer ? "error" : "success"}
               showIcon
@@ -813,6 +865,93 @@ const ScammerReportPage = () => {
           </div>
         )}
       </Drawer>
+      {/* Edit Report Modal */}
+<Modal
+  title="Edit Scammer Report"
+  open={editModalVisible}
+  onCancel={() => {
+    setEditModalVisible(false);
+    setEditFormData({
+      status: '',
+      additionalInfo: ''
+    });
+    setSelectedReport(null);
+  }}
+  footer={null}
+  width={600}
+>
+  {selectedReport && (
+    <div>
+      <div style={{ marginBottom: '16px', padding: '12px', backgroundColor: '#f5f5f5', borderRadius: '6px' }}>
+        <Text strong>Editing Report for: </Text>
+        <Text code>{selectedReport.identifier}</Text>
+        <br />
+        <Text strong>Type: </Text>
+        <Tag icon={getTypeIcon(selectedReport.type)} color="blue">
+          {getTypeDisplayName(selectedReport.type)}
+        </Tag>
+      </div>
+
+      <div style={{ marginBottom: '16px' }}>
+        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+          Status *
+        </label>
+        <Select 
+          placeholder="Select status" 
+          style={{ width: '100%' }}
+          value={editFormData.status}
+          onChange={(value) => setEditFormData(prev => ({ ...prev, status: value }))}
+        >
+          <Option value={ScammerStatus.PENDING}>
+            <Tag color="orange">PENDING</Tag>
+          </Option>
+          <Option value={ScammerStatus.VERIFIED}>
+            <Tag color="red">VERIFIED</Tag>
+          </Option>
+          <Option value={ScammerStatus.FALSE_POSITIVE}>
+            <Tag color="green">FALSE POSITIVE</Tag>
+          </Option>
+          <Option value={ScammerStatus.INVESTIGATING}>
+            <Tag color="blue">INVESTIGATING</Tag>
+          </Option>
+        </Select>
+      </div>
+
+      <div style={{ marginBottom: '16px' }}>
+        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+          Additional Information
+        </label>
+        <TextArea
+          rows={4}
+          placeholder="Add any additional information or notes..."
+          value={editFormData.additionalInfo}
+          onChange={(e) => setEditFormData(prev => ({ ...prev, additionalInfo: e.target.value }))}
+        />
+      </div>
+
+      <div style={{ textAlign: 'right' }}>
+        <Space>
+          <Button onClick={() => {
+            setEditModalVisible(false);
+            setEditFormData({
+              status: '',
+              additionalInfo: ''
+            });
+            setSelectedReport(null);
+          }}>
+            Cancel
+          </Button>
+          <Button 
+            type="primary" 
+            onClick={() => updateReport(selectedReport.id, editFormData)}
+          >
+            Update Report
+          </Button>
+        </Space>
+      </div>
+    </div>
+  )}
+</Modal>
     </div>
   );
 };

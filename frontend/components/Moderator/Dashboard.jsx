@@ -322,16 +322,7 @@ const ModeratorDashboard = () => {
 
       {/* Statistics Cards */}
       <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Total Users"
-              value={stats.totalUsers}
-              prefix={<UserOutlined style={{ color: '#1890ff' }} />}
-              valueStyle={{ color: '#1890ff' }}
-            />
-          </Card>
-        </Col>
+      
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic

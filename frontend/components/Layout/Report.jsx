@@ -8,9 +8,9 @@ import {
   CheckCircleOutlined,
   SafetyOutlined,
   WhatsAppOutlined,
-  BugOutlined,
   SecurityScanOutlined,
-  GlobalOutlined
+  GlobalOutlined,
+  MessageOutlined
 } from '@ant-design/icons'
 import { motion } from 'framer-motion'
 const { TextArea } = Input
@@ -348,6 +348,10 @@ const handleTelegramReport = () => {
   window.open('https://t.me/ndimboni_bot', '_blank');
 };
 
+const handleWhatsAppReport = () => {
+  window.open('https://wa.me/your_whatsapp_number', '_blank');
+};
+
   if (!mounted) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -404,20 +408,7 @@ const reportCards = [
     handleOpenCheckModal();  
   }
 },
-  {
-    icon: <SendOutlined className="text-4xl" style={{ color: '#0088cc' }} />,
-    title: 'Report via Telegram',
-    description: 'Quickly report scams, fraudulent activities, or suspicious content directly through our Telegram channel. Get fast community support and connect with other users who can help verify threats.',
-    details: 'Our Telegram reporting system allows you to instantly share suspicious messages, screenshots, and scam details with our verification team and community. Receive real-time feedback and warnings about emerging scam patterns from other users.',
-    buttonText: 'Report via Telegram',
-    buttonIcon: <SendOutlined />,
-    gradient: 'from-blue-400 to-blue-500',
-    bgColor: '#e3f2fd',
-    handler: () => {
-      handleTelegramReport();
-    }
-  },
-  {
+ {
     icon: <ArrowRightOutlined className="text-4xl" style={{ color: '#2980B9' }} />,
     title: 'Report a Scam',
     description: 'Encountered any type of fraudulent activity or suspicious behavior? Use our comprehensive reporting system to document and report various types of scams including online fraud, phone scams, email phishing, and more.',
@@ -430,6 +421,33 @@ const reportCards = [
       handleOpenReportModal();
     }
   },
+{
+  icon: <MessageOutlined className="text-4xl" style={{ color: '#25D366' }} />,
+  title: 'Report via WhatsApp',
+  description: 'Quickly report scams, fraudulent activities, or suspicious content directly through our WhatsApp channel. Get fast community support and connect with other users who can help verify threats.',
+  details: 'Our WhatsApp reporting system allows you to instantly share suspicious messages, and scam details with our verification team and community. Receive real-time feedback and warnings about emerging scam patterns from other users.',
+  buttonText: 'Report via WhatsApp',
+  buttonIcon: <MessageOutlined />,
+  gradient: 'from-green-500 to-green-600',
+  bgColor: '#e8f5e8',
+  handler: () => {
+    handleWhatsAppReport();
+  }
+},
+  {
+    icon: <SendOutlined className="text-4xl" style={{ color: '#0088cc' }} />,
+    title: 'Report via Telegram',
+    description: 'Quickly report scams, fraudulent activities, or suspicious content directly through our Telegram channel. Get fast community support and connect with other users who can help verify threats.',
+    details: 'Our Telegram reporting system allows you to instantly share suspicious messages, and scam details with our verification team and community. Receive real-time feedback and warnings about emerging scam patterns from other users.',
+    buttonText: 'Report via Telegram',
+    buttonIcon: <SendOutlined />,
+    gradient: 'from-blue-400 to-blue-500',
+    bgColor: '#e3f2fd',
+    handler: () => {
+      handleTelegramReport();
+    }
+  },
+ 
   {
     icon: <SearchOutlined className="text-4xl" style={{ color: '#2980b9' }} />,
     title: 'Check Scammer',
@@ -443,37 +461,28 @@ const reportCards = [
      handleOpenScamModal();
     }
   },
-  {
-    icon: <PhoneOutlined className="text-4xl" style={{ color: '#27ae60' }} />,
-    title: 'Report Phone Scam',
-    description: 'Received suspicious phone calls claiming to be from banks, government agencies, or tech support asking for sensitive information? Report these voice-based scams immediately.',
-    details: 'Phone scammers often use caller ID spoofing to appear legitimate. They may claim your account is compromised, threaten legal action, or offer fake technical support to gain access to your information.',
-    buttonText: 'Report Phone Scam',
-    buttonIcon: <PhoneOutlined />,
-    gradient: 'from-green-500 to-green-600',
-    bgColor: '#e8f5e8',
-    handler: () => {
-      // Add your functionality here
-      console.log('Report Phone Scam clicked');
-      // You can add phone scam reporting, etc.
-    }
-  },
-  {
-    icon: <GlobalOutlined className="text-4xl" style={{ color: '#34495e' }} />,
-    title: 'Report Other Scams',
-    description: 'Encountered any other type of digital fraud or suspicious online activity not covered above? Use this option to report any other scam attempts or cybersecurity threats.',
-    details: 'This includes online shopping scams, fake charity requests, romance scams, business email compromise, or any other fraudulent activity you\'ve encountered online or through digital channels.',
-    buttonText: 'Report Other Scam',
-    buttonIcon: <BugOutlined />,
-    gradient: 'from-gray-500 to-gray-600',
-    bgColor: '#f5f5f5',
-    handler: () => {
-      // Add your functionality here
-      console.log('Report Other Scam clicked');
-      // You can add other scam reporting, etc.
-    }
-  }
+  
+ 
 ]
+
+const handleEmergencyCall = () => {
+ 
+  window.location.href = 'tel:250783447260';
+};
+
+const handleWhatsAppSupport = () => {
+ 
+  const whatsappNumber = '+250784310609'; 
+  const message = 'Hello, I need help with a scam issue.';
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+  window.open(whatsappUrl, '_blank');
+};
+
+const handleCyberCrimeUnit = () => {
+
+  window.location.href = 'tel:+250783447260';  
+  
+};
 
   if (!mounted) {
     return (
@@ -629,77 +638,80 @@ const reportCards = [
           </div>
         </section>
         {/* Emergency Contact Section */}
-        <section className="py-6 bg-gradient-to-br from-[#EBF5FB] to-[#AED6F1]">
-          <div className="container mx-auto px-6">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              className="text-center"
-            >
-              <Title level={2} className="text-lg font-bold mb-6" style={{ color: '#1A5276' }}>
-                Need Immediate Help?
-              </Title>
-              <Paragraph className="text-sm mb-8 max-w-2xl mx-auto" style={{ color: '#1A5276' }}>
-                If you're currently being targeted by a scam or have already been victimized, 
-                contact the authorities immediately or reach out to our emergency support channels.
-              </Paragraph>
-              
-              <Space size="large" className="flex flex-col sm:flex-row justify-center">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    type="primary"
-                    size="large"
-                    icon={<PhoneOutlined />}
-                    className="font-semibold px-8 py-3 h-auto"
-                    style={{ 
-                      background: 'linear-gradient(135deg, #e74c3c, #c0392b)',
-                      border: 'none',
-                      borderRadius: '12px'
-                    }}
-                  >
-                    Emergency: 112
-                  </Button>
-                </motion.div>
-                
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    type="default"
-                    size="large"
-                    icon={<WhatsAppOutlined />}
-                    className="font-semibold px-8 py-3 h-auto"
-                    style={{ 
-                      backgroundColor: '#25D366',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '12px'
-                    }}
-                  >
-                    WhatsApp Support
-                  </Button>
-                </motion.div>
-                
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    type="default"
-                    size="large"
-                    icon={<SafetyOutlined />}
-                    className="font-semibold px-8 py-3 h-auto"
-                    style={{ 
-                      backgroundColor: '#2980B9',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '12px'
-                    }}
-                  >
-                    Cyber Crime Unit
-                  </Button>
-                </motion.div>
-              </Space>
-            </motion.div>
-          </div>
-        </section>
+<section className="py-6 bg-gradient-to-br from-[#EBF5FB] to-[#AED6F1]">
+  <div className="container mx-auto px-6">
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8 }}
+      viewport={{ once: true }}
+      className="text-center"
+    >
+      <Title level={2} className="text-lg font-bold mb-6" style={{ color: '#1A5276' }}>
+        Need Immediate Help?
+      </Title>
+      <Paragraph className="text-sm mb-8 max-w-2xl mx-auto" style={{ color: '#1A5276' }}>
+        If you're currently being targeted by a scam or have already been victimized, 
+        contact the authorities immediately or reach out to our emergency support channels.
+      </Paragraph>
+      
+      <Space size="large" className="flex flex-col sm:flex-row justify-center">
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <Button
+            type="primary"
+            size="large"
+            icon={<PhoneOutlined />}
+            className="font-semibold px-8 py-3 h-auto"
+            style={{ 
+              background: 'linear-gradient(135deg, #e74c3c, #c0392b)',
+              border: 'none',
+              borderRadius: '12px'
+            }}
+            onClick={handleEmergencyCall}
+          >
+            Deal +250783447260
+          </Button>
+        </motion.div>
+        
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <Button
+            type="default"
+            size="large"
+            icon={<WhatsAppOutlined />}
+            className="font-semibold px-8 py-3 h-auto"
+            style={{ 
+              backgroundColor: '#25D366',
+              color: 'white',
+              border: 'none',
+              borderRadius: '12px'
+            }}
+            onClick={handleWhatsAppSupport}
+          >
+            WhatsApp Support
+          </Button>
+        </motion.div>
+        
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <Button
+            type="default"
+            size="large"
+            icon={<SafetyOutlined />}
+            className="font-semibold px-8 py-3 h-auto"
+            style={{ 
+              backgroundColor: '#2980B9',
+              color: 'white',
+              border: 'none',
+              borderRadius: '12px'
+            }}
+            onClick={handleCyberCrimeUnit}
+          >
+            Cyber Crime Unit
+          </Button>
+        </motion.div>
+      </Space>
+    </motion.div>
+  </div>
+</section>
         <>
           {/* Message Check Modal */}
           <Modal

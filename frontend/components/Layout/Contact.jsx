@@ -8,7 +8,7 @@ import {
   UserOutlined,
   MessageOutlined,
   ClockCircleOutlined,
-  GlobalOutlined,
+  GithubOutlined,
   WhatsAppOutlined,
   TwitterOutlined,
   LinkedinOutlined
@@ -70,6 +70,20 @@ export default function ContactPage() {
       color: '#25D366'
     }
   ]
+
+
+const openSocialMedia = (platform) => {
+  const socialLinks = {
+    twitter: 'https://twitter.com',
+    linkedin: 'https://linkedin.com',
+    whatsapp: 'https://wa.me/250784310609',
+    github: 'https://github.com/GabrielDushime'
+  }
+  
+  if (socialLinks[platform]) {
+    window.open(socialLinks[platform], '_blank', 'noopener,noreferrer')
+  }
+}
 
   const officeHours = [
     { day: 'Monday - Friday', hours: '8:00 AM - 6:00 PM' },
@@ -150,7 +164,7 @@ export default function ContactPage() {
       
       message.success('Your message has been sent successfully! We will get back to you soon.')
       
-      // Reset form
+     
       setFormData({
         name: '',
         email: '',
@@ -483,58 +497,62 @@ export default function ContactPage() {
                     </Title>
                     
                     <Space size="large">
-                      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                        <Button
-                          shape="circle"
-                          size="large"
-                          icon={<TwitterOutlined />}
-                          style={{ 
-                            backgroundColor: '#1DA1F2',
-                            color: 'white',
-                            border: 'none'
-                          }}
-                        />
-                      </motion.div>
-                      
-                      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                        <Button
-                          shape="circle"
-                          size="large"
-                          icon={<LinkedinOutlined />}
-                          style={{ 
-                            backgroundColor: '#0077B5',
-                            color: 'white',
-                            border: 'none'
-                          }}
-                        />
-                      </motion.div>
-                      
-                      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                        <Button
-                          shape="circle"
-                          size="large"
-                          icon={<WhatsAppOutlined />}
-                          style={{ 
-                            backgroundColor: '#25D366',
-                            color: 'white',
-                            border: 'none'
-                          }}
-                        />
-                      </motion.div>
-                      
-                      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                        <Button
-                          shape="circle"
-                          size="large"
-                          icon={<GlobalOutlined />}
-                          style={{ 
-                            backgroundColor: '#2980B9',
-                            color: 'white',
-                            border: 'none'
-                          }}
-                        />
-                      </motion.div>
-                    </Space>
+  <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+    <Button
+      shape="circle"
+      size="large"
+      icon={<TwitterOutlined />}
+      onClick={() => openSocialMedia('twitter')}
+      style={{ 
+        backgroundColor: '#1DA1F2',
+        color: 'white',
+        border: 'none'
+      }}
+    />
+  </motion.div>
+  
+  <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+    <Button
+      shape="circle"
+      size="large"
+      icon={<LinkedinOutlined />}
+      onClick={() => openSocialMedia('linkedin')}
+      style={{ 
+        backgroundColor: '#0077B5',
+        color: 'white',
+        border: 'none'
+      }}
+    />
+  </motion.div>
+  
+  <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+    <Button
+      shape="circle"
+      size="large"
+      icon={<WhatsAppOutlined />}
+      onClick={() => openSocialMedia('whatsapp')}
+      style={{ 
+        backgroundColor: '#25D366',
+        color: 'white',
+        border: 'none'
+      }}
+    />
+  </motion.div>
+  
+  <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+    <Button
+      shape="circle"
+      size="large"
+      icon={<GithubOutlined/>}
+      onClick={() => openSocialMedia('github')}
+      style={{ 
+        backgroundColor: '#2980B9',
+        color: 'white',
+        border: 'none'
+      }}
+    />
+  </motion.div>
+</Space>
                   </Card>
                 </motion.div>
               </Col>

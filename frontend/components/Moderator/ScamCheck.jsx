@@ -445,20 +445,7 @@ const ScamCheckPage = () => {
               onClick={() => fetchCheckDetails(record.id)}
             />
           </Tooltip>
-          <Tooltip title="Delete">
-            <Popconfirm
-              title="Are you sure you want to delete this check?"
-              onConfirm={() => deleteCheck(record.id)}
-              okText="Yes"
-              cancelText="No"
-            >
-              <Button
-                type="text"
-                danger
-                icon={<DeleteOutlined />}
-              />
-            </Popconfirm>
-          </Tooltip>
+        
         </Space>
       )
     }
