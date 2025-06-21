@@ -11,6 +11,7 @@ import {
   MenuUnfoldOutlined,
   MailOutlined,
   SafetyCertificateOutlined,
+   MessageOutlined,
 } from '@ant-design/icons';
 import AdminDashboard from './Dashboard';
 
@@ -46,6 +47,7 @@ const ModeratorLayout = ({ children, currentPage = 'dashboard' }) => {
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [profileData, setProfileData] = useState(null);
   const [profileLoading, setProfileLoading] = useState(false);
+   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
 
   const getUserInitials = (name) => {
     return name
@@ -57,6 +59,29 @@ const ModeratorLayout = ({ children, currentPage = 'dashboard' }) => {
 
   const getRoleDisplay = (role) => {
     return role === 'moderator' ? 'Moderator' : 'Admin';
+  };
+
+  
+  const fetchUnreadMessagesCount = async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      if (!token) return;
+
+      const response = await fetch(`${API_BASE_URL}/contact/unread-count`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUnreadMessagesCount(data.count || 0);
+      }
+    } catch (error) {
+      console.error('Error fetching unread messages count:', error);
+    }
   };
 
   const fetchUserProfile = async () => {
@@ -110,15 +135,21 @@ const ModeratorLayout = ({ children, currentPage = 'dashboard' }) => {
     window.addEventListener('resize', checkIfMobile);
     
    
-    const storedUserName = localStorage.getItem('user_name') || 'Admin User';
-    const storedUserEmail = localStorage.getItem('user_email') || 'admin@ndimboni.com';
-    const storedUserRole = localStorage.getItem('user_role') || 'admin';
+    const storedUserName = localStorage.getItem('user_name') || 'Moderator User';
+    const storedUserEmail = localStorage.getItem('user_email') || 'moderator@ndimboni.com';
+    const storedUserRole = localStorage.getItem('user_role') || 'moderator';
     
     setUserName(storedUserName);
     setUserEmail(storedUserEmail);
     setUserRole(storedUserRole);
     
     setSelectedKey(currentPage);
+
+    //Fetch unread messages count on component mount
+    fetchUnreadMessagesCount();
+    
+    // Set up interval to fetch unread count periodically (every 30 seconds)
+    const interval = setInterval(fetchUnreadMessagesCount, 30000);
     
     return () => {
       window.removeEventListener('resize', checkIfMobile);
@@ -178,12 +209,18 @@ const ModeratorLayout = ({ children, currentPage = 'dashboard' }) => {
     if (isMobile) {
       setIsOpen(false);
     }
+
+     // Mark messages as read when navigating to messages page
+    if (key === 'messages') {
+      setUnreadMessagesCount(0);
+    }
     
     const routes = {
       'dashboard': '/moderator/dashboard',
   
       'scam-reports': '/moderator/scam-reports',
       'scam-check': '/moderator/scam-check',
+       'messages': '/moderator/messages',
      
     };
     
@@ -205,6 +242,11 @@ const ModeratorLayout = ({ children, currentPage = 'dashboard' }) => {
         return <ScamReportsPage />;
       case 'scam-check':
         return <ScamCheckPage />;
+      case 'messages':
+        return <div style={{ padding: '24px' }}>
+          <h2>Contact Messages</h2>
+          <p>Contact messages content will be displayed here...</p>
+        </div>;
       
       default:
         return <AdminDashboard />;
@@ -250,6 +292,30 @@ const ModeratorLayout = ({ children, currentPage = 'dashboard' }) => {
       key: 'scam-check',
       icon: <SecurityScanOutlined />,
       label: 'Scam Check',
+    },
+    {
+      key: 'messages',
+      icon: <MessageOutlined />,
+      label: (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <span>Messages</span>
+          {unreadMessagesCount > 0 && !collapsed && (
+            <Badge 
+              count={unreadMessagesCount} 
+              size="small"
+              style={{ 
+                backgroundColor: '#ff4d4f',
+                fontSize: '10px',
+                minWidth: '16px',
+                height: '16px',
+                lineHeight: '16px',
+                borderRadius: '8px',
+                marginLeft: '8px'
+              }}
+            />
+          )}
+        </div>
+      ),
     },
     
   ];
@@ -565,7 +631,7 @@ const ModeratorLayout = ({ children, currentPage = 'dashboard' }) => {
                   position: 'absolute',
                   right: '0',
                   top: '50%',
-                  marginRight:'30px',
+                  marginRight:'20px',
                   transform: 'translateY(-50%)',
                   fontSize: '1rem',
                 }}
@@ -713,7 +779,7 @@ const ModeratorLayout = ({ children, currentPage = 'dashboard' }) => {
                 marginLeft: isMobile ? '0' : '20px',
                 fontSize: '22px', 
                 fontWeight: '700',
-                color: '#1A5276'
+                color: '#fff'
               }}>
                 {navItems.find(item => item.key === selectedKey)?.label || 'Dashboard'}
               </h1>

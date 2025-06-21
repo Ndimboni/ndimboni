@@ -5,7 +5,6 @@ import {
   UserOutlined,
   ExclamationCircleOutlined,
   SecurityScanOutlined,
-  PhoneOutlined,
   SettingOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
@@ -13,6 +12,7 @@ import {
   MailOutlined,
   SafetyCertificateOutlined,
   MessageOutlined,
+ 
 } from '@ant-design/icons';
 import AdminDashboard from './Dashboard';
 
@@ -67,7 +67,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
     return role === 'admin' ? 'Administrator' : 'Moderator';
   };
 
-  // Fetch unread messages count
+ 
   const fetchUnreadMessagesCount = async () => {
     try {
       const token = localStorage.getItem('access_token');
@@ -803,7 +803,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
                 marginLeft: isMobile ? '0' : '20px',
                 fontSize: '22px', 
                 fontWeight: '700',
-                color: '#1A5276'
+                color: '#fff'
               }}>
                 {navItems.find(item => item.key === selectedKey)?.label?.props?.children?.[0] || 
                  navItems.find(item => item.key === selectedKey)?.label || 'Dashboard'}
