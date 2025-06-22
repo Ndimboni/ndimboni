@@ -17,6 +17,8 @@ import { CommonServicesModule } from './common/services/common-services.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import configuration from './config/configuration';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { WhatsappBotModule } from './whatsapp-bot/whatsapp-bot.module';
+import { EducationResourcesModule } from './education-resources/education-resources.module';
 
 @Module({
   imports: [
@@ -39,6 +41,8 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
     ScammerReportsModule,
     ContactModule,
     TelegramBotModule,
+    WhatsappBotModule,
+    EducationResourcesModule,
     HttpSmsModule,
   ],
   controllers: [AppController],

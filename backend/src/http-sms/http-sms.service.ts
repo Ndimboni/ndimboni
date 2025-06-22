@@ -95,9 +95,9 @@ export class HttpSmsService {
     );
 
     try {
-      if (messageContent.toLowerCase().startsWith('check ')) {
+      if (messageContent.toLowerCase().includes('check ')) {
         return await this.handleCheckCommand(payload);
-      } else if (messageContent.toLowerCase().startsWith('report ')) {
+      } else if (messageContent.toLowerCase().includes('report ')) {
         return await this.handleReportCommand(payload);
       } else if (messageContent.toLowerCase() === 'stats') {
         return await this.handleStatsCommand(payload);

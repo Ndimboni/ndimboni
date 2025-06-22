@@ -5,7 +5,6 @@ The rise of digital communication in Rwanda has led to an increase in online sca
 
 ## 🚀 Features
 
-
 ### Authentication & Authorization
 
 - **JWT Authentication** - Secure token-based authentication
@@ -173,6 +172,10 @@ ALLOWED_FILE_TYPES=jpg,jpeg,png,gif,pdf,doc,docx
 ADMIN_EMAIL=admin@ndimboni.com
 ADMIN_PASSWORD=admin123
 ADMIN_NAME=Admin User
+
+# WhatsApp Bot Configuration
+WHATSAPP_BOT_TOKEN=your-whatsapp-bot-token
+WHATSAPP_WEBHOOK_URL=https://your-domain.com/api/whatsapp/webhook
 ```
 
 ### Database Setup
@@ -189,21 +192,23 @@ pnpm run start:dev
 #### PostgreSQL (Production)
 
 1. **Install PostgreSQL**:
+
    ```bash
    # macOS (using Homebrew)
    brew install postgresql
    brew services start postgresql
-   
+
    # Ubuntu/Debian
    sudo apt update
    sudo apt install postgresql postgresql-contrib
-   
+
    # Create database and user
    sudo -u postgres createdb ndimboni
    sudo -u postgres createuser --superuser your_username
    ```
 
 2. **Configure Environment**:
+
    ```env
    DB_TYPE=postgres
    DB_HOST=localhost
@@ -214,10 +219,11 @@ pnpm run start:dev
    ```
 
 3. **Run Migrations** (if needed):
+
    ```bash
    # Generate migration
    pnpm run migration:generate -- -n InitialSchema
-   
+
    # Run migrations
    pnpm run migration:run
    ```
@@ -445,8 +451,6 @@ $ pnpm run test:e2e
 
 $ pnpm run test:cov
 
-````
-
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
@@ -456,7 +460,7 @@ If you are looking for a cloud-based platform to deploy your NestJS application,
 ```bash
 $ pnpm install -g @nestjs/mau
 $ mau deploy
-````
+```
 
 With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
 
