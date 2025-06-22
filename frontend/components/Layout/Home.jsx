@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Typography, Button, Row, Col, Card, Space, Modal, Input, Select,Drawer,Tag, Progress, Alert, Collapse,Form,message } from 'antd'
+import { Typography, Button, Row, Col, Card, Space, Modal, Input, Select,Tag, Progress, Alert, Collapse,Form,message } from 'antd'
 import { ArrowRightOutlined, SecurityScanOutlined, BulbOutlined, ExclamationCircleOutlined, UserOutlined, CheckCircleOutlined,GlobalOutlined, LinkOutlined, SendOutlined } from '@ant-design/icons'
 import { motion } from 'framer-motion'
 
@@ -382,6 +382,14 @@ const handleOpenReportModal = () => {
 };
 
 
+
+
+ const handleOpenEducationPage = () => {
+  window.location.href = '/education';
+ 
+};
+  
+  
 // Function to handle opening the check scammer modal
 const handleOpenScamModal = () => {
   
@@ -692,6 +700,7 @@ const handleOpenScamModal = () => {
                 className="mt-4 flex items-center justify-center text-[#2980B9] font-medium text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 initial={{ y: 10 }}
                 whileHover={{ y: 0 }}
+                onClick={handleOpenEducationPage}
               >
                 <span>Learn More</span>
                 <svg className="w-3 h-3 ml-2 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -717,7 +726,7 @@ const handleOpenScamModal = () => {
     >
       <div className="inline-flex items-center space-x-2 px-6 py-3 bg-[#FFFFFF] rounded-full hover:bg-[#AED6F1] transition-all duration-300 cursor-pointer group"
            style={{ boxShadow: '0 4px 10px rgba(26, 82, 118, 0.2)' }}
-           onClick={handleOpenCheckModal}>
+           onClick={handleOpenEducationPage}>
         <span className="text-[#1A5276] font-medium group-hover:text-[#FFFFFF] transition-colors duration-200">Ready to get started?</span>
         <motion.div
           whileHover={{ x: 5 }}

@@ -148,10 +148,10 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
     
     setSelectedKey(currentPage);
     
-    // Fetch unread messages count on component mount
+ 
     fetchUnreadMessagesCount();
     
-    // Set up interval to fetch unread count periodically (every 30 seconds)
+  
     const interval = setInterval(fetchUnreadMessagesCount, 30000);
     
     return () => {
@@ -214,7 +214,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
       setIsOpen(false);
     }
     
-    // Mark messages as read when navigating to messages page
+    
     if (key === 'messages') {
       setUnreadMessagesCount(0);
     }
