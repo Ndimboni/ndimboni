@@ -137,7 +137,7 @@ const Education = () => {
  const submitReport = async (formData) => {
   setIsSubmittingReport(true);
   try {
-    // Validation
+ 
     if (!formData.type || !formData.identifier || !formData.description) {
       message.error('Please fill in all required fields');
       return;
@@ -148,7 +148,7 @@ const Education = () => {
       return;
     }
 
-    // Prepare request data
+    
     const requestData = {
       type: formData.type,
       identifier: formData.identifier.trim(),
@@ -157,7 +157,7 @@ const Education = () => {
       source: formData.source || 'web'
     };
 
-    // Clean up undefined/empty values
+   
     Object.keys(requestData).forEach(key => {
       if (requestData[key] === undefined || requestData[key] === '') {
         delete requestData[key];
@@ -181,7 +181,7 @@ const Education = () => {
         additionalInfo: '',
         source: 'web'
       });
-      // REMOVED: reportForm.resetFields(); - This was causing the error!
+    
     } else {
       throw new Error('Invalid response format');
     }
@@ -238,7 +238,7 @@ const Education = () => {
               Digital Security Education
             </h1>
             <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto" style={{ color: '#AED6F1' }}>
-              Empowering Rwandans with knowledge to identify, prevent, and report digital scams
+              Empowering Rwandans with knowledge to identify, prevent, and report digital scam
             </p>
             <div className="flex flex-wrap justify-center gap-6" style={{ color: '#AED6F1' }}>
               <div className="flex items-center">
