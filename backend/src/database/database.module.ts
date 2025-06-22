@@ -8,6 +8,7 @@ import {
   UploadedFile,
   ScamCheck,
   ScammerReport,
+  EducationResource,
 } from '../entities';
 import { SeedService } from './seed.service';
 import { MigrationService } from './migration.service';
@@ -20,7 +21,14 @@ import { MigrationService } from './migration.service';
         const dbConfig = configService.get('database');
         return {
           ...dbConfig,
-          entities: [User, ScamReport, UploadedFile, ScamCheck, ScammerReport],
+          entities: [
+            User,
+            ScamReport,
+            UploadedFile,
+            ScamCheck,
+            ScammerReport,
+            EducationResource,
+          ],
         } as TypeOrmModuleOptions;
       },
       inject: [ConfigService],
@@ -31,6 +39,7 @@ import { MigrationService } from './migration.service';
       UploadedFile,
       ScamCheck,
       ScammerReport,
+      EducationResource,
     ]),
   ],
   providers: [SeedService, MigrationService],

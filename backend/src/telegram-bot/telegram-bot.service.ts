@@ -284,7 +284,7 @@ For support, contact our team.
       );
       const reportData = {
         type: scammerType,
-        identifier: ctx.from?.id?.toString() || 'unknown',
+        identifier,
         description: args.trim(),
         evidence: [],
         additionalInfo: JSON.stringify({
