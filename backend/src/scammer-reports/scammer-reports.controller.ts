@@ -206,9 +206,7 @@ export class ScammerReportController {
         success: true,
         isScammer: !!result,
         data: result || undefined,
-        message: result
-          ? 'Scammer'
-          : 'No scammer record found',
+        message: result ? 'Scammer' : 'No scammer record found',
       };
     } catch (error) {
       this.logger.error('Error checking scammer:', error);

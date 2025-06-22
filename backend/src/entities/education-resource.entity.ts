@@ -11,6 +11,11 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 
+export enum ResourceStatus {
+  DRAFT = 'draft',
+  PUBLISHED = 'published',
+}
+
 @Entity('education_resources')
 export class EducationResource {
   @PrimaryGeneratedColumn('uuid')
@@ -27,6 +32,15 @@ export class EducationResource {
 
   @Column({ nullable: true })
   imageUrl?: string;
+
+  @Column({ nullable: true })
+  category?: string;
+
+  @Column({
+    type: 'varchar',
+    default: ResourceStatus.DRAFT,
+  })
+  status: ResourceStatus;
 
   // Link to the user who created the resource
   @ManyToOne(() => User, { nullable: true, eager: false })
