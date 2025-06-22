@@ -88,32 +88,6 @@ export class EducationResourcesController {
     return this.service.findOne(id);
   }
 
-  @Post('upload-image')
-  @ApiBearerAuth()
-  @UseGuards(PolicyGuard)
-  @RequirePolicy(Action.CREATE, Resource.ADMIN_PANEL)
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploads/public',
-        filename: (req, file, cb) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          cb(null, uniqueSuffix + extname(file.originalname));
-        },
-      }),
-      fileFilter: (req, file, cb) => {
-        if (!file.mimetype.match(/^image\/(jpeg|png|jpg)$/)) {
-          return cb(
-            new BadRequestException('Only image files are allowed!'),
-            false,
-          );
-        }
-        cb(null, true);
-      },
-      limits: { fileSize: 5 * 1024 * 1024 },
-    }),
-  )
   @ApiOperation({ summary: 'Upload an image for an education resource' })
   @ApiResponse({ status: 201, description: 'Image uploaded' })
   async uploadImage(@UploadedFile() file: Express.Multer.File) {
