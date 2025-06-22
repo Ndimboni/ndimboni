@@ -7,7 +7,7 @@ export default function EducationPage() {
   return (
     <Layout>
       <Head>
-        <title>Education Resources - Ndimboni Digital Platform</title>
+        <title>Education Resources - Ndimboni- Digital Platform</title>
         <meta name="description" content="Learn how to protect yourself from digital scams with comprehensive educational resources from Ndimboni" />
         <meta name="keywords" content="digital scams, cybersecurity education, Rwanda, scam prevention, digital literacy" />
         <meta property="og:title" content="Education Resources - Ndimboni Digital Platform" />
