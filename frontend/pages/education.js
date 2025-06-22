@@ -1,7 +1,7 @@
 // pages/education.js
 import Head from 'next/head'
 import Layout from '../components/Layout/Layout'
-import Education from '@/components/Layout/Education'
+import Education from '@/components/Layout/Education.jsx'
 
 export default function EducationPage() {
   return (
