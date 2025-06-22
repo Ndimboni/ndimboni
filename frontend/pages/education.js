@@ -1,4 +1,3 @@
-// pages/education.js
 import Head from 'next/head'
 import Layout from '../components/Layout/Layout'
 import Education from '@/components/Layout/Education'
@@ -7,15 +6,15 @@ export default function EducationPage() {
   return (
     <Layout>
       <Head>
-        <title>Education Resources - Ndimboni- Digital Platform</title>
-        <meta name="description" content="Learn how to protect yourself from digital scams with comprehensive educational resources from Ndimboni" />
-        <meta name="keywords" content="digital scams, cybersecurity education, Rwanda, scam prevention, digital literacy" />
-        <meta property="og:title" content="Education Resources - Ndimboni Digital Platform" />
-        <meta property="og:description" content="Learn how to protect yourself from digital scams with comprehensive educational resources" />
+        <title>Digital Security Education - Ndimboni Digital Platform</title>
+        <meta name="description" content="Empowering Rwandans with knowledge to identify, prevent, and report digital scams. Access educational resources, scam prevention tips, and community safety information." />
+        <meta name="keywords" content="digital security, scam prevention, education, Rwanda, cybersecurity, online safety" />
+        <meta property="og:title" content="Digital Security Education - Ndimboni Digital Platform" />
+        <meta property="og:description" content="Empowering Rwandans with knowledge to identify, prevent, and report digital scams." />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Education Resources - Ndimboni" />
-        <meta name="twitter:description" content="Learn digital scam prevention with interactive educational resources" />
+        <meta name="twitter:title" content="Digital Security Education - Ndimboni Digital Platform" />
+        <meta name="twitter:description" content="Empowering Rwandans with knowledge to identify, prevent, and report digital scams." />
       </Head>
       <Education />
     </Layout>

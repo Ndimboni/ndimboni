@@ -619,7 +619,7 @@ const Education = () => {
                 loading={isSubmittingReport} 
                 disabled={isSubmittingReport}
               >
-                Report Scammer
+                Report a Scammer
               </Button>
             </Space>
           </div>
