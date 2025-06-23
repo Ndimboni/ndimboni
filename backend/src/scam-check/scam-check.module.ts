@@ -7,9 +7,15 @@ import { ScamCheck } from '../entities/scam-check.entity';
 import { TelegramModerationService } from '../telegram-bot/telegram-moderation.service';
 import { AuthzModule } from '../authz/authz.module';
 import { UrlScanningService } from 'src/common/services/url-scanning.service';
+import { CommonServicesModule } from '../common/services/common-services.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ScamCheck]), HttpModule, AuthzModule],
+  imports: [
+    TypeOrmModule.forFeature([ScamCheck]),
+    HttpModule,
+    AuthzModule,
+    CommonServicesModule,
+  ],
   controllers: [ScamCheckController],
   providers: [ScamCheckService, UrlScanningService, TelegramModerationService],
   exports: [ScamCheckService],
