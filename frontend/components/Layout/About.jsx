@@ -8,7 +8,6 @@ import {
   AimOutlined,
   HeartOutlined,
   TrophyOutlined,
-  RocketOutlined,
   SafetyOutlined,
   ExperimentOutlined,
   GlobalOutlined,
@@ -65,6 +64,11 @@ export default function About() {
     )
   }
 
+   const handleOpenEducationPage = () => {
+  window.location.href = '/education';
+ 
+};
+
   return (
     <div className="min-h-screen bg-gray-100 p-2">
       <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
@@ -96,17 +100,11 @@ export default function About() {
                       style={{ 
                         background: 'linear-gradient(135deg, #2980B9, #1A5276)',
                       }}
+                      onClick={handleOpenEducationPage}
                     >
                       Learn More
                     </Button>
-                    <Button
-                      type="default"
-                      size="large"
-                      icon={<ExperimentOutlined />}
-                      className="font-semibold px-8 py-3 h-auto"
-                    >
-                      Try Simulation
-                    </Button>
+                  
                   </Space>
                 </motion.div>
               </Col>

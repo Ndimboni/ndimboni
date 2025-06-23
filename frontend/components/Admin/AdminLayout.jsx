@@ -12,7 +12,7 @@ import {
   MailOutlined,
   SafetyCertificateOutlined,
   MessageOutlined,
- 
+  BookOutlined,
 } from '@ant-design/icons';
 import AdminDashboard from './Dashboard';
 
@@ -37,6 +37,13 @@ const ScamCheckPage = () => (
   <div style={{ padding: '24px' }}>
     <h2>Scam Check</h2>
     <p>Scam check content will be displayed here...</p>
+  </div>
+);
+
+const EducationResource = () => (
+  <div style={{ padding: '24px' }}>
+    <h2>Blog Management</h2>
+    <p>Education resources and blog content management will be displayed here...</p>
   </div>
 );
 
@@ -148,10 +155,10 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
     
     setSelectedKey(currentPage);
     
-    // Fetch unread messages count on component mount
+ 
     fetchUnreadMessagesCount();
     
-    // Set up interval to fetch unread count periodically (every 30 seconds)
+  
     const interval = setInterval(fetchUnreadMessagesCount, 30000);
     
     return () => {
@@ -214,7 +221,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
       setIsOpen(false);
     }
     
-    // Mark messages as read when navigating to messages page
+    
     if (key === 'messages') {
       setUnreadMessagesCount(0);
     }
@@ -225,6 +232,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
       'scam-reports': '/admin/scam-reports',
       'scam-check': '/admin/scam-check',
       'messages': '/admin/messages',
+      'blog-management': '/admin/education-resource',
     };
     
     if (routes[key]) {
@@ -251,6 +259,8 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
           <h2>Contact Messages</h2>
           <p>Contact messages content will be displayed here...</p>
         </div>;
+      case 'education-resource':
+        return <BlogManagementPage />;
       default:
         return <AdminDashboard />;
     }
@@ -299,6 +309,11 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
       key: 'scam-check',
       icon: <SecurityScanOutlined />,
       label: 'Scam Check',
+    },
+    {
+      key: 'blog-management',
+      icon: <BookOutlined />,
+      label: 'Blog Management',
     },
     {
       key: 'messages',
@@ -683,7 +698,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
           {sidebarCollapsed && unreadMessagesCount > 0 && (
             <div style={{
               position: 'absolute',
-              top: '280px', // Adjust based on Messages menu position
+              top: '340px', // Adjusted for new menu position
               right: '10px',
               zIndex: 1001,
             }}>

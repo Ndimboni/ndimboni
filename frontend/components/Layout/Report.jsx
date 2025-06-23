@@ -349,7 +349,7 @@ const handleTelegramReport = () => {
 };
 
 const handleWhatsAppReport = () => {
-  window.open('https://wa.me/your_whatsapp_number', '_blank');
+  window.open('http://wa.me/250784743039', '_blank');
 };
 
   if (!mounted) {
