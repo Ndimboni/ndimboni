@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import Layout from '../components/Layout/Layout'
-import Home from '../components/Layout/Home'
+import Home from '../components/Layout/Home.jsx'
 
 
 export default function IndexPage() {

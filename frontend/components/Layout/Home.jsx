@@ -292,19 +292,24 @@ const getIntentColor = (intent) => {
 
     const data = await response.json();
 
-    if (data.success) {
-     
+    if (data.success && data.data) {
+      // Handle new backend response structure
+      const result = data.data.result || {};
+      
       const transformedResult = {
-        status: data.data.status || CheckStatus.UNKNOWN,
-        intent: data.data.detectedIntent || IntentType.UNKNOWN,
-        risk_score: data.data.riskScore || 0,
-        analysis: data.data.analysis || 'Analysis completed successfully.',
-        warning_flags: data.data.reasons || [],
-        recommendations: data.data.recommendations || [],
-        timestamp: new Date().toISOString(),
-        extracted_urls: data.data.extractedUrls || [],
-        confidence: data.data.confidence || 0,
-        detected_patterns: data.data.detectedPatterns || []
+        id: data.data.id,
+        isScam: result.isScam || false,
+        status: result.status || CheckStatus.UNKNOWN,
+        intent: result.detectedIntent || IntentType.UNKNOWN,
+        risk_score: parseFloat(result.riskScore || result.confidence || 0),
+        confidence: parseFloat(result.confidence || 0),
+        analysis: result.analysis || 'Analysis completed successfully.',
+        warning_flags: result.reasons || [],
+        recommendations: result.recommendations || [],
+        timestamp: data.data.createdAt || new Date().toISOString(),
+        extracted_urls: result.extractedUrls || [],
+        detected_patterns: result.detectedPatterns || [],
+        source: data.data.source || 'web'
       };
 
       setCheckResult(transformedResult);
@@ -312,9 +317,6 @@ const getIntentColor = (intent) => {
       setResultsModalVisible(true);
       setMessageValue('');
       
-     
-      fetchChecks();
-      fetchStats();
     } else {
       throw new Error(data.message || 'Failed to check message');
     }
@@ -1155,39 +1157,72 @@ const handleOpenScamModal = () => {
           className="p-4 text-center"
           style={{
             background: `linear-gradient(135deg, ${
-              checkResult.status === CheckStatus.SAFE ? '#d4edda' :
+              checkResult.isScam ? '#f8d7da' :
               checkResult.status === CheckStatus.SUSPICIOUS ? '#fff3cd' :
-              checkResult.status === CheckStatus.MALICIOUS ? '#f8d7da' : '#e2e3e5'
+              checkResult.status === CheckStatus.SAFE ? '#d4edda' : '#e2e3e5'
             }, #ffffff)`
           }}
         >
           <div className="text-3xl mb-2">
-            {getStatusIcon(checkResult.status || CheckStatus.UNKNOWN)}
+            {checkResult.isScam ? '🚨' : 
+             checkResult.status === CheckStatus.SAFE ? '✅' :
+             checkResult.status === CheckStatus.SUSPICIOUS ? '⚠️' : '❓'}
           </div>
           <Title
             level={4}
             className="mb-1"
             style={{
-              color:
-                (checkResult.status || CheckStatus.UNKNOWN) === CheckStatus.SAFE
-                  ? '#155724'
-                  : (checkResult.status || CheckStatus.UNKNOWN) === CheckStatus.SUSPICIOUS
-                  ? '#856404'
-                  : (checkResult.status || CheckStatus.UNKNOWN) === CheckStatus.MALICIOUS
-                  ? '#721c24'
-                  : '#383d41'
+              color: checkResult.isScam ? '#721c24' :
+                    checkResult.status === CheckStatus.SAFE ? '#155724' :
+                    checkResult.status === CheckStatus.SUSPICIOUS ? '#856404' : '#383d41'
             }}
           >
-            Analysis Complete
+            {checkResult.isScam ? 'Scam Detected!' : 'Analysis Complete'}
           </Title>
+          <Text style={{ 
+            color: checkResult.isScam ? '#721c24' :
+                  checkResult.status === CheckStatus.SAFE ? '#155724' :
+                  checkResult.status === CheckStatus.SUSPICIOUS ? '#856404' : '#383d41'
+          }}>
+            {checkResult.isScam ? 'This message appears to be a scam' : 
+             checkResult.status === CheckStatus.SAFE ? 'This message appears to be safe' :
+             'Analysis results available below'}
+          </Text>
         </div>
 
         {/* Modal Body */}
         <div className="p-4 space-y-3">
+          {/* Quick Summary */}
+          {checkResult.isScam && (
+            <Alert
+              message="⚠️ Scam Alert"
+              description="This message has been identified as a potential scam. Please do not respond to it or click any links."
+              type="error"
+              showIcon
+              className="mb-3"
+            />
+          )}
+          
+          {!checkResult.isScam && checkResult.status === CheckStatus.SAFE && (
+            <Alert
+              message="✅ Message appears safe"
+              description="No scam indicators were detected in this message."
+              type="success"
+              showIcon
+              className="mb-3"
+            />
+          )}
+
           {/* Status Row */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div className="text-center p-2 bg-gray-50 rounded-lg">
-              <Text className="text-xs text-gray-600 block mb-1">Status</Text>
+              <Text className="text-xs text-gray-600 block mb-1">Scam Status</Text>
+              <Tag color={checkResult.isScam ? 'red' : 'green'} className="text-xs">
+                {checkResult.isScam ? 'SCAM' : 'NOT SCAM'}
+              </Tag>
+            </div>
+            <div className="text-center p-2 bg-gray-50 rounded-lg">
+              <Text className="text-xs text-gray-600 block mb-1">Safety Status</Text>
               <Tag color={getStatusColor(checkResult.status || CheckStatus.UNKNOWN)} className="text-xs">
                 {checkResult.status || CheckStatus.UNKNOWN}
               </Tag>
@@ -1258,18 +1293,18 @@ const handleOpenScamModal = () => {
           {checkResult.warning_flags?.length > 0 && (
             <div className="p-3 bg-orange-50 rounded-lg">
               <Text strong className="text-sm text-orange-800 block mb-2">
-                Warning Flags ({checkResult.warning_flags.length})
+                Detection Reasons ({checkResult.warning_flags.length})
               </Text>
-              <div className="space-y-1">
+              <div className="space-y-2">
                 {checkResult.warning_flags.slice(0, 3).map((flag, index) => (
-                  <div key={index} className="flex items-center text-xs">
-                    <ExclamationCircleOutlined className="text-orange-500 mr-2 text-xs" />
-                    <Text className="text-xs">{flag.replace('_', ' ')}</Text>
+                  <div key={index} className="flex items-start text-xs">
+                    <ExclamationCircleOutlined className="text-orange-500 mr-2 text-xs mt-0.5 flex-shrink-0" />
+                    <Text className="text-xs leading-relaxed">{flag}</Text>
                   </div>
                 ))}
                 {checkResult.warning_flags.length > 3 && (
                   <Text className="text-xs text-gray-600">
-                    +{checkResult.warning_flags.length - 3} more...
+                    +{checkResult.warning_flags.length - 3} more reasons...
                   </Text>
                 )}
               </div>

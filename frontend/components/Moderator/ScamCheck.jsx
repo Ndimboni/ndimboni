@@ -256,7 +256,7 @@ const ScamCheckPage = () => {
         body: { message: values.message }
       });
       
-      if (response.success) {
+      if (response.success && response.data) {
         message.success('Message checked successfully');
         setCheckModalVisible(false);
         setMessageValue('');
@@ -365,7 +365,18 @@ const ScamCheckPage = () => {
 
 
   const columns = [
-
+    {
+      title: 'ID',
+      dataIndex: 'id',
+      key: 'id',
+      width: 100,
+      ellipsis: true,
+      render: (id) => (
+        <Tooltip title={id}>
+          <Text code>{id.substring(0, 8)}...</Text>
+        </Tooltip>
+      )
+    },
     {
       title: 'Message',
       dataIndex: 'message',
@@ -378,51 +389,60 @@ const ScamCheckPage = () => {
       )
     },
     {
+      title: 'Is Scam',
+      dataIndex: ['result', 'isScam'],
+      key: 'isScam',
+      width: 100,
+      render: (isScam) => (
+        <Tag color={isScam ? 'red' : 'green'}>
+          {isScam ? 'SCAM' : 'SAFE'}
+        </Tag>
+      )
+    },
+    {
       title: 'Status',
-      dataIndex: 'status',
+      dataIndex: ['result', 'status'],
       key: 'status',
       width: 120,
       render: (status) => (
         <Tag color={getStatusColor(status)} icon={getStatusIcon(status)}>
-          {status}
+          {status || 'UNKNOWN'}
         </Tag>
       )
     },
     {
-      title: 'Intent',
-      dataIndex: 'detectedIntent',
-      key: 'detectedIntent',
-      width: 140,
-      render: (intent) => (
-        <Tag color={getIntentColor(intent)}>
-          {intent?.replace('_', ' ') || 'UNKNOWN'}
-        </Tag>
+      title: 'Confidence',
+      dataIndex: ['result', 'confidence'],
+      key: 'confidence',
+      width: 120,
+      render: (confidence) => (
+        <Progress 
+          percent={Math.round((parseFloat(confidence) || 0) * 100)} 
+          size="small"
+          strokeColor="#1890ff"
+        />
       )
     },
     {
       title: 'Risk Score',
-      dataIndex: 'riskScore',
+      dataIndex: ['result', 'riskScore'],
       key: 'riskScore',
       width: 120,
       render: (score) => (
         <Progress 
-          percent={Math.round((score || 0) * 100)} 
+          percent={Math.round((parseFloat(score) || 0) * 100)} 
           size="small"
           strokeColor={score > 0.8 ? 'red' : score > 0.5 ? 'orange' : 'green'}
         />
       )
     },
     {
-      title: 'URLs',
-      dataIndex: 'extractedUrls',
-      key: 'extractedUrls',
+      title: 'Source',
+      dataIndex: 'source',
+      key: 'source',
       width: 80,
-      render: (urls) => (
-        urls?.length > 0 ? (
-          <Badge count={urls.length} size="small">
-            <LinkOutlined />
-          </Badge>
-        ) : null
+      render: (source) => (
+        <Tag color="blue">{source || 'web'}</Tag>
       )
     },
     {
@@ -445,7 +465,6 @@ const ScamCheckPage = () => {
               onClick={() => fetchCheckDetails(record.id)}
             />
           </Tooltip>
-        
         </Space>
       )
     }
@@ -692,35 +711,47 @@ const ScamCheckPage = () => {
                 <Col span={8}><Text strong>ID:</Text></Col>
                 <Col span={16}><Text code>{selectedCheck.id}</Text></Col>
                 
-                <Col span={8}><Text strong>Status:</Text></Col>
+                <Col span={8}><Text strong>Is Scam:</Text></Col>
                 <Col span={16}>
-                  <Tag color={getStatusColor(selectedCheck.status)} icon={getStatusIcon(selectedCheck.status)}>
-                    {selectedCheck.status}
+                  <Tag color={selectedCheck.result?.isScam ? 'red' : 'green'}>
+                    {selectedCheck.result?.isScam ? 'SCAM' : 'NOT SCAM'}
                   </Tag>
                 </Col>
                 
-                <Col span={8}><Text strong>Intent:</Text></Col>
+                <Col span={8}><Text strong>Status:</Text></Col>
                 <Col span={16}>
-                  <Tag color={getIntentColor(selectedCheck.detectedIntent)}>
-                    {selectedCheck.detectedIntent?.replace('_', ' ') || 'UNKNOWN'}
+                  <Tag color={getStatusColor(selectedCheck.result?.status)} icon={getStatusIcon(selectedCheck.result?.status)}>
+                    {selectedCheck.result?.status || 'UNKNOWN'}
                   </Tag>
                 </Col>
                 
                 <Col span={8}><Text strong>Risk Score:</Text></Col>
                 <Col span={16}>
                   <Progress 
-                    percent={Math.round((selectedCheck.riskScore || 0) * 100)} 
+                    percent={Math.round((parseFloat(selectedCheck.result?.riskScore) || 0) * 100)} 
                     size="small"
-                    strokeColor={selectedCheck.riskScore > 0.8 ? 'red' : selectedCheck.riskScore > 0.5 ? 'orange' : 'green'}
+                    strokeColor={selectedCheck.result?.riskScore > 0.8 ? 'red' : selectedCheck.result?.riskScore > 0.5 ? 'orange' : 'green'}
                   />
+                  <Text type="secondary" style={{ marginLeft: 8 }}>
+                    {((parseFloat(selectedCheck.result?.riskScore) || 0) * 100).toFixed(1)}%
+                  </Text>
                 </Col>
                 
                 <Col span={8}><Text strong>Confidence:</Text></Col>
                 <Col span={16}>
                   <Progress 
-                    percent={Math.round((selectedCheck.confidence || 0) * 100)} 
+                    percent={Math.round((parseFloat(selectedCheck.result?.confidence) || 0) * 100)} 
                     size="small"
+                    strokeColor="#1890ff"
                   />
+                  <Text type="secondary" style={{ marginLeft: 8 }}>
+                    {((parseFloat(selectedCheck.result?.confidence) || 0) * 100).toFixed(1)}%
+                  </Text>
+                </Col>
+                
+                <Col span={8}><Text strong>Source:</Text></Col>
+                <Col span={16}>
+                  <Tag color="blue">{selectedCheck.source || 'web'}</Tag>
                 </Col>
                 
                 <Col span={8}><Text strong>Created:</Text></Col>
@@ -734,64 +765,29 @@ const ScamCheckPage = () => {
               </Paragraph>
             </Card>
 
-            {selectedCheck.extractedUrls?.length > 0 && (
-              <Card title="Extracted URLs" style={{ marginBottom: '16px' }}>
+            {selectedCheck.result?.reasons?.length > 0 && (
+              <Card title="Detection Reasons" style={{ marginBottom: '16px' }}>
                 <List
                   size="small"
-                  dataSource={selectedCheck.extractedUrls}
-                  renderItem={url => (
+                  dataSource={selectedCheck.result.reasons}
+                  renderItem={(reason, index) => (
                     <List.Item>
-                      <Text code>{url}</Text>
+                      <Text>{reason}</Text>
                     </List.Item>
                   )}
                 />
               </Card>
             )}
 
-            {selectedCheck.reasons?.length > 0 && (
-              <Card title="Detection Reasons" style={{ marginBottom: '16px' }}>
-                <Timeline
-                  size="small"
-                  items={selectedCheck.reasons.map(reason => ({
-                    children: reason.replace('_', ' ').toUpperCase()
-                  }))}
-                />
-              </Card>
-            )}
-
-            {selectedCheck.detectedPatterns?.length > 0 && (
+            {selectedCheck.result?.detectedPatterns?.length > 0 && (
               <Card title="Detected Patterns" style={{ marginBottom: '16px' }}>
                 <Space wrap>
-                  {selectedCheck.detectedPatterns.map((pattern, index) => (
+                  {selectedCheck.result.detectedPatterns.map((pattern, index) => (
                     <Tag key={index} color="blue">
-                      {pattern.replace('_', ' ')}
+                      {pattern}
                     </Tag>
                   ))}
                 </Space>
-              </Card>
-            )}
-
-            {selectedCheck.urlScanResults && (
-              <Card title="URL Scan Results">
-                <Row gutter={[16, 16]}>
-                  <Col span={8}>
-                    <Statistic title="Total URLs" value={selectedCheck.urlScanResults.totalUrls || 0} />
-                  </Col>
-                  <Col span={8}>
-                    <Statistic 
-                      title="Safe URLs" 
-                      value={selectedCheck.urlScanResults.safeUrls || 0}
-                      valueStyle={{ color: '#3f8600' }}
-                    />
-                  </Col>
-                  <Col span={8}>
-                    <Statistic 
-                      title="Suspicious URLs" 
-                      value={selectedCheck.urlScanResults.suspiciousUrls || 0}
-                      valueStyle={{ color: '#fa8c16' }}
-                    />
-                  </Col>
-                </Row>
               </Card>
             )}
           </div>
