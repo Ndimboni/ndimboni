@@ -362,19 +362,20 @@ const ScamCheckPage = () => {
       title: "ID",
       dataIndex: "id",
       key: "id",
-      width: 100,
+      width: 80,
       ellipsis: true,
       render: (id) => (
         <Tooltip title={id}>
-          <Text code>{id.substring(0, 8)}...</Text>
+          <Text code>{id.substring(0, 6)}...</Text>
         </Tooltip>
       ),
     },
     {
       title: "Message",
-      dataIndex: "message",
+      dataIndex: ["result", "scanResults", "message"],
       key: "message",
       ellipsis: true,
+      width: 200,
       render: (message) => (
         <Tooltip title={message}>
           <Text>{message}</Text>
@@ -382,10 +383,26 @@ const ScamCheckPage = () => {
       ),
     },
     {
+      title: "User",
+      dataIndex: ["result", "metadata", "user", "name"],
+      key: "userName",
+      width: 120,
+      ellipsis: true,
+      render: (name, record) => {
+        const user = record?.result?.metadata?.user;
+        if (!user) return <Text type="secondary">Anonymous</Text>;
+        return (
+          <Tooltip title={`${user.name} (${user.email})`}>
+            <Text>{user.name}</Text>
+          </Tooltip>
+        );
+      },
+    },
+    {
       title: "Is Scam",
       dataIndex: ["result", "isScam"],
       key: "isScam",
-      width: 100,
+      width: 80,
       render: (isScam) => (
         <Tag color={isScam ? "red" : "green"}>{isScam ? "SCAM" : "SAFE"}</Tag>
       ),
@@ -394,7 +411,7 @@ const ScamCheckPage = () => {
       title: "Status",
       dataIndex: ["result", "status"],
       key: "status",
-      width: 120,
+      width: 100,
       render: (status) => (
         <Tag color={getStatusColor(status)} icon={getStatusIcon(status)}>
           {status || "UNKNOWN"}
@@ -402,15 +419,27 @@ const ScamCheckPage = () => {
       ),
     },
     {
+      title: "Intent",
+      dataIndex: ["result", "detectedIntent"],
+      key: "detectedIntent",
+      width: 120,
+      render: (intent) => (
+        <Tag color={getIntentColor(intent)}>
+          {intent ? intent.replace('_', ' ') : "UNKNOWN"}
+        </Tag>
+      ),
+    },
+    {
       title: "Confidence",
       dataIndex: ["result", "confidence"],
       key: "confidence",
-      width: 120,
+      width: 100,
       render: (confidence) => (
         <Progress
           percent={Math.round((parseFloat(confidence) || 0) * 100)}
           size="small"
           strokeColor="#1890ff"
+          format={(percent) => `${percent}%`}
         />
       ),
     },
@@ -418,12 +447,13 @@ const ScamCheckPage = () => {
       title: "Risk Score",
       dataIndex: ["result", "riskScore"],
       key: "riskScore",
-      width: 120,
+      width: 100,
       render: (score) => (
         <Progress
           percent={Math.round((parseFloat(score) || 0) * 100)}
           size="small"
           strokeColor={score > 0.8 ? "red" : score > 0.5 ? "orange" : "green"}
+          format={(percent) => `${percent}%`}
         />
       ),
     },
@@ -431,20 +461,20 @@ const ScamCheckPage = () => {
       title: "Source",
       dataIndex: "source",
       key: "source",
-      width: 80,
+      width: 70,
       render: (source) => <Tag color="blue">{source || "web"}</Tag>,
     },
     {
       title: "Created",
       dataIndex: "createdAt",
       key: "createdAt",
-      width: 120,
+      width: 100,
       render: (date) => new Date(date).toLocaleDateString(),
     },
     {
       title: "Actions",
       key: "actions",
-      width: 120,
+      width: 100,
       render: (_, record) => (
         <Space size="small">
           <Tooltip title="View Details">
