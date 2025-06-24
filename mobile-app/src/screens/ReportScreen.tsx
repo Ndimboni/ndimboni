@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -9,45 +9,48 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-} from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import { StackNavigationProp } from '@react-navigation/stack';
-import NdimboniAPI from '../services/api';
-import { RootStackParamList, ReportScammerRequest } from '../types';
-import { APP_CONSTANTS } from '../utils/config';
+} from "react-native";
+import { StatusBar } from "expo-status-bar";
+import { StackNavigationProp } from "@react-navigation/stack";
+import NdimboniAPI from "../services/api";
+import { RootStackParamList, ReportScammerRequest } from "../types";
+import { APP_CONSTANTS } from "../utils/config";
 
-type ReportScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Report'>;
+type ReportScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  "Report"
+>;
 
 interface Props {
   navigation: ReportScreenNavigationProp;
 }
 
 export default function ReportScreen({ navigation }: Props) {
-  const [phoneNumber, setPhoneNumber] = useState<string>('');
-  const [description, setDescription] = useState<string>('');
-  const [additionalInfo, setAdditionalInfo] = useState<string>('');
+  const [phoneNumber, setPhoneNumber] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [additionalInfo, setAdditionalInfo] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const handleSubmit = async (): Promise<void> => {
     try {
       // Validation
       if (!phoneNumber.trim()) {
-        Alert.alert('Error', 'Please enter a phone number');
+        Alert.alert("Error", "Please enter a phone number");
         return;
       }
 
       if (!NdimboniAPI.validatePhoneNumber(phoneNumber)) {
-        Alert.alert('Error', 'Please enter a valid phone number');
+        Alert.alert("Error", "Please enter a valid phone number");
         return;
       }
 
       if (!description.trim()) {
-        Alert.alert('Error', 'Please provide a description of the scam');
+        Alert.alert("Error", "Please provide a description of the scam");
         return;
       }
 
       if (description.trim().length < 10) {
-        Alert.alert('Error', 'Description must be at least 10 characters');
+        Alert.alert("Error", "Description must be at least 10 characters");
         return;
       }
 
@@ -63,16 +66,16 @@ export default function ReportScreen({ navigation }: Props) {
 
       if (result.success) {
         Alert.alert(
-          'Report Submitted',
+          "Report Submitted",
           APP_CONSTANTS.SUCCESS_MESSAGES.REPORT_SUBMITTED,
           [
             {
-              text: 'OK',
+              text: "OK",
               onPress: () => {
                 // Clear form
-                setPhoneNumber('');
-                setDescription('');
-                setAdditionalInfo('');
+                setPhoneNumber("");
+                setDescription("");
+                setAdditionalInfo("");
                 // Navigate back to home
                 navigation.goBack();
               },
@@ -80,14 +83,16 @@ export default function ReportScreen({ navigation }: Props) {
           ]
         );
       } else {
-        throw new Error(result.message || 'Failed to submit report');
+        throw new Error(result.message || "Failed to submit report");
       }
     } catch (error) {
-      console.error('Error submitting report:', error);
+      console.error("Error submitting report:", error);
       Alert.alert(
-        'Submission Failed',
-        error instanceof Error ? error.message : APP_CONSTANTS.ERROR_MESSAGES.REPORT_FAILED,
-        [{ text: 'OK' }]
+        "Submission Failed",
+        error instanceof Error
+          ? error.message
+          : APP_CONSTANTS.ERROR_MESSAGES.REPORT_FAILED,
+        [{ text: "OK" }]
       );
     } finally {
       setIsSubmitting(false);
@@ -96,23 +101,23 @@ export default function ReportScreen({ navigation }: Props) {
 
   const formatPhoneNumber = (text: string): string => {
     // Remove all non-digit characters except +
-    let cleaned = text.replace(/[^\d+]/g, '');
-    
+    let cleaned = text.replace(/[^\d+]/g, "");
+
     // Auto-format for Rwanda numbers
-    if (cleaned.startsWith('0')) {
-      cleaned = '+250' + cleaned.substring(1);
+    if (cleaned.startsWith("0")) {
+      cleaned = "+250" + cleaned.substring(1);
     }
-    
+
     return cleaned;
   };
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <StatusBar style="dark" />
-      
+
       <ScrollView style={styles.scrollView} keyboardShouldPersistTaps="handled">
         {/* Header */}
         <View style={styles.header}>
@@ -181,10 +186,10 @@ export default function ReportScreen({ navigation }: Props) {
           <View style={styles.infoBox}>
             <Text style={styles.infoTitle}>Why Report?</Text>
             <Text style={styles.infoText}>
-              • Helps protect other users from the same scammer{'\n'}
-              • Contributes to our scammer database{'\n'}
-              • Enables community-driven protection{'\n'}
-              • Reports are reviewed by our team
+              • Helps protect other users from the same scammer{"\n"}•
+              Contributes to our scammer database{"\n"}• Enables
+              community-driven protection{"\n"}• Reports are reviewed by our
+              team
             </Text>
           </View>
 
@@ -198,7 +203,7 @@ export default function ReportScreen({ navigation }: Props) {
             disabled={isSubmitting}
           >
             <Text style={styles.submitButtonText}>
-              {isSubmitting ? 'Submitting...' : 'Submit Report'}
+              {isSubmitting ? "Submitting..." : "Submit Report"}
             </Text>
           </TouchableOpacity>
 
@@ -219,27 +224,27 @@ export default function ReportScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   scrollView: {
     flex: 1,
   },
   header: {
-    backgroundColor: '#2196F3',
+    backgroundColor: "#2196F3",
     padding: 20,
     paddingTop: 50,
-    alignItems: 'center',
+    alignItems: "center",
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: "bold",
+    color: "#fff",
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,
-    color: '#E3F2FD',
-    textAlign: 'center',
+    color: "#E3F2FD",
+    textAlign: "center",
   },
   form: {
     padding: 20,
@@ -249,73 +254,73 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: "#E0E0E0",
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    color: '#333',
+    color: "#333",
   },
   textArea: {
     height: 80,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
   inputHint: {
     fontSize: 12,
-    color: '#666',
+    color: "#666",
     marginTop: 4,
   },
   infoBox: {
-    backgroundColor: '#E3F2FD',
+    backgroundColor: "#E3F2FD",
     borderLeftWidth: 4,
-    borderLeftColor: '#2196F3',
+    borderLeftColor: "#2196F3",
     padding: 16,
     marginBottom: 20,
     borderRadius: 4,
   },
   infoTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1976D2',
+    fontWeight: "600",
+    color: "#1976D2",
     marginBottom: 8,
   },
   infoText: {
     fontSize: 14,
-    color: '#1976D2',
+    color: "#1976D2",
     lineHeight: 20,
   },
   submitButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: "#2196F3",
     padding: 16,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 12,
   },
   submitButtonDisabled: {
-    backgroundColor: '#B0BEC5',
+    backgroundColor: "#B0BEC5",
   },
   submitButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   cancelButton: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     borderWidth: 1,
-    borderColor: '#666',
+    borderColor: "#666",
     padding: 16,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
   cancelButtonText: {
-    color: '#666',
+    color: "#666",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

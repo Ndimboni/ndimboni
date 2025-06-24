@@ -8,7 +8,7 @@ export class ScamAnalysisFormatterService {
    */
   formatScamAnalysisResponse(
     message: string,
-    result: ScamCheckResponse,
+    { result }: ScamCheckResponse,
     platform: 'telegram' | 'whatsapp' = 'telegram',
   ): string {
     // Format risk level with consistent logic
@@ -57,13 +57,14 @@ export class ScamAnalysisFormatterService {
       }
     }
 
-    // Format scam type if detected
+    // Format scam type if detected (using aiAnalysis data if available)
     let scamTypeText = '';
-    if (result.detectedIntent && result.detectedIntent !== 'unknown') {
+    const scamType = result.aiAnalysis?.intentScore?.intent;
+    if (scamType && scamType !== 'unknown' && scamType !== 'UNKNOWN') {
       scamTypeText =
         platform === 'telegram'
-          ? `\n📋 <b>Scam Type:</b> ${result.detectedIntent.toUpperCase()}\n`
-          : `\n📋 Scam Type: ${result.detectedIntent.toUpperCase()}\n`;
+          ? `\n📋 <b>Scam Type:</b> ${scamType.replace('_', ' ').toUpperCase()}\n`
+          : `\n📋 Scam Type: ${scamType.replace('_', ' ').toUpperCase()}\n`;
     }
 
     // Safety tips based on risk level
@@ -79,9 +80,10 @@ export class ScamAnalysisFormatterService {
       safetyTips += '• Report suspicious messages to authorities\n';
     }
 
-    // URL warning if suspicious links found
+    // URL warning if suspicious links found (using aiAnalysis data)
     let urlWarning = '';
-    if (result.extractedUrls && result.extractedUrls.length > 0) {
+    const extractedUrls = result.aiAnalysis?.extractedIdentifiers?.urls;
+    if (extractedUrls && extractedUrls.length > 0) {
       urlWarning =
         '\n\n⚠️ <b>Links Found:</b> Be extremely careful with any links in this message!';
     }

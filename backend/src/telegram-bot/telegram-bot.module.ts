@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { TelegramModerationService } from './telegram-moderation.service';
 import { ScamReport } from '../entities/scam-report.entity';
 import { User } from '../entities/user.entity';
 import { ScamCheckModule } from '../scam-check/scam-check.module';
@@ -21,12 +20,7 @@ import { TelegramBotController } from './telegram-bot.controller';
     AuthzModule,
     CommonServicesModule,
   ],
-  providers: [
-    TelegramBotService,
-    TelegramWebhookService,
-    TelegramModerationService,
-  ],
+  providers: [TelegramBotService, TelegramWebhookService],
   controllers: [TelegramBotController],
-  exports: [TelegramBotService, TelegramModerationService],
 })
 export class TelegramBotModule {}

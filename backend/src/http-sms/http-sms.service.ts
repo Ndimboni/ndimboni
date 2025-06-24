@@ -212,7 +212,8 @@ export class HttpSmsService {
       ipAddress: payload.data.contact,
     });
 
-    if (['suspicious', 'malicious'].includes(checkResult.status)) {
+    // Check if the result indicates suspicious or malicious content
+    if (checkResult.result.isScam && checkResult.result.riskLevel !== 'low') {
       await this.sendCheckResponse(payload.data.contact, checkResult);
     }
 

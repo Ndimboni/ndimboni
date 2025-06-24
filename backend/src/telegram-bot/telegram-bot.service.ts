@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Telegraf, Context } from 'telegraf';
 import { TelegramConfig } from '../common/interfaces/config.interface';
-import { TelegramModerationService } from './telegram-moderation.service';
+import { RankingService } from '../scam-check/risk-score-ranking.service';
 import { ScamCheckService } from 'src/scam-check/scam-check.service';
 import { ScamReport } from 'src/entities/scam-report.entity';
 import { ScamAnalysisFormatterService } from '../common/services/scam-analysis-formatter.service';
@@ -26,7 +26,7 @@ export class TelegramBotService implements OnModuleInit, OnModuleDestroy {
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly moderationService: TelegramModerationService,
+    private readonly rankingService: RankingService,
     private readonly scamCheckService: ScamCheckService,
     private readonly scamAnalysisFormatterService: ScamAnalysisFormatterService,
     @InjectRepository(ScamReport)
@@ -333,7 +333,7 @@ For support, contact our team.
       }
 
       this.logger.log(
-        `Check command completed for user ${ctx.from?.id}: Risk=${Math.round(result.riskScore * 100)}%, Status=${result.status}`,
+        `Check command completed for user ${ctx.from?.id}: Risk=${Math.round(result.result.riskScore * 100)}%, Status=${result.result.riskLevel}`,
       );
     } catch (error) {
       // Delete the processing message if it exists
@@ -387,12 +387,12 @@ For support, contact our team.
             `Analyzing message in group ${ctx.chat.id} from user ${ctx.from?.id}`,
           );
 
-          const analysis = await this.moderationService.analyzeMessage(
+          const analysis = await this.rankingService.analyzeMessage(
             ctx.message.text,
             ctx.from?.id?.toString(),
           );
 
-          const action = this.moderationService.getModerationAction(analysis);
+          const action = this.rankingService.getModerationAction(analysis);
           const riskPercentage = Math.round(analysis.confidence * 100);
 
           if (action === 'delete') {
@@ -562,7 +562,7 @@ ${
           }
 
           this.logger.log(
-            `Private message analyzed for user ${ctx.from?.id}: Risk=${Math.round(result.riskScore * 100)}%`,
+            `Private message analyzed for user ${ctx.from?.id}: Risk=${Math.round(result.result.riskScore * 100)}%`,
           );
         } catch (error) {
           this.logger.error('Error analyzing private message:', error);

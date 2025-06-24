@@ -6,7 +6,10 @@ import {
   CheckStatus,
   IntentType,
 } from '../entities/scam-check.entity';
-import { TelegramModerationService } from '../telegram-bot/telegram-moderation.service';
+import {
+  RankingService,
+  RankingServiceResult,
+} from './risk-score-ranking.service';
 import {
   ScanSummary,
   UrlScanningService,
@@ -23,15 +26,7 @@ export interface ScamCheckRequest {
 
 export interface ScamCheckResponse {
   id: string;
-  status: CheckStatus;
-  detectedIntent: IntentType;
-  riskScore: number;
-  confidence: number;
-  reasons: string[];
-  detectedPatterns: string[];
-  urlScanResults?: any;
-  message: string;
-  extractedUrls?: string[];
+  result: RankingServiceResult;
   source: string;
   createdAt: Date;
 }
@@ -54,7 +49,7 @@ export class ScamCheckService {
     @InjectRepository(ScamCheck)
     private readonly scamCheckRepository: Repository<ScamCheck>,
     private readonly urlScanningService: UrlScanningService,
-    private readonly telegramModerationService: TelegramModerationService,
+    private readonly rankingService: RankingService,
     private readonly groqService: GroqService,
   ) {}
 
@@ -79,7 +74,7 @@ export class ScamCheckService {
 
       // Analyze the message using Telegram moderation service with timeout
       const analysis = await Promise.race([
-        this.telegramModerationService.analyzeMessage(request.message),
+        this.rankingService.analyzeMessage(request.message),
         timeoutPromise,
       ]);
 
@@ -360,19 +355,18 @@ export class ScamCheckService {
   private mapToResponse(check: ScamCheck): ScamCheckResponse {
     return {
       id: check.id,
-      status: check.status,
-      detectedIntent: check.detectedIntent,
-      riskScore: check.riskScore,
-      confidence: check.confidence,
-      reasons: check.reasons ? JSON.parse(check.reasons) : [],
-      detectedPatterns: check.detectedPatterns
-        ? JSON.parse(check.detectedPatterns)
-        : [],
-      urlScanResults: check.urlScanResults
-        ? JSON.parse(check.urlScanResults)
-        : null,
-      message: check.message,
-      extractedUrls: check.extractedUrls ? JSON.parse(check.extractedUrls) : [],
+      result: {
+        isScam:
+          check.status === CheckStatus.MALICIOUS ||
+          check.status === CheckStatus.SUSPICIOUS,
+        confidence: check.confidence,
+        riskScore: check.riskScore,
+        reasons: check.reasons ? JSON.parse(check.reasons) : [],
+        detectedPatterns: check.detectedPatterns
+          ? JSON.parse(check.detectedPatterns)
+          : [],
+        status: check.status,
+      } as RankingServiceResult & { status: CheckStatus },
       source: check.source,
       createdAt: check.createdAt,
     };

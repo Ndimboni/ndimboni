@@ -1,9 +1,9 @@
-import * as Notifications from 'expo-notifications';
-import { Platform } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import NdimboniAPI from './api';
-import { DetectionRecord, ServiceStatus, ScammerData } from '../types';
-import appConfig, { APP_CONSTANTS } from '../utils/config';
+import * as Notifications from "expo-notifications";
+import { Platform } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import NdimboniAPI from "./api";
+import { DetectionRecord, ServiceStatus, ScammerData } from "../types";
+import appConfig, { APP_CONSTANTS } from "../utils/config";
 
 // Configure notification behavior
 Notifications.setNotificationHandler({
@@ -25,9 +25,9 @@ class ScamDetectionService {
     try {
       await this.requestPermissions();
       this.isInitialized = true;
-      console.log('ScamDetectionService initialized successfully');
+      console.log("ScamDetectionService initialized successfully");
     } catch (error) {
-      console.error('Failed to initialize ScamDetectionService:', error);
+      console.error("Failed to initialize ScamDetectionService:", error);
     }
   }
 
@@ -38,15 +38,15 @@ class ScamDetectionService {
     try {
       // Request notification permissions
       const { status } = await Notifications.requestPermissionsAsync();
-      this.notificationPermission = status === 'granted';
+      this.notificationPermission = status === "granted";
 
       if (!this.notificationPermission) {
-        console.warn('Notification permission not granted');
+        console.warn("Notification permission not granted");
       }
 
       return this.notificationPermission;
     } catch (error) {
-      console.error('Error requesting permissions:', error);
+      console.error("Error requesting permissions:", error);
       return false;
     }
   }
@@ -55,8 +55,8 @@ class ScamDetectionService {
    * Check if a phone number is a scammer and show alert if needed
    */
   async checkAndAlertScammer(
-    phoneNumber: string, 
-    context: 'call' | 'sms' | 'test' = 'unknown' as any
+    phoneNumber: string,
+    context: "call" | "sms" | "test" = "unknown" as any
   ): Promise<boolean> {
     try {
       if (!phoneNumber || phoneNumber.length < 5) {
@@ -78,19 +78,19 @@ class ScamDetectionService {
 
       if (result.isScammer) {
         this.alertHistory.set(alertKey, Date.now());
-        
+
         // Show notification
         await this.showScammerAlert(phoneNumber, context, result.data);
-        
+
         // Log the detection
         await this.logScammerDetection(phoneNumber, context, result.data);
-        
+
         return true;
       }
 
       return false;
     } catch (error) {
-      console.error('Error checking scammer:', error);
+      console.error("Error checking scammer:", error);
       return false;
     }
   }
@@ -99,27 +99,31 @@ class ScamDetectionService {
    * Show scammer alert notification
    */
   async showScammerAlert(
-    phoneNumber: string, 
-    context: 'call' | 'sms' | 'test', 
+    phoneNumber: string,
+    context: "call" | "sms" | "test",
     scammerData?: ScammerData
   ): Promise<void> {
     try {
       if (!this.notificationPermission) {
-        console.warn('Cannot show notification: permission not granted');
+        console.warn("Cannot show notification: permission not granted");
         return;
       }
 
-      const contextText = context === 'call' ? 'incoming call' : 
-                         context === 'sms' ? 'SMS message' : 'contact';
+      const contextText =
+        context === "call"
+          ? "incoming call"
+          : context === "sms"
+          ? "SMS message"
+          : "contact";
 
-      const title = '🚨 SCAMMER ALERT!';
+      const title = "🚨 SCAMMER ALERT!";
       const body = `Warning: ${contextText} from reported scammer ${phoneNumber}`;
 
       await Notifications.scheduleNotificationAsync({
         content: {
           title,
           body,
-          sound: 'default',
+          sound: "default",
           priority: Notifications.AndroidNotificationPriority.HIGH,
           data: {
             phoneNumber,
@@ -135,7 +139,7 @@ class ScamDetectionService {
         console.log(`Scammer alert shown for ${phoneNumber} (${context})`);
       }
     } catch (error) {
-      console.error('Error showing scammer alert:', error);
+      console.error("Error showing scammer alert:", error);
     }
   }
 
@@ -143,8 +147,8 @@ class ScamDetectionService {
    * Log scammer detection for analytics
    */
   private async logScammerDetection(
-    phoneNumber: string, 
-    context: 'call' | 'sms' | 'test', 
+    phoneNumber: string,
+    context: "call" | "sms" | "test",
     scammerData?: ScammerData
   ): Promise<void> {
     try {
@@ -161,10 +165,10 @@ class ScamDetectionService {
       await AsyncStorage.setItem(key, JSON.stringify(detection));
 
       if (appConfig.DEBUG_MODE) {
-        console.log('Scammer detection logged:', detection);
+        console.log("Scammer detection logged:", detection);
       }
     } catch (error) {
-      console.error('Error logging detection:', error);
+      console.error("Error logging detection:", error);
     }
   }
 
@@ -174,8 +178,8 @@ class ScamDetectionService {
   async getDetectionHistory(): Promise<DetectionRecord[]> {
     try {
       const keys = await AsyncStorage.getAllKeys();
-      const detectionKeys = keys.filter(key => key.startsWith('detection_'));
-      
+      const detectionKeys = keys.filter((key) => key.startsWith("detection_"));
+
       const detections: DetectionRecord[] = [];
       for (const key of detectionKeys) {
         const detection = await AsyncStorage.getItem(key);
@@ -186,10 +190,10 @@ class ScamDetectionService {
 
       // Sort by timestamp, newest first
       detections.sort((a, b) => b.timestamp - a.timestamp);
-      
+
       return detections;
     } catch (error) {
-      console.error('Error getting detection history:', error);
+      console.error("Error getting detection history:", error);
       return [];
     }
   }
@@ -199,10 +203,10 @@ class ScamDetectionService {
    */
   async cleanupDetectionHistory(): Promise<void> {
     try {
-      const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+      const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
       const keys = await AsyncStorage.getAllKeys();
-      const detectionKeys = keys.filter(key => key.startsWith('detection_'));
-      
+      const detectionKeys = keys.filter((key) => key.startsWith("detection_"));
+
       const keysToRemove: string[] = [];
       for (const key of detectionKeys) {
         const detection = await AsyncStorage.getItem(key);
@@ -219,7 +223,7 @@ class ScamDetectionService {
         console.log(`Cleaned up ${keysToRemove.length} old detection records`);
       }
     } catch (error) {
-      console.error('Error cleaning up detection history:', error);
+      console.error("Error cleaning up detection history:", error);
     }
   }
 
@@ -242,10 +246,10 @@ class ScamDetectionService {
         message: result.message,
       };
     } catch (error) {
-      console.error('Error in manual check:', error);
+      console.error("Error in manual check:", error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
       };
     }
   }

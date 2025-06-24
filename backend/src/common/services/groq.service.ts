@@ -8,6 +8,7 @@ export interface IntentAnalysisResult {
   confidence: number;
   reasoning: string;
   isScam: boolean;
+  riskLevel: 'low' | 'medium' | 'high';
 }
 
 @Injectable()
@@ -71,7 +72,8 @@ export class GroqService {
               "intent": "INTENT_TYPE",
               "confidence": 0.85,
               "reasoning": "Brief explanation of your analysis",
-              "isScam": true/false
+              "isScam": true/false,
+              "riskLevel": "<low|medium|high>",
             }
             
             Confidence should be between 0.0 and 1.0.`,
@@ -120,6 +122,7 @@ export class GroqService {
         confidence: result.confidence,
         reasoning: result.reasoning || 'No reasoning provided',
         isScam: result.isScam || false,
+        riskLevel: result.riskLevel || 'unknown',
       };
     } catch (error) {
       this.logger.error('Error analyzing intent with Groq:', error);
@@ -159,7 +162,6 @@ Provide your analysis in the specified JSON format.`;
     ) {
       intent = IntentType.PHISHING;
       isScam = true;
-      confidence = 0.6;
       reasoning = 'Contains phishing-related keywords';
     } else if (
       lowerMessage.includes('love') ||
@@ -168,7 +170,6 @@ Provide your analysis in the specified JSON format.`;
     ) {
       intent = IntentType.ROMANCE_SCAM;
       isScam = true;
-      confidence = 0.5;
       reasoning = 'Contains romance-related keywords that may indicate scam';
     } else if (
       lowerMessage.includes('invest') ||
@@ -177,7 +178,6 @@ Provide your analysis in the specified JSON format.`;
     ) {
       intent = IntentType.INVESTMENT_SCAM;
       isScam = true;
-      confidence = 0.6;
       reasoning =
         'Contains investment-related keywords with potential scam indicators';
     } else if (
@@ -187,7 +187,6 @@ Provide your analysis in the specified JSON format.`;
     ) {
       intent = IntentType.LOTTERY_SCAM;
       isScam = true;
-      confidence = 0.7;
       reasoning = 'Contains lottery/prize-related keywords';
     } else if (
       lowerMessage.includes('money') ||
@@ -196,7 +195,6 @@ Provide your analysis in the specified JSON format.`;
     ) {
       intent = IntentType.MONEY_REQUEST;
       isScam = true;
-      confidence = 0.4;
       reasoning = 'Contains money/payment-related keywords';
     } else if (
       lowerMessage.includes('technical support') ||
@@ -205,11 +203,9 @@ Provide your analysis in the specified JSON format.`;
     ) {
       intent = IntentType.TECH_SUPPORT_SCAM;
       isScam = true;
-      confidence = 0.5;
       reasoning = 'Contains tech support-related keywords';
     } else {
       intent = IntentType.UNKNOWN;
-      confidence = 0.1;
       reasoning = 'No clear patterns detected, classified as unknown';
     }
 
@@ -218,6 +214,7 @@ Provide your analysis in the specified JSON format.`;
       confidence,
       reasoning,
       isScam,
+      riskLevel: 'low',
     };
   }
 

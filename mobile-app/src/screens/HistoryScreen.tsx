@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,12 +8,12 @@ import {
   Alert,
   RefreshControl,
   Platform,
-} from 'react-native';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { DetectionHistory, StackNavigationProp } from '../types';
+} from "react-native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { DetectionHistory, StackNavigationProp } from "../types";
 
-type HistoryScreenNavigationProp = StackNavigationProp<'History'>;
+type HistoryScreenNavigationProp = StackNavigationProp<"History">;
 
 const HistoryScreen: React.FC = () => {
   const navigation = useNavigation<HistoryScreenNavigationProp>();
@@ -23,18 +23,19 @@ const HistoryScreen: React.FC = () => {
 
   const loadHistory = async () => {
     try {
-      const storedHistory = await AsyncStorage.getItem('detection_history');
+      const storedHistory = await AsyncStorage.getItem("detection_history");
       if (storedHistory) {
         const parsedHistory: DetectionHistory[] = JSON.parse(storedHistory);
         // Sort by timestamp descending (newest first)
         const sortedHistory = parsedHistory.sort(
-          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          (a, b) =>
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
         setHistory(sortedHistory);
       }
     } catch (error) {
-      console.error('Error loading history:', error);
-      Alert.alert('Error', 'Failed to load detection history');
+      console.error("Error loading history:", error);
+      Alert.alert("Error", "Failed to load detection history");
     } finally {
       setLoading(false);
     }
@@ -48,21 +49,21 @@ const HistoryScreen: React.FC = () => {
 
   const clearHistory = () => {
     Alert.alert(
-      'Clear History',
-      'Are you sure you want to clear all detection history? This action cannot be undone.',
+      "Clear History",
+      "Are you sure you want to clear all detection history? This action cannot be undone.",
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: "Cancel", style: "cancel" },
         {
-          text: 'Clear',
-          style: 'destructive',
+          text: "Clear",
+          style: "destructive",
           onPress: async () => {
             try {
-              await AsyncStorage.removeItem('detection_history');
+              await AsyncStorage.removeItem("detection_history");
               setHistory([]);
-              Alert.alert('Success', 'Detection history cleared');
+              Alert.alert("Success", "Detection history cleared");
             } catch (error) {
-              console.error('Error clearing history:', error);
-              Alert.alert('Error', 'Failed to clear history');
+              console.error("Error clearing history:", error);
+              Alert.alert("Error", "Failed to clear history");
             }
           },
         },
@@ -86,13 +87,13 @@ const HistoryScreen: React.FC = () => {
 
     if (diffHours < 1) {
       const diffMinutes = Math.floor(diffMs / (1000 * 60));
-      return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
+      return `${diffMinutes} minute${diffMinutes !== 1 ? "s" : ""} ago`;
     } else if (diffHours < 24) {
       const hours = Math.floor(diffHours);
-      return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+      return `${hours} hour${hours !== 1 ? "s" : ""} ago`;
     } else if (diffDays < 7) {
       const days = Math.floor(diffDays);
-      return `${days} day${days !== 1 ? 's' : ''} ago`;
+      return `${days} day${days !== 1 ? "s" : ""} ago`;
     } else {
       return date.toLocaleDateString();
     }
@@ -100,27 +101,27 @@ const HistoryScreen: React.FC = () => {
 
   const getTypeColor = (type: string): string => {
     switch (type) {
-      case 'call':
-        return '#FF6B6B';
-      case 'sms':
-        return '#4ECDC4';
-      case 'manual':
-        return '#45B7D1';
+      case "call":
+        return "#FF6B6B";
+      case "sms":
+        return "#4ECDC4";
+      case "manual":
+        return "#45B7D1";
       default:
-        return '#95A5A6';
+        return "#95A5A6";
     }
   };
 
   const getTypeIcon = (type: string): string => {
     switch (type) {
-      case 'call':
-        return '📞';
-      case 'sms':
-        return '💬';
-      case 'manual':
-        return '🔍';
+      case "call":
+        return "📞";
+      case "sms":
+        return "💬";
+      case "manual":
+        return "🔍";
       default:
-        return '❓';
+        return "❓";
     }
   };
 
@@ -135,15 +136,17 @@ const HistoryScreen: React.FC = () => {
         </View>
         <Text style={styles.timestamp}>{formatTimestamp(item.timestamp)}</Text>
       </View>
-      
+
       <View style={styles.phoneContainer}>
         <Text style={styles.phoneNumber}>{item.phoneNumber}</Text>
-        <View style={[
-          styles.statusBadge,
-          { backgroundColor: item.isScammer ? '#FF6B6B' : '#2ECC71' }
-        ]}>
+        <View
+          style={[
+            styles.statusBadge,
+            { backgroundColor: item.isScammer ? "#FF6B6B" : "#2ECC71" },
+          ]}
+        >
           <Text style={styles.statusText}>
-            {item.isScammer ? 'SCAMMER' : 'SAFE'}
+            {item.isScammer ? "SCAMMER" : "SAFE"}
           </Text>
         </View>
       </View>
@@ -173,11 +176,12 @@ const HistoryScreen: React.FC = () => {
       <Text style={styles.emptyIcon}>📋</Text>
       <Text style={styles.emptyTitle}>No Detection History</Text>
       <Text style={styles.emptyText}>
-        When you receive calls or SMS messages, they'll appear here if they match known scammers.
+        When you receive calls or SMS messages, they'll appear here if they
+        match known scammers.
       </Text>
       <TouchableOpacity
         style={styles.checkButton}
-        onPress={() => navigation.navigate('Check')}
+        onPress={() => navigation.navigate("Check")}
       >
         <Text style={styles.checkButtonText}>Check a Number Manually</Text>
       </TouchableOpacity>
@@ -201,14 +205,14 @@ const HistoryScreen: React.FC = () => {
           <Text style={styles.statLabel}>Total Checks</Text>
         </View>
         <View style={styles.statItem}>
-          <Text style={[styles.statNumber, { color: '#FF6B6B' }]}>
-            {history.filter(item => item.isScammer).length}
+          <Text style={[styles.statNumber, { color: "#FF6B6B" }]}>
+            {history.filter((item) => item.isScammer).length}
           </Text>
           <Text style={styles.statLabel}>Scammers Detected</Text>
         </View>
         <View style={styles.statItem}>
-          <Text style={[styles.statNumber, { color: '#2ECC71' }]}>
-            {history.filter(item => !item.isScammer).length}
+          <Text style={[styles.statNumber, { color: "#2ECC71" }]}>
+            {history.filter((item) => !item.isScammer).length}
           </Text>
           <Text style={styles.statLabel}>Safe Numbers</Text>
         </View>
@@ -227,7 +231,9 @@ const HistoryScreen: React.FC = () => {
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
-          contentContainerStyle={history.length === 0 ? styles.emptyContainer : undefined}
+          contentContainerStyle={
+            history.length === 0 ? styles.emptyContainer : undefined
+          }
           showsVerticalScrollIndicator={false}
         />
       )}
@@ -238,20 +244,20 @@ const HistoryScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: "#F8F9FA",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: "#E9ECEF",
     ...Platform.select({
       ios: {
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
@@ -263,30 +269,30 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2C3E50',
+    fontWeight: "bold",
+    color: "#2C3E50",
   },
   clearButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: '#E74C3C',
+    backgroundColor: "#E74C3C",
     borderRadius: 20,
   },
   clearButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
+    color: "#FFFFFF",
+    fontWeight: "600",
     fontSize: 14,
   },
   statsContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
+    flexDirection: "row",
+    backgroundColor: "#FFFFFF",
     marginHorizontal: 16,
     marginTop: 16,
     borderRadius: 12,
     padding: 16,
     ...Platform.select({
       ios: {
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
@@ -298,28 +304,28 @@ const styles = StyleSheet.create({
   },
   statItem: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
   statNumber: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2C3E50',
+    fontWeight: "bold",
+    color: "#2C3E50",
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: '#7F8C8D',
-    textAlign: 'center',
+    color: "#7F8C8D",
+    textAlign: "center",
   },
   historyItem: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     marginHorizontal: 16,
     marginVertical: 8,
     borderRadius: 12,
     padding: 16,
     ...Platform.select({
       ios: {
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
@@ -330,14 +336,14 @@ const styles = StyleSheet.create({
     }),
   },
   historyHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 12,
   },
   typeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   typeIcon: {
     fontSize: 16,
@@ -345,22 +351,22 @@ const styles = StyleSheet.create({
   },
   typeText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   timestamp: {
     fontSize: 12,
-    color: '#7F8C8D',
+    color: "#7F8C8D",
   },
   phoneContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 8,
   },
   phoneNumber: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#2C3E50',
+    fontWeight: "600",
+    color: "#2C3E50",
     flex: 1,
   },
   statusBadge: {
@@ -369,63 +375,63 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   statusText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 10,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   detailsContainer: {
     marginTop: 8,
     padding: 12,
-    backgroundColor: '#FFF5F5',
+    backgroundColor: "#FFF5F5",
     borderRadius: 8,
     borderLeftWidth: 4,
-    borderLeftColor: '#FF6B6B',
+    borderLeftColor: "#FF6B6B",
   },
   detailsTitle: {
     fontSize: 12,
-    fontWeight: '600',
-    color: '#E74C3C',
+    fontWeight: "600",
+    color: "#E74C3C",
     marginBottom: 4,
   },
   detailsText: {
     fontSize: 14,
-    color: '#2C3E50',
+    color: "#2C3E50",
     lineHeight: 20,
   },
   messageContainer: {
     marginTop: 8,
     padding: 12,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: "#F8F9FA",
     borderRadius: 8,
   },
   messageLabel: {
     fontSize: 12,
-    fontWeight: '600',
-    color: '#7F8C8D',
+    fontWeight: "600",
+    color: "#7F8C8D",
     marginBottom: 4,
   },
   messageText: {
     fontSize: 14,
-    color: '#2C3E50',
+    color: "#2C3E50",
     lineHeight: 20,
-    fontStyle: 'italic',
+    fontStyle: "italic",
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   loadingText: {
     fontSize: 16,
-    color: '#7F8C8D',
+    color: "#7F8C8D",
   },
   emptyContainer: {
     flex: 1,
   },
   emptyState: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 32,
   },
   emptyIcon: {
@@ -434,28 +440,28 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2C3E50',
+    fontWeight: "bold",
+    color: "#2C3E50",
     marginBottom: 8,
-    textAlign: 'center',
+    textAlign: "center",
   },
   emptyText: {
     fontSize: 16,
-    color: '#7F8C8D',
-    textAlign: 'center',
+    color: "#7F8C8D",
+    textAlign: "center",
     lineHeight: 24,
     marginBottom: 32,
   },
   checkButton: {
-    backgroundColor: '#3498DB',
+    backgroundColor: "#3498DB",
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 25,
   },
   checkButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });
 

@@ -1,0 +1,52 @@
+# Ndimboni Digital Scam Protection - Production Docker Compose
+# Latest stable versions with security-first configuration
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database - Latest stable version
+
+  backend:
+    image: sostene/ndimboini-api:latest
+    platform: linux/amd64
+    container_name: ndimboni-backend-prod
+    restart: unless-stopped
+    env_file:
+      - ../.env.ndimboni
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./ndimboni_uploads_data:/app/uploads
+      - ./ndimboni_data:/app/data
+    ports:
+      - '${PORT:-3000}:3000'
+    networks:
+      - ndimboni-network
+    tmpfs:
+      - /tmp
+
+  # Nginx Reverse Proxy (Optional)
+
+# Volumes for persistent data
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  uploads_data:
+    driver: local
+  app_data:
+    driver: local
+  nginx_cache:
+    driver: local
+
+# Networks
+networks:
+  ndimboni-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

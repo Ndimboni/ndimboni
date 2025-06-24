@@ -28,7 +28,7 @@ A React Native mobile application that protects users from scam calls and SMS by
 
 ## Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - Expo CLI (`npm install -g @expo/cli`)
 - iOS Simulator (for iOS development) or Android Studio (for Android development)
 - Physical device with Expo Go app for testing
@@ -36,26 +36,30 @@ A React Native mobile application that protects users from scam calls and SMS by
 ## Installation
 
 1. **Clone the repository**:
+
    ```bash
    git clone <repository-url>
    cd Ndimboni-Digital-Scam-Protection/mobile-app
    ```
 
 2. **Install dependencies**:
+
    ```bash
    npm install
    ```
 
 3. **Configure backend URL**:
    Edit `src/utils/config.ts` and update the `API_BASE_URL` to point to your Ndimboni backend:
+
    ```typescript
    const appConfig: AppConfig = {
-     API_BASE_URL: 'http://your-backend-url:3000', // Update this
+     API_BASE_URL: "http://your-backend-url:3000", // Update this
      // ... other config
    };
    ```
 
 4. **Start the development server**:
+
    ```bash
    npm start
    ```
@@ -97,24 +101,24 @@ The app connects to the Ndimboni backend API. Configure the connection in `src/u
 
 ```typescript
 const appConfig: AppConfig = {
-  API_BASE_URL: 'http://localhost:3000', // Your backend URL
-  API_TIMEOUT: 10000,                    // Request timeout
-  CACHE_DURATION: 300000,                // 5 minutes cache
-  DEBUG_MODE: __DEV__,                   // Enable debug logging
-  
+  API_BASE_URL: "http://localhost:3000", // Your backend URL
+  API_TIMEOUT: 10000, // Request timeout
+  CACHE_DURATION: 300000, // 5 minutes cache
+  DEBUG_MODE: __DEV__, // Enable debug logging
+
   FEATURES: {
-    CALL_MONITORING: true,               // Enable call monitoring
-    SMS_MONITORING: true,                // Enable SMS monitoring  
-    BACKGROUND_DETECTION: true,          // Background processing
-    MANUAL_REPORTING: true,              // Manual scammer reporting
-    DETECTION_HISTORY: true,             // Store detection history
+    CALL_MONITORING: true, // Enable call monitoring
+    SMS_MONITORING: true, // Enable SMS monitoring
+    BACKGROUND_DETECTION: true, // Background processing
+    MANUAL_REPORTING: true, // Manual scammer reporting
+    DETECTION_HISTORY: true, // Store detection history
   },
-  
+
   PHONE_CONFIG: {
-    DEFAULT_COUNTRY_CODE: '+250',        // Rwanda country code
-    RWANDA_PREFIX: '25',                 // Rwanda prefix for normalization
-    MIN_LENGTH: 9,                       // Minimum phone number length
-    MAX_LENGTH: 13,                      // Maximum phone number length
+    DEFAULT_COUNTRY_CODE: "+250", // Rwanda country code
+    RWANDA_PREFIX: "25", // Rwanda prefix for normalization
+    MIN_LENGTH: 9, // Minimum phone number length
+    MAX_LENGTH: 13, // Maximum phone number length
   },
 };
 ```
@@ -157,20 +161,25 @@ The app uses Expo Notifications for scam alerts. Permissions are requested autom
 The app integrates with these Ndimboni backend endpoints:
 
 ### Check Scammer
+
 ```
 GET /scammer-reports/check/{type}/{identifier}
 ```
+
 - Checks if a phone number is in the scammer database
 - Returns scammer details if found
 
 ### Report Scammer
+
 ```
 POST /scammer-reports
 ```
+
 - Reports a new scammer to the database
 - Requires phone number and description
 
 ### Response Format
+
 ```typescript
 interface CheckScammerResponse {
   success: boolean;
@@ -189,11 +198,13 @@ interface ReportScammerResponse {
 ## Call & SMS Monitoring
 
 ### Android
+
 - Uses `react-native-call-detection` for call monitoring
 - Uses `react-native-sms-android` for SMS monitoring
 - Requires device permissions for phone and SMS access
 
 ### iOS
+
 - Limited call monitoring due to iOS restrictions
 - SMS monitoring requires special entitlements
 - Background processing has limitations
@@ -250,11 +261,13 @@ Some features require ejecting from Expo managed workflow:
 ### Platform Limitations
 
 #### Android
+
 - Full call and SMS monitoring supported
 - Background detection possible
 - Requires runtime permissions
 
-#### iOS  
+#### iOS
+
 - Limited call detection capabilities
 - SMS monitoring requires special entitlements
 - Strict background processing limitations
@@ -272,22 +285,26 @@ For full functionality, consider:
 ### Common Issues
 
 1. **"Module not found" errors**:
+
    ```bash
    npm install
    expo install --fix
    ```
 
 2. **Metro bundler issues**:
+
    ```bash
    expo start --clear
    ```
 
 3. **Type errors**:
+
    ```bash
    npx tsc --noEmit
    ```
 
 4. **Notification permissions denied**:
+
    - Check device settings
    - Restart app after granting permissions
 

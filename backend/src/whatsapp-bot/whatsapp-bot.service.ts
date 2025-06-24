@@ -60,13 +60,12 @@ export class WhatsappBotService {
       text.trim().toLowerCase().includes('/report') ||
       text.trim().toLowerCase().includes('/scam')
     ) {
-      // Extract report details (very basic, for demo)
       const description = text.slice(7).trim();
       const report = this.scamReportRepository.create({
         title: 'WhatsApp Report',
         description,
-        status: 'pending', // Fix: use enum ScamStatus.PENDING
-        scamType: 'other', // Fix: use enum ScamType.OTHER
+        status: 'pending',
+        scamType: 'other',
         reporterPhone: waId,
       } as Partial<ScamReport>);
       const saved = await this.scamReportRepository.save(report);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -10,14 +10,17 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-} from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import { StackNavigationProp } from '@react-navigation/stack';
-import ScamDetectionService from '../services/ScamDetectionService';
-import NdimboniAPI from '../services/api';
-import { RootStackParamList, ScammerData } from '../types';
+} from "react-native";
+import { StatusBar } from "expo-status-bar";
+import { StackNavigationProp } from "@react-navigation/stack";
+import ScamDetectionService from "../services/ScamDetectionService";
+import NdimboniAPI from "../services/api";
+import { RootStackParamList, ScammerData } from "../types";
 
-type CheckScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Check'>;
+type CheckScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  "Check"
+>;
 
 interface Props {
   navigation: CheckScreenNavigationProp;
@@ -32,34 +35,35 @@ interface CheckResult {
 }
 
 export default function CheckScreen({ navigation }: Props) {
-  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [isChecking, setIsChecking] = useState<boolean>(false);
   const [result, setResult] = useState<CheckResult | null>(null);
 
   const handleCheck = async (): Promise<void> => {
     try {
       if (!phoneNumber.trim()) {
-        Alert.alert('Error', 'Please enter a phone number');
+        Alert.alert("Error", "Please enter a phone number");
         return;
       }
 
       if (!NdimboniAPI.validatePhoneNumber(phoneNumber)) {
-        Alert.alert('Error', 'Please enter a valid phone number');
+        Alert.alert("Error", "Please enter a valid phone number");
         return;
       }
 
       setIsChecking(true);
       setResult(null);
 
-      const checkResult = await ScamDetectionService.manualCheck(phoneNumber.trim());
+      const checkResult = await ScamDetectionService.manualCheck(
+        phoneNumber.trim()
+      );
       setResult(checkResult);
-
     } catch (error) {
-      console.error('Error checking number:', error);
+      console.error("Error checking number:", error);
       Alert.alert(
-        'Check Failed',
-        'Failed to check the phone number. Please try again.',
-        [{ text: 'OK' }]
+        "Check Failed",
+        "Failed to check the phone number. Please try again.",
+        [{ text: "OK" }]
       );
     } finally {
       setIsChecking(false);
@@ -67,18 +71,18 @@ export default function CheckScreen({ navigation }: Props) {
   };
 
   const formatPhoneNumber = (text: string): string => {
-    let cleaned = text.replace(/[^\d+]/g, '');
-    
-    if (cleaned.startsWith('0')) {
-      cleaned = '+250' + cleaned.substring(1);
+    let cleaned = text.replace(/[^\d+]/g, "");
+
+    if (cleaned.startsWith("0")) {
+      cleaned = "+250" + cleaned.substring(1);
     }
-    
+
     return cleaned;
   };
 
   const clearResult = (): void => {
     setResult(null);
-    setPhoneNumber('');
+    setPhoneNumber("");
   };
 
   const renderResult = (): React.ReactElement | null => {
@@ -92,7 +96,7 @@ export default function CheckScreen({ navigation }: Props) {
             <Text style={styles.resultTitle}>Check Failed</Text>
           </View>
           <Text style={styles.resultMessage}>
-            {result.error || 'Unable to check this number'}
+            {result.error || "Unable to check this number"}
           </Text>
         </View>
       );
@@ -112,7 +116,7 @@ export default function CheckScreen({ navigation }: Props) {
             <View style={styles.resultDetails}>
               <Text style={styles.detailsTitle}>Report Details:</Text>
               <Text style={styles.detailsText}>
-                Type: {result.data.type || 'Unknown'}
+                Type: {result.data.type || "Unknown"}
               </Text>
               {result.data.description && (
                 <Text style={styles.detailsText}>
@@ -146,11 +150,12 @@ export default function CheckScreen({ navigation }: Props) {
         </Text>
         <View style={styles.resultActions}>
           <Text style={styles.infoText}>
-            💡 If you believe this number is a scammer, you can report it to help protect others.
+            💡 If you believe this number is a scammer, you can report it to
+            help protect others.
           </Text>
           <TouchableOpacity
             style={styles.reportButton}
-            onPress={() => navigation.navigate('Report')}
+            onPress={() => navigation.navigate("Report")}
           >
             <Text style={styles.reportButtonText}>Report as Scammer</Text>
           </TouchableOpacity>
@@ -160,12 +165,12 @@ export default function CheckScreen({ navigation }: Props) {
   };
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <StatusBar style="dark" />
-      
+
       <ScrollView style={styles.scrollView} keyboardShouldPersistTaps="handled">
         {/* Header */}
         <View style={styles.header}>
@@ -213,10 +218,7 @@ export default function CheckScreen({ navigation }: Props) {
           </TouchableOpacity>
 
           {result && (
-            <TouchableOpacity
-              style={styles.clearButton}
-              onPress={clearResult}
-            >
+            <TouchableOpacity style={styles.clearButton} onPress={clearResult}>
               <Text style={styles.clearButtonText}>Check Another Number</Text>
             </TouchableOpacity>
           )}
@@ -255,27 +257,27 @@ export default function CheckScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   scrollView: {
     flex: 1,
   },
   header: {
-    backgroundColor: '#2196F3',
+    backgroundColor: "#2196F3",
     padding: 20,
     paddingTop: 50,
-    alignItems: 'center',
+    alignItems: "center",
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: "bold",
+    color: "#fff",
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,
-    color: '#E3F2FD',
-    textAlign: 'center',
+    color: "#E3F2FD",
+    textAlign: "center",
   },
   form: {
     padding: 20,
@@ -285,82 +287,82 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: "#E0E0E0",
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    color: '#333',
+    color: "#333",
   },
   inputHint: {
     fontSize: 12,
-    color: '#666',
+    color: "#666",
     marginTop: 4,
   },
   checkButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: "#2196F3",
     padding: 16,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 12,
   },
   checkButtonDisabled: {
-    backgroundColor: '#B0BEC5',
+    backgroundColor: "#B0BEC5",
   },
   checkButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   checkingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   clearButton: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     borderWidth: 1,
-    borderColor: '#666',
+    borderColor: "#666",
     padding: 16,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
   clearButtonText: {
-    color: '#666',
+    color: "#666",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   resultCard: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     margin: 20,
     marginTop: 0,
     borderRadius: 12,
-    overflow: 'hidden',
+    overflow: "hidden",
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   resultHeader: {
     padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   dangerHeader: {
-    backgroundColor: '#FFEBEE',
+    backgroundColor: "#FFEBEE",
   },
   safeHeader: {
-    backgroundColor: '#E8F5E8',
+    backgroundColor: "#E8F5E8",
   },
   errorHeader: {
-    backgroundColor: '#FFF3E0',
+    backgroundColor: "#FFF3E0",
   },
   resultIcon: {
     fontSize: 24,
@@ -368,30 +370,30 @@ const styles = StyleSheet.create({
   },
   resultTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   resultMessage: {
     padding: 16,
     paddingTop: 0,
     fontSize: 16,
-    color: '#666',
+    color: "#666",
     lineHeight: 22,
   },
   resultDetails: {
     padding: 16,
     paddingTop: 0,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: "#F5F5F5",
   },
   detailsTitle: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
     marginBottom: 8,
   },
   detailsText: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginBottom: 4,
   },
   resultActions: {
@@ -399,50 +401,50 @@ const styles = StyleSheet.create({
   },
   warningText: {
     fontSize: 14,
-    color: '#D32F2F',
-    fontWeight: '500',
-    textAlign: 'center',
-    backgroundColor: '#FFEBEE',
+    color: "#D32F2F",
+    fontWeight: "500",
+    textAlign: "center",
+    backgroundColor: "#FFEBEE",
     padding: 12,
     borderRadius: 8,
   },
   infoText: {
     fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
     marginBottom: 12,
   },
   reportButton: {
-    backgroundColor: '#FF9800',
+    backgroundColor: "#FF9800",
     padding: 12,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
   reportButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   infoSection: {
     margin: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     padding: 20,
     borderRadius: 12,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   infoSectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
     marginBottom: 16,
   },
   infoItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
     marginBottom: 12,
   },
   infoItemIcon: {
@@ -453,7 +455,7 @@ const styles = StyleSheet.create({
   infoItemText: {
     flex: 1,
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     lineHeight: 20,
   },
 });

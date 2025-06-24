@@ -9,16 +9,19 @@ This error typically occurs when there are Metro bundler cache issues or package
 **Solutions:**
 
 1. **Clear Metro Cache:**
+
    ```bash
    npx expo start --clear
    ```
 
 2. **Fix Package Versions:**
+
    ```bash
    npx expo install --fix
    ```
 
 3. **Full Cache Clear:**
+
    ```bash
    rm -rf node_modules/.cache
    rm -rf .expo
@@ -39,11 +42,13 @@ This error typically occurs when there are Metro bundler cache issues or package
 **Solutions:**
 
 1. **Check TypeScript Configuration:**
+
    ```bash
    npx tsc --noEmit
    ```
 
 2. **Restart Metro Bundler:**
+
    ```bash
    npx expo start --clear
    ```
@@ -57,6 +62,7 @@ This error typically occurs when there are Metro bundler cache issues or package
 **Error:** Package compatibility warnings
 
 **Solution:**
+
 ```bash
 npx expo install --fix
 ```
@@ -66,16 +72,19 @@ This automatically installs the correct versions for your Expo SDK.
 ### 4. Simulator/Device Connection Issues
 
 **iOS Simulator:**
+
 ```bash
 npx expo start --ios
 ```
 
 **Android Emulator:**
+
 ```bash
 npx expo start --android
 ```
 
 **Physical Device Issues:**
+
 - Ensure device and computer are on same WiFi network
 - Use `npx expo start --tunnel` for remote testing
 - Check firewall settings
@@ -87,6 +96,7 @@ npx expo start --android
 **Note:** Some modules require ejecting from Expo managed workflow:
 
 1. **For Development:**
+
    - Use simulation mode in debug builds
    - Test core functionality without native modules
 
@@ -101,11 +111,13 @@ npx expo start --android
 **Check:**
 
 1. **Backend Status:**
+
    ```bash
    curl http://localhost:3000/api
    ```
 
 2. **Configuration:**
+
    - Verify `API_BASE_URL` in `src/utils/config.ts`
    - Use IP address instead of localhost for device testing
 
@@ -120,6 +132,7 @@ npx expo start --android
 **Solutions:**
 
 1. **Check App Settings:**
+
    - Manually enable permissions in device settings
    - Restart app after granting permissions
 
@@ -134,6 +147,7 @@ npx expo start --android
 **Solutions:**
 
 1. **Clean Build:**
+
    ```bash
    npx expo start --clear
    rm -rf .expo
@@ -155,11 +169,13 @@ npx expo start --android
 **Solutions:**
 
 1. **Check Types:**
+
    ```bash
    npx tsc --noEmit
    ```
 
 2. **Update TypeScript:**
+
    ```bash
    npm install typescript@latest
    ```
@@ -175,10 +191,12 @@ npx expo start --android
 **Solutions:**
 
 1. **Enable Flipper (if ejected):**
+
    - Use React Native debugger
    - Monitor performance metrics
 
 2. **Optimize Bundle:**
+
    - Check bundle size
    - Remove unused dependencies
 
@@ -189,6 +207,7 @@ npx expo start --android
 ## Debugging Commands
 
 ### Development
+
 ```bash
 # Start with clear cache
 npx expo start --clear
@@ -202,6 +221,7 @@ npx expo start --android
 ```
 
 ### Package Management
+
 ```bash
 # Fix version conflicts
 npx expo install --fix
@@ -214,6 +234,7 @@ npm install -g @expo/cli@latest
 ```
 
 ### Troubleshooting
+
 ```bash
 # Type checking
 npx tsc --noEmit
@@ -230,16 +251,19 @@ npx expo start --clear
 ## Environment-Specific Issues
 
 ### macOS
+
 - Ensure Xcode is installed for iOS development
 - Install Android Studio for Android development
 - Check firewall settings for local development
 
 ### Windows
+
 - Use WSL2 for better performance
 - Ensure Android SDK is properly configured
 - Use PowerShell or Command Prompt
 
 ### Linux
+
 - Install Android SDK manually
 - Configure ANDROID_HOME environment variable
 - Ensure proper permissions for device access
@@ -247,22 +271,27 @@ npx expo start --clear
 ## Getting Help
 
 ### Check Logs
+
 1. **Metro Bundler Logs:** Check terminal output when running `expo start`
 2. **Device Logs:** Use device console for runtime errors
 3. **Network Logs:** Monitor API requests in debug mode
 
 ### Debug Mode Features
+
 Enable debug mode in `src/utils/config.ts`:
+
 ```typescript
-DEBUG_MODE: true
+DEBUG_MODE: true;
 ```
 
 This enables:
+
 - Console logging for API requests
 - Additional error information
 - Development tools in the app
 
 ### Community Resources
+
 - [Expo Documentation](https://docs.expo.dev/)
 - [React Native Troubleshooting](https://reactnative.dev/docs/troubleshooting)
 - [Stack Overflow](https://stackoverflow.com/questions/tagged/expo)

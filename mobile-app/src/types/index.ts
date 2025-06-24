@@ -1,4 +1,4 @@
-import { StackNavigationProp as RNStackNavigationProp } from '@react-navigation/stack';
+import { StackNavigationProp as RNStackNavigationProp } from "@react-navigation/stack";
 
 // Types for the Ndimboni Scam Guard App
 
@@ -15,18 +15,18 @@ export interface ScammerData {
 }
 
 export enum ScammerType {
-  EMAIL = 'email',
-  PHONE = 'phone',
-  SOCIAL_MEDIA = 'social_media',
-  WEBSITE = 'website',
-  OTHER = 'other',
+  EMAIL = "email",
+  PHONE = "phone",
+  SOCIAL_MEDIA = "social_media",
+  WEBSITE = "website",
+  OTHER = "other",
 }
 
 export enum ScammerStatus {
-  PENDING = 'pending',
-  VERIFIED = 'verified',
-  FALSE_POSITIVE = 'false_positive',
-  INVESTIGATING = 'investigating',
+  PENDING = "pending",
+  VERIFIED = "verified",
+  FALSE_POSITIVE = "false_positive",
+  INVESTIGATING = "investigating",
 }
 
 export interface CheckScammerRequest {
@@ -55,7 +55,7 @@ export interface ReportScammerResponse {
 
 export interface DetectionHistory {
   phoneNumber: string;
-  type: 'call' | 'sms' | 'manual';
+  type: "call" | "sms" | "manual";
   isScammer: boolean;
   timestamp: string;
   details?: string;
@@ -64,7 +64,7 @@ export interface DetectionHistory {
 
 export interface DetectionRecord {
   phoneNumber: string;
-  context: 'call' | 'sms' | 'test';
+  context: "call" | "sms" | "test";
   scammerData?: ScammerData;
   timestamp: number;
   deviceInfo: string;
@@ -86,7 +86,7 @@ export interface ServiceStatus {
 
 export interface CallEvent {
   phoneNumber: string;
-  callState: 'incoming' | 'answered' | 'ended';
+  callState: "incoming" | "answered" | "ended";
   timestamp: number;
 }
 
@@ -134,4 +134,5 @@ export type RootStackParamList = {
 export type ScreenNames = keyof RootStackParamList;
 
 // Navigation prop types
-export type StackNavigationProp<T extends keyof RootStackParamList> = RNStackNavigationProp<RootStackParamList, T>;
+export type StackNavigationProp<T extends keyof RootStackParamList> =
+  RNStackNavigationProp<RootStackParamList, T>;
