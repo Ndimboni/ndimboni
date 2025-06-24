@@ -73,7 +73,7 @@ const ContactMessagesPage = () => {
   const [isClient, setIsClient] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
 
-  const API_BASE_URL = 'https://ndimboni-digital-scam-protection.onrender.com';
+  const API_BASE_URL = 'https://ndimboniapi.ini.rw';
 
   const checkAuthorization = () => {
     if (typeof window === 'undefined') return false;

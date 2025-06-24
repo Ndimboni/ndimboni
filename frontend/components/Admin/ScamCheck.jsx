@@ -44,7 +44,7 @@ const { Option } = Select;
 const { RangePicker } = DatePicker;
 
 
-const API_BASE_URL = 'https://ndimboni-digital-scam-protection.onrender.com/api/scam-check';
+const API_BASE_URL = 'https://ndimboniapi.ini.rw/api/scam-check';
 
 
 const CheckStatus = {

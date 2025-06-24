@@ -93,7 +93,7 @@ const ModeratorLayout = ({ children, currentPage = 'dashboard' }) => {
         return;
       }
 
-      const response = await fetch('https://ndimboni-digital-scam-protection.onrender.com/auth/profile', {
+      const response = await fetch('https://ndimboniapi.ini.rw/auth/profile', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

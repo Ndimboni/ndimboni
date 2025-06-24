@@ -69,9 +69,9 @@ const AdminDashboard = () => {
       const headers = getAuthHeaders();
 
       const [usersResponse, scamChecksResponse, reportsResponse] = await Promise.allSettled([
-        fetch('https://ndimboni-digital-scam-protection.onrender.com/users', { headers }),
-        fetch('https://ndimboni-digital-scam-protection.onrender.com/api/scam-check/all', { headers }),
-        fetch('https://ndimboni-digital-scam-protection.onrender.com/api/api/scammer-reports/all', { headers })
+        fetch('https://ndimboniapi.ini.rw/users', { headers }),
+        fetch('https://ndimboniapi.ini.rw/api/scam-check/all', { headers }),
+        fetch('https://ndimboniapi.ini.rw/api/scammer-reports/all', { headers })
       ]);
 
       const users = usersResponse.status === 'fulfilled' && usersResponse.value.ok 

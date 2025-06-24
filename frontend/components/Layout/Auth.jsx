@@ -15,8 +15,8 @@ export default function AuthPage() {
     
     try {
       const endpoint = isLogin 
-        ? 'https://ndimboni-digital-scam-protection.onrender.com/auth/login'
-        : 'https://ndimboni-digital-scam-protection.onrender.com/auth/register'
+        ? 'https://ndimboniapi.ini.rw/auth/login'
+        : 'https://ndimboniapi.ini.rw/auth/register'
       
       const payload = isLogin 
         ? { email: values.email, password: values.password }
