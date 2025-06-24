@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TelegramConfig } from '../common/interfaces/config.interface';
+import { GroqService } from '../common/services/groq.service';
 
 export interface ModerationResult {
   isScam: boolean;
@@ -8,6 +9,7 @@ export interface ModerationResult {
   confidence: number;
   reasons: string[];
   detectedPatterns: string[];
+  analysisMethod?: 'groq' | 'rule-based' | 'enhanced';
 }
 
 @Injectable()
@@ -97,7 +99,10 @@ export class TelegramModerationService {
     /moderator/gi,
   ];
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private readonly groqService: GroqService,
+  ) {
     const telegramConfig = this.configService.get<TelegramConfig>('telegram');
     if (!telegramConfig) {
       throw new Error('Telegram configuration is required');
@@ -106,6 +111,82 @@ export class TelegramModerationService {
   }
 
   async analyzeMessage(
+    text: string,
+    _userId?: string,
+  ): Promise<ModerationResult> {
+    try {
+      // First, try to use Groq AI for comprehensive analysis
+      const groqAnalysis = await this.groqService.analyzeIntent(text);
+
+      if (groqAnalysis.confidence > 0.5) {
+        // High confidence from Groq, use AI results
+        const reasons: string[] = [groqAnalysis.reasoning];
+        const detectedPatterns: string[] = [];
+
+        // Still run pattern detection to get additional context
+        this.detectAdditionalPatterns(text, detectedPatterns);
+
+        let riskLevel: 'low' | 'medium' | 'high' = 'low';
+        if (groqAnalysis.confidence >= 0.8) {
+          riskLevel = 'high';
+        } else if (groqAnalysis.confidence >= 0.6) {
+          riskLevel = 'medium';
+        }
+
+        this.logger.log(
+          `Groq analysis: ${groqAnalysis.intent}, confidence: ${groqAnalysis.confidence}, isScam: ${groqAnalysis.isScam}`,
+        );
+
+        return {
+          isScam: groqAnalysis.isScam,
+          riskLevel,
+          confidence: groqAnalysis.confidence,
+          reasons,
+          detectedPatterns,
+          analysisMethod: 'groq',
+        };
+      }
+    } catch (error) {
+      this.logger.warn(
+        'Groq analysis failed, falling back to rule-based detection:',
+        error,
+      );
+    }
+
+    // Fallback to rule-based analysis
+    return this.analyzeMessageRuleBased(text, _userId);
+  }
+
+  /**
+   * Detect additional patterns to supplement AI analysis
+   */
+  private detectAdditionalPatterns(
+    text: string,
+    detectedPatterns: string[],
+  ): void {
+    // Check for URLs
+    this.urlPatterns.forEach((pattern) => {
+      if (pattern.test(text)) {
+        detectedPatterns.push('suspicious_url');
+      }
+    });
+
+    // Check for phone patterns
+    this.phoneNumberPatterns.forEach((pattern) => {
+      if (pattern.test(text)) {
+        detectedPatterns.push('phone_harvesting');
+      }
+    });
+
+    // Check for urgency patterns
+    this.urgencyPatterns.forEach((pattern) => {
+      if (pattern.test(text)) {
+        detectedPatterns.push('urgency_tactics');
+      }
+    });
+  }
+
+  private async analyzeMessageRuleBased(
     text: string,
     _userId?: string,
   ): Promise<ModerationResult> {
@@ -161,6 +242,11 @@ export class TelegramModerationService {
     // Calculate confidence and risk level
     confidence = Math.min(totalScore / 10, 1); // Normalize to 0-1
 
+    // Ensure minimum confidence of 0.1 if any patterns were detected
+    if (totalScore > 0 && confidence < 0.1) {
+      confidence = 0.1;
+    }
+
     let riskLevel: 'low' | 'medium' | 'high' = 'low';
     if (totalScore >= 7) {
       riskLevel = 'high';
@@ -180,6 +266,7 @@ export class TelegramModerationService {
       confidence,
       reasons,
       detectedPatterns,
+      analysisMethod: 'rule-based',
     };
   }
 
@@ -417,5 +504,101 @@ export class TelegramModerationService {
       return 'warn';
     }
     return 'none';
+  }
+
+  /**
+   * Enhanced analysis that combines Groq AI with rule-based detection
+   * for more comprehensive scam detection
+   */
+  async analyzeMessageEnhanced(
+    text: string,
+    userId?: string,
+  ): Promise<ModerationResult> {
+    this.logger.log('Starting enhanced message analysis...');
+
+    const results: {
+      groq?: any;
+      ruleBased: ModerationResult;
+    } = {
+      ruleBased: await this.analyzeMessageRuleBased(text, userId),
+    };
+
+    try {
+      this.logger.log('Requesting Groq AI analysis...');
+      // Get Groq analysis
+      const groqAnalysis = await this.groqService.analyzeIntent(text);
+      results.groq = groqAnalysis;
+
+      this.logger.log(
+        `Groq analysis completed: confidence=${groqAnalysis.confidence}, isScam=${groqAnalysis.isScam}`,
+      );
+
+      // Combine insights from both systems
+      const combinedReasons = [...results.ruleBased.reasons];
+      const combinedPatterns = [...results.ruleBased.detectedPatterns];
+
+      // Add Groq reasoning if different
+      if (!combinedReasons.includes(groqAnalysis.reasoning)) {
+        combinedReasons.unshift(`AI Analysis: ${groqAnalysis.reasoning}`);
+      }
+
+      // Determine final verdict by combining both analyses
+      const ruleBasedIsScam = results.ruleBased.isScam;
+      const groqIsScam = groqAnalysis.isScam;
+
+      // If either system detects a scam, consider it suspicious
+      const finalIsScam = ruleBasedIsScam || groqIsScam;
+
+      // Use the higher confidence score, but ensure it's properly normalized
+      let finalConfidence = Math.max(
+        results.ruleBased.confidence,
+        groqAnalysis.confidence,
+      );
+
+      // Ensure confidence is between 0 and 1
+      finalConfidence = Math.min(Math.max(finalConfidence, 0), 1);
+
+      // Adjust risk level based on combined analysis
+      let finalRiskLevel: 'low' | 'medium' | 'high' = 'low';
+      if (finalIsScam && finalConfidence >= 0.8) {
+        finalRiskLevel = 'high';
+      } else if (finalIsScam && finalConfidence >= 0.5) {
+        finalRiskLevel = 'medium';
+      } else if (
+        results.ruleBased.riskLevel === 'medium' ||
+        groqAnalysis.confidence >= 0.4
+      ) {
+        finalRiskLevel = 'medium';
+      }
+
+      this.logger.log(
+        `Enhanced analysis complete - Final: isScam=${finalIsScam}, confidence=${finalConfidence}, risk=${finalRiskLevel}`,
+      );
+
+      return {
+        isScam: finalIsScam,
+        riskLevel: finalRiskLevel,
+        confidence: finalConfidence,
+        reasons: combinedReasons,
+        detectedPatterns: combinedPatterns,
+        analysisMethod: 'enhanced',
+      };
+    } catch (error) {
+      this.logger.warn(
+        'Enhanced analysis failed, using rule-based results:',
+        error,
+      );
+
+      // Ensure rule-based confidence is properly normalized
+      const normalizedConfidence = Math.min(
+        Math.max(results.ruleBased.confidence, 0),
+        1,
+      );
+
+      return {
+        ...results.ruleBased,
+        confidence: normalizedConfidence,
+      };
+    }
   }
 }

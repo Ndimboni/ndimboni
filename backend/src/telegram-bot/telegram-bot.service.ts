@@ -5,12 +5,14 @@ import {
   OnModuleDestroy,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { Telegraf, Context } from 'telegraf';
 import { TelegramConfig } from '../common/interfaces/config.interface';
 import { TelegramModerationService } from './telegram-moderation.service';
 import { ScamCheckService } from 'src/scam-check/scam-check.service';
-import { ScammerReportService } from 'src/scammer-reports/scammer-report.service';
-import { ScammerType } from 'src/entities';
+import { ScamReport } from 'src/entities/scam-report.entity';
+import { ScamAnalysisFormatterService } from '../common/services/scam-analysis-formatter.service';
 
 interface BotContext extends Context {
   botInfo: any;
@@ -26,7 +28,9 @@ export class TelegramBotService implements OnModuleInit, OnModuleDestroy {
     private readonly configService: ConfigService,
     private readonly moderationService: TelegramModerationService,
     private readonly scamCheckService: ScamCheckService,
-    private readonly scamReportService: ScammerReportService, // Assuming this is the correct service for scam checks
+    private readonly scamAnalysisFormatterService: ScamAnalysisFormatterService,
+    @InjectRepository(ScamReport)
+    private readonly scamReportRepository: Repository<ScamReport>,
   ) {
     const telegramConfig = this.configService.get<TelegramConfig>('telegram');
     if (!telegramConfig) {
@@ -167,39 +171,39 @@ export class TelegramBotService implements OnModuleInit, OnModuleDestroy {
 
   private async handleStartCommand(ctx: BotContext): Promise<void> {
     const welcomeMessage = `
-🛡️ **Welcome to Ndimboni Digital Scam Protection Bot!**
+🛡️ <b>Welcome to Ndimboni Digital Scam Protection Bot!</b>
 
 I'm here to help you identify and report scams. Here's what I can do:
 
-• **/report** [description] - Report a scam
-• **/check** [message] - Check if a message might be a scam
-• **/stats** - View scam statistics
-• **/help** - Show this help message
+• <b>/report</b> [description] - Report a scam
+• <b>/check</b> [message] - Check if a message might be a scam
+• <b>/stats</b> - View scam statistics
+• <b>/help</b> - Show this help message
 
 Stay safe online! 🔒
     `;
 
-    await ctx.reply(welcomeMessage, { parse_mode: 'Markdown' });
+    await ctx.reply(welcomeMessage, { parse_mode: 'HTML' });
   }
 
   private async handleHelpCommand(ctx: BotContext): Promise<void> {
     const helpMessage = `
-📋 **Available Commands:**
+📋 <b>Available Commands:</b>
 
-**/start** - Welcome message and overview
-**/help** - Show this help message
-**/report** [description] - Report a scam you encountered
-**/check** [message] - Analyze a message for scam indicators
-**/stats** - View current scam statistics
+<b>/start</b> - Welcome message and overview
+<b>/help</b> - Show this help message
+<b>/report</b> [description] - Report a scam you encountered
+<b>/check</b> [message] - Analyze a message for scam indicators
+<b>/stats</b> - View current scam statistics
 
-**Examples:**
-• \`/report Received fake bank SMS asking for PIN\`
-• \`/check Hey! You won $1000! Click here to claim...\`
+<b>Examples:</b>
+• <code>/report Received fake bank SMS asking for PIN</code>
+• <code>/check Hey! You won $1000! Click here to claim...</code>
 
 For support, contact our team.
     `;
 
-    await ctx.reply(helpMessage, { parse_mode: 'Markdown' });
+    await ctx.reply(helpMessage, { parse_mode: 'HTML' });
   }
 
   private async handleReportCommand(ctx: BotContext): Promise<void> {
@@ -211,8 +215,8 @@ For support, contact our team.
     if (!args.trim()) {
       await ctx.reply(
         '❌ Please provide a description of the scam.\n\n' +
-          'Example: `/report Received fake bank SMS asking for PIN`',
-        { parse_mode: 'Markdown' },
+          'Example: <code>/report Received fake bank SMS asking for PIN</code>',
+        { parse_mode: 'HTML' },
       );
       return;
     }
@@ -220,99 +224,40 @@ For support, contact our team.
     try {
       // Send initial acknowledgment
       await ctx.reply('📝 Processing your scam report...', {
-        parse_mode: 'Markdown',
+        parse_mode: 'HTML',
       });
 
-      // Create the scammer report using the correct service
+      // Create the scammer report using simplified logic like WhatsApp
+      const description = args.trim();
 
-      // Analyze the reported content to determine the scammer type
-      let scammerType = ScammerType.OTHER;
-      const content = args.trim().toLowerCase();
-
-      // Check for phone number patterns
-      const phonePatterns = [
-        /\+?[\d\s\-\(\)]{10,}/g, // General phone pattern
-        /\+250[\d\s\-]{9,}/g, // Rwanda specific
-        /07\d{8}/g, // Rwanda mobile format
-        /\b\d{3}[\s\-]?\d{3}[\s\-]?\d{4}\b/g, // US format
-      ];
-
-      // Check for email patterns
-      const emailPattern =
-        /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
-
-      // Check for website/URL patterns
-      const urlPatterns = [
-        /https?:\/\/[^\s]+/g,
-        /www\.[^\s]+/g,
-        /\b[a-zA-Z0-9-]+\.[a-zA-Z]{2,}[^\s]*/g,
-      ];
-
-      // Determine scammer type based on content analysis
-      if (phonePatterns.some((pattern) => pattern.test(content))) {
-        scammerType = ScammerType.PHONE;
-      } else if (emailPattern.test(content)) {
-        scammerType = ScammerType.EMAIL;
-      } else if (urlPatterns.some((pattern) => pattern.test(content))) {
-        scammerType = ScammerType.WEBSITE;
-      }
-
-      // Extract the actual identifier from the content
-      let identifier = 'unknown';
-      if (scammerType === ScammerType.PHONE) {
-        const phoneMatch = content.match(
-          phonePatterns.find((p) => p.test(content)) || phonePatterns[0],
-        );
-        identifier = phoneMatch
-          ? phoneMatch[0].replace(/\s+/g, '').trim()
-          : 'unknown';
-      } else if (scammerType === ScammerType.EMAIL) {
-        const emailMatch = content.match(emailPattern);
-        identifier = emailMatch ? emailMatch[0] : 'unknown';
-      } else if (scammerType === ScammerType.WEBSITE) {
-        const urlMatch = content.match(
-          urlPatterns.find((p) => p.test(content)) || urlPatterns[0],
-        );
-        identifier = urlMatch ? urlMatch[0] : 'unknown';
-      } else {
-        // Fallback to using Telegram user ID for OTHER type
-        identifier = ctx.from?.id?.toString() || 'unknown';
-      }
-
-      this.logger.log(
-        `Detected scammer type: ${scammerType}, identifier: ${identifier}`,
-      );
-      const reportData = {
-        type: scammerType,
-        identifier,
-        description: args.trim(),
-        evidence: [],
+      // Use scamReportRepository directly like WhatsApp bot
+      const report = this.scamReportRepository.create({
+        title: 'Telegram Report',
+        description,
+        status: 'pending' as any, // Will be properly typed
+        scamType: 'other' as any, // Will be properly typed
+        reporterPhone: ctx.from?.id?.toString() || 'unknown',
         additionalInfo: JSON.stringify({
           reporterName: ctx.from?.first_name || 'Anonymous',
-          contactInfo: `Telegram User ID: ${ctx.from?.id}`,
           telegramUserId: ctx.from?.id,
           telegramUsername: ctx.from?.username,
           chatId: ctx.chat?.id,
           chatType: ctx.chat?.type,
         }),
-        // reportedBy: ctx.from?.first_name || 'Anonymous',
-        source: 'telegram',
-      };
+      } as Partial<ScamReport>);
 
-      const report = await this.scamReportService.createReport(reportData);
+      const saved = await this.scamReportRepository.save(report);
 
-      const successMessage = `
-    ✅ **Report Submitted Successfully!**
+      // Use shared formatter for success message
+      const successMessage =
+        this.scamAnalysisFormatterService.formatReportSuccessResponse(
+          saved.id,
+          'telegram',
+        );
 
-    **Report ID:** ${report.id}
-    **Status:** Under Review
+      await ctx.reply(successMessage, { parse_mode: 'HTML' });
 
-    Thank you for helping protect others from scams. Our team will review your report and take appropriate action.
-
-    🛡️ Stay vigilant and keep reporting suspicious activity!
-      `;
-
-      await ctx.reply(successMessage, { parse_mode: 'Markdown' });
+      this.logger.log(`Report submitted by user ${ctx.from?.id}: ${saved.id}`);
     } catch (error) {
       this.logger.error('Error handling report command:', error);
       await ctx.reply(
@@ -330,53 +275,89 @@ For support, contact our team.
     if (!args.trim()) {
       await ctx.reply(
         '❌ Please provide a message to check.\n\n' +
-          'Example: `/check Hey, I got this message about winning money...`',
-        { parse_mode: 'Markdown' },
+          'Example: <code>/check Hey, I got this message about winning money...</code>',
+        { parse_mode: 'HTML' },
       );
       return;
     }
 
+    // Send immediate feedback that analysis is starting
+    const processingMessage = await ctx.reply(
+      '🔍 **Analyzing message for scam indicators...**\n\n' +
+        '⏳ This may take a few seconds while I check multiple databases and AI systems.\n\n' +
+        '🛡️ Please wait for the complete analysis results.',
+      { parse_mode: 'Markdown' },
+    );
+
     try {
-      // Use the moderation service for advanced analysis
-      const analysis = await this.scamCheckService.checkMessage({
+      // Use the scam check service directly like WhatsApp bot
+      // Note: We don't pass checkedBy for Telegram users since they aren't registered users
+      const result = await this.scamCheckService.checkMessage({
         message: args.trim(),
         source: 'telegram',
+        // checkedBy is omitted - Telegram users aren't in our users table
       });
 
-      let response = `🔍 **Scam Analysis Results:**\n\n`;
-      response += `**Message:** "${args.trim()}"\n\n`;
-
-      if (analysis.riskScore >= 0.7) {
-        response += `⚠️ **POTENTIAL SCAM DETECTED**\n\n`;
-        response += `**Risk Score:** ${Math.round(analysis.riskScore * 100)}%\n`;
-        response += `**Confidence:** ${Math.round(analysis.confidence * 100)}%\n\n`;
-
-        if (analysis.reasons && analysis.reasons.length > 0) {
-          response += `**Warning Signs:**\n`;
-          analysis.reasons.forEach((reason) => {
-            response += `• ${reason}\n`;
-          });
-          response += `\n`;
+      // Delete the processing message safely
+      try {
+        if (ctx.chat && processingMessage?.message_id) {
+          await ctx.telegram.deleteMessage(
+            ctx.chat.id,
+            processingMessage.message_id,
+          );
         }
-
-        response += `**Recommendation:** Be extremely cautious with this message.`;
-      } else if (analysis.riskScore >= 0.4) {
-        response += `⚠️ **MODERATE RISK DETECTED**\n\n`;
-        response += `**Risk Score:** ${Math.round(analysis.riskScore * 100)}%\n`;
-        response += `**Confidence:** ${Math.round(analysis.confidence * 100)}%\n\n`;
-
-        response += `**Recommendation:** Exercise caution and verify the source.`;
-      } else {
-        response += `✅ **LOW RISK**\n\n`;
-        response += `**Risk Score:** ${Math.round(analysis.riskScore * 100)}%\n`;
-        response += `**Recommendation:** Message appears relatively safe.`;
+      } catch (deleteError) {
+        this.logger.debug('Could not delete processing message:', deleteError);
+        // This is non-critical, continue processing
       }
 
-      await ctx.reply(response, { parse_mode: 'Markdown' });
+      // Format response using shared formatter service
+      const response =
+        this.scamAnalysisFormatterService.formatScamAnalysisResponse(
+          args.trim(),
+          result,
+          'telegram',
+        );
+
+      // Send response with HTML parsing for better compatibility
+      try {
+        await ctx.reply(response, { parse_mode: 'HTML' });
+      } catch (htmlError) {
+        this.logger.warn(
+          'HTML parsing failed, sending as plain text:',
+          htmlError,
+        );
+        // Fallback to plain text if HTML fails
+        const plainResponse = response.replace(/<[^>]*>/g, '');
+        await ctx.reply(plainResponse);
+      }
+
+      this.logger.log(
+        `Check command completed for user ${ctx.from?.id}: Risk=${Math.round(result.riskScore * 100)}%, Status=${result.status}`,
+      );
     } catch (error) {
+      // Delete the processing message if it exists
+      try {
+        if (ctx.chat && processingMessage?.message_id) {
+          await ctx.telegram.deleteMessage(
+            ctx.chat.id,
+            processingMessage.message_id,
+          );
+        }
+      } catch (deleteError) {
+        this.logger.debug('Could not delete processing message:', deleteError);
+        // This is non-critical, continue with error handling
+      }
+
       this.logger.error('Error analyzing message:', error);
       await ctx.reply(
-        '❌ Sorry, there was an error analyzing the message. Please try again later.',
+        '❌ **Analysis Failed**\n\n' +
+          'Sorry, there was an error analyzing the message. This could be due to:\n' +
+          '• Temporary network issues\n' +
+          '• AI service overload\n' +
+          '• Database connectivity\n\n' +
+          '🔄 Please try again in a few moments.',
+        { parse_mode: 'Markdown' },
       );
     }
   }
@@ -402,32 +383,45 @@ For support, contact our team.
     if (ctx.chat?.type === 'group' || ctx.chat?.type === 'supergroup') {
       if (ctx.message && 'text' in ctx.message) {
         try {
+          this.logger.debug(
+            `Analyzing message in group ${ctx.chat.id} from user ${ctx.from?.id}`,
+          );
+
           const analysis = await this.moderationService.analyzeMessage(
             ctx.message.text,
             ctx.from?.id?.toString(),
           );
 
           const action = this.moderationService.getModerationAction(analysis);
+          const riskPercentage = Math.round(analysis.confidence * 100);
 
           if (action === 'delete') {
             await ctx.deleteMessage();
 
             const warningMessage = `
-⚠️ **Message removed by Ndimboni Bot**
+🚨 **Message Automatically Removed by Ndimboni Bot**
 
-A message was automatically removed because it contained potential scam content.
+**Reason:** Potential scam content detected
+**Risk Level:** ${analysis.riskLevel.toUpperCase()} (${riskPercentage}% confidence)
+**Analysis Method:** ${analysis.analysisMethod || 'pattern-detection'}
 
-**Risk Level:** ${analysis.riskLevel.toUpperCase()}
-**Confidence:** ${Math.round(analysis.confidence * 100)}%
+${
+  analysis.reasons.length > 0
+    ? `**Detected Issues:**\n${analysis.reasons
+        .slice(0, 3)
+        .map((reason) => `• ${reason}`)
+        .join('\n')}`
+    : ''
+}
 
-Stay safe! 🛡️
+🛡️ **Stay safe!** This action helps protect group members from scams.
             `;
 
             const warning = await ctx.reply(warningMessage, {
               parse_mode: 'Markdown',
             });
 
-            // Auto-delete warning after 30 seconds
+            // Auto-delete warning after 45 seconds
             setTimeout(() => {
               void (async () => {
                 try {
@@ -441,18 +435,24 @@ Stay safe! 🛡️
                   this.logger.debug('Could not delete warning message:', error);
                 }
               })();
-            }, 30000);
+            }, 45000);
 
             this.logger.warn(
-              `Deleted potential scam message in group ${ctx.chat.id} from user ${ctx.from?.id}`,
+              `Deleted potential scam message in group ${ctx.chat.id} from user ${ctx.from?.id} - Risk: ${riskPercentage}%`,
             );
           } else if (action === 'warn') {
             const warningMessage = `
-⚠️ **Caution advised**
+⚠️ **Caution: Potentially Suspicious Content**
 
-This message contains potentially suspicious content.
+**Risk Level:** ${analysis.riskLevel.toUpperCase()} (${riskPercentage}% confidence)
 
-**Risk Level:** ${analysis.riskLevel.toUpperCase()}
+${
+  analysis.reasons.length > 0
+    ? `**Concerns:** ${analysis.reasons.slice(0, 2).join(', ')}`
+    : ''
+}
+
+🔍 Please verify this content before taking any action.
             `;
 
             const warning = await ctx.reply(warningMessage, {
@@ -477,15 +477,101 @@ This message contains potentially suspicious content.
                 }
               })();
             }, 60000);
+
+            this.logger.log(
+              `Warning issued for message in group ${ctx.chat.id} from user ${ctx.from?.id} - Risk: ${riskPercentage}%`,
+            );
           }
         } catch (error) {
           this.logger.error('Error during auto-moderation:', error);
         }
       }
     } else {
-      // For private chats, always reply with bot capabilities after any message
-      const capabilitiesMessage = `\n🤖 *Ndimboni Digital Scam Protection Bot Capabilities*\n\nYou can:\n• /report [description] — Report a scammer or scam incident\n• /check [message] — Check if a message might be a scam\n• /start — View welcome message and overview\n\nJust type your command or message!`;
-      await ctx.reply(capabilitiesMessage, { parse_mode: 'Markdown' });
+      // For private chats, analyze all messages like WhatsApp bot
+      if (ctx.message && 'text' in ctx.message) {
+        const text = ctx.message.text.trim();
+
+        // Respond to greetings like WhatsApp bot
+        const greetings = ['hi', 'hello', 'hey', 'start', 'muraho', 'salut'];
+        if (
+          greetings.some((greeting) => text.toLowerCase().includes(greeting))
+        ) {
+          const capabilitiesMessage =
+            this.scamAnalysisFormatterService.formatGreetingResponse(
+              'telegram',
+            );
+
+          await ctx.reply(capabilitiesMessage, { parse_mode: 'HTML' });
+          return;
+        }
+
+        // Skip analysis for commands (they have their own handlers)
+        if (text.startsWith('/')) {
+          return;
+        }
+
+        try {
+          // Send processing message for analysis
+          const processingMessage = await ctx.reply(
+            '🔍 **Analyzing your message for scam indicators...**\n\n⏳ Please wait...',
+            { parse_mode: 'Markdown' },
+          );
+
+          // Analyze the message using same logic as WhatsApp
+          const result = await this.scamCheckService.checkMessage({
+            message: text,
+            source: 'telegram',
+            // checkedBy is omitted - Telegram users aren't in our users table
+          });
+
+          // Delete processing message safely
+          try {
+            if (ctx.chat && processingMessage?.message_id) {
+              await ctx.telegram.deleteMessage(
+                ctx.chat.id,
+                processingMessage.message_id,
+              );
+            }
+          } catch (deleteError) {
+            this.logger.debug(
+              'Could not delete processing message:',
+              deleteError,
+            );
+            // This is non-critical, continue processing
+          }
+
+          // Format and send response using shared formatter
+          const response =
+            this.scamAnalysisFormatterService.formatScamAnalysisResponse(
+              text,
+              result,
+              'telegram',
+            );
+
+          // Send response with HTML parsing for better compatibility
+          try {
+            await ctx.reply(response, { parse_mode: 'HTML' });
+          } catch (htmlError) {
+            this.logger.warn(
+              'HTML parsing failed in private chat, sending as plain text:',
+              htmlError,
+            );
+            // Fallback to plain text if HTML fails
+            const plainResponse = response.replace(/<[^>]*>/g, '');
+            await ctx.reply(plainResponse);
+          }
+
+          this.logger.log(
+            `Private message analyzed for user ${ctx.from?.id}: Risk=${Math.round(result.riskScore * 100)}%`,
+          );
+        } catch (error) {
+          this.logger.error('Error analyzing private message:', error);
+          await ctx.reply(
+            "❌ **Analysis Error**\n\nSorry, I couldn't analyze your message right now. Please try again later or use the /check command.",
+            { parse_mode: 'Markdown' },
+          );
+        }
+      }
     }
   }
 
