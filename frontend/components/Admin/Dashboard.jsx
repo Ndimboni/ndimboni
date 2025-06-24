@@ -67,42 +67,104 @@ const AdminDashboard = () => {
       setError(null);
 
       const headers = getAuthHeaders();
+      console.log('Fetching data with headers:', headers);
 
+     
       const [usersResponse, scamChecksResponse, reportsResponse] = await Promise.allSettled([
         fetch('https://ndimboniapi.ini.rw/users', { headers }),
         fetch('https://ndimboniapi.ini.rw/api/scam-check/all', { headers }),
         fetch('https://ndimboniapi.ini.rw/api/scammer-reports/all', { headers })
       ]);
 
-      const users = usersResponse.status === 'fulfilled' && usersResponse.value.ok 
-        ? await usersResponse.value.json() 
-        : [];
       
-      const scamChecks = scamChecksResponse.status === 'fulfilled' && scamChecksResponse.value.ok 
-        ? await scamChecksResponse.value.json() 
-        : [];
-      
-      const scammerReports = reportsResponse.status === 'fulfilled' && reportsResponse.value.ok 
-        ? await reportsResponse.value.json() 
-        : [];
+      let users = [];
+      if (usersResponse.status === 'fulfilled' && usersResponse.value.ok) {
+        const usersData = await usersResponse.value.json();
+        console.log('Users response:', usersData);
+        
+        
+        if (Array.isArray(usersData)) {
+          users = usersData;
+        } else if (usersData && Array.isArray(usersData.data)) {
+          users = usersData.data;
+        } else if (usersData && Array.isArray(usersData.users)) {
+          users = usersData.users;
+        } else if (usersData && typeof usersData === 'object') {
+         
+          users = Object.values(usersData).filter(item => item && typeof item === 'object');
+        }
+      } else {
+        console.error('Users fetch failed:', usersResponse.status === 'fulfilled' ? usersResponse.value.status : usersResponse.reason);
+      }
+
+     
+      let scamChecks = [];
+      if (scamChecksResponse.status === 'fulfilled' && scamChecksResponse.value.ok) {
+        const scamChecksData = await scamChecksResponse.value.json();
+        console.log('Scam checks response:', scamChecksData);
+        
+        if (Array.isArray(scamChecksData)) {
+          scamChecks = scamChecksData;
+        } else if (scamChecksData && Array.isArray(scamChecksData.data)) {
+          scamChecks = scamChecksData.data;
+        } else if (scamChecksData && Array.isArray(scamChecksData.scamChecks)) {
+          scamChecks = scamChecksData.scamChecks;
+        } else if (scamChecksData && typeof scamChecksData === 'object') {
+          scamChecks = Object.values(scamChecksData).filter(item => item && typeof item === 'object');
+        }
+      } else {
+        console.error('Scam checks fetch failed:', scamChecksResponse.status === 'fulfilled' ? scamChecksResponse.value.status : scamChecksResponse.reason);
+      }
+
+     
+      let scammerReports = [];
+      if (reportsResponse.status === 'fulfilled' && reportsResponse.value.ok) {
+        const reportsData = await reportsResponse.value.json();
+        console.log('Reports response:', reportsData);
+        
+        if (Array.isArray(reportsData)) {
+          scammerReports = reportsData;
+        } else if (reportsData && Array.isArray(reportsData.data)) {
+          scammerReports = reportsData.data;
+        } else if (reportsData && Array.isArray(reportsData.reports)) {
+          scammerReports = reportsData.reports;
+        } else if (reportsData && typeof reportsData === 'object') {
+          scammerReports = Object.values(reportsData).filter(item => item && typeof item === 'object');
+        }
+      } else {
+        console.error('Reports fetch failed:', reportsResponse.status === 'fulfilled' ? reportsResponse.value.status : reportsResponse.reason);
+      }
+
+    
+      const totalUsers = users.length;
+      const totalScamChecks = scamChecks.length;
+      const totalReports = scammerReports.length;
+      const recentActivity = getRecentActivity(users, scamChecks, scammerReports);
+
+      console.log('Calculated stats:', {
+        totalUsers,
+        totalScamChecks,
+        totalReports,
+        recentActivity
+      });
 
       const stats = {
-        totalUsers: Array.isArray(users) ? users.length : 0,
-        totalScamChecks: Array.isArray(scamChecks) ? scamChecks.length : 0,
-        totalReports: Array.isArray(scammerReports) ? scammerReports.length : 0,
-        recentActivity: getRecentActivity(users, scamChecks, scammerReports)
+        totalUsers,
+        totalScamChecks,
+        totalReports,
+        recentActivity
       };
 
       setDashboardData({
-        users: Array.isArray(users) ? users : [],
-        scamChecks: Array.isArray(scamChecks) ? scamChecks : [],
-        scammerReports: Array.isArray(scammerReports) ? scammerReports : [],
+        users,
+        scamChecks,
+        scammerReports,
         stats
       });
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
-      setError('Failed to load dashboard data. Please try again.');
+      setError(`Failed to load dashboard data: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -114,24 +176,61 @@ const AdminDashboard = () => {
 
     let recentCount = 0;
 
+   
     if (Array.isArray(users)) {
-      recentCount += users.filter(user => 
-        user.created_at && new Date(user.created_at) > sevenDaysAgo
-      ).length;
+      const recentUsers = users.filter(user => {
+        if (!user) return false;
+        const createdAt = user.created_at || user.createdAt || user.date_created;
+        if (!createdAt) return false;
+        
+        try {
+          const userDate = new Date(createdAt);
+          return userDate > sevenDaysAgo;
+        } catch (e) {
+          return false;
+        }
+      });
+      recentCount += recentUsers.length;
+      console.log(`Recent users: ${recentUsers.length}`);
     }
 
+ 
     if (Array.isArray(scamChecks)) {
-      recentCount += scamChecks.filter(check => 
-        check.created_at && new Date(check.created_at) > sevenDaysAgo
-      ).length;
+      const recentChecks = scamChecks.filter(check => {
+        if (!check) return false;
+        const createdAt = check.created_at || check.createdAt || check.date_created;
+        if (!createdAt) return false;
+        
+        try {
+          const checkDate = new Date(createdAt);
+          return checkDate > sevenDaysAgo;
+        } catch (e) {
+          return false;
+        }
+      });
+      recentCount += recentChecks.length;
+      console.log(`Recent scam checks: ${recentChecks.length}`);
     }
 
+   
     if (Array.isArray(reports)) {
-      recentCount += reports.filter(report => 
-        report.created_at && new Date(report.created_at) > sevenDaysAgo
-      ).length;
+      const recentReports = reports.filter(report => {
+        if (!report) return false;
+        const createdAt = report.created_at || report.createdAt || report.date_created;
+        if (!createdAt) return false;
+        
+        try {
+          const reportDate = new Date(createdAt);
+          return reportDate > sevenDaysAgo;
+        } catch (e) {
+          return false;
+        }
+      });
+      recentCount += recentReports.length;
+      console.log(`Recent reports: ${recentReports.length}`);
     }
 
+    console.log(`Total recent activity: ${recentCount}`);
     return recentCount;
   };
 
@@ -139,42 +238,86 @@ const AdminDashboard = () => {
     const activities = [];
     const { users, scamChecks, scammerReports } = dashboardData;
 
-    users.slice(0, 3).forEach(user => {
-      activities.push({
-        key: `user-${user.id}`,
-        type: 'User Registration',
-        description: `New user: ${user.username || user.email}`,
-        time: user.created_at,
-        status: 'success',
-        icon: <UserOutlined />
-      });
-    });
+    if (Array.isArray(users) && users.length > 0) {
+      const sortedUsers = users
+        .filter(user => user && (user.created_at || user.createdAt || user.date_created))
+        .sort((a, b) => {
+          const dateA = new Date(a.created_at || a.createdAt || a.date_created);
+          const dateB = new Date(b.created_at || b.createdAt || b.date_created);
+          return dateB - dateA;
+        })
+        .slice(0, 3);
 
-    scamChecks.slice(0, 3).forEach(check => {
-      activities.push({
-        key: `check-${check.id}`,
-        type: 'Scam Check',
-        description: `Scam check performed`,
-        time: check.created_at,
-        status: check.is_scam ? 'warning' : 'success',
-        icon: <SecurityScanOutlined />
+      sortedUsers.forEach((user, index) => {
+        activities.push({
+          key: `user-${user.id || index}`,
+          type: 'User Registration',
+          description: `New user: ${user.username || user.email || user.name || 'Unknown'}`,
+          time: user.created_at || user.createdAt || user.date_created,
+          status: 'success',
+          icon: <UserOutlined />
+        });
       });
-    });
+    }
 
-    scammerReports.slice(0, 3).forEach(report => {
-      activities.push({
-        key: `report-${report.id}`,
-        type: 'Scam Report',
-        description: `New scam report submitted`,
-        time: report.created_at,
-        status: 'error',
-        icon: <ExclamationCircleOutlined />
+    
+    if (Array.isArray(scamChecks) && scamChecks.length > 0) {
+      const sortedChecks = scamChecks
+        .filter(check => check && (check.created_at || check.createdAt || check.date_created))
+        .sort((a, b) => {
+          const dateA = new Date(a.created_at || a.createdAt || a.date_created);
+          const dateB = new Date(b.created_at || b.createdAt || b.date_created);
+          return dateB - dateA;
+        })
+        .slice(0, 3);
+
+      sortedChecks.forEach((check, index) => {
+        activities.push({
+          key: `check-${check.id || index}`,
+          type: 'Scam Check',
+          description: `Scam check performed`,
+          time: check.created_at || check.createdAt || check.date_created,
+          status: check.is_scam || check.isScam ? 'warning' : 'success',
+          icon: <SecurityScanOutlined />
+        });
       });
-    });
+    }
+
+   
+    if (Array.isArray(scammerReports) && scammerReports.length > 0) {
+      const sortedReports = scammerReports
+        .filter(report => report && (report.created_at || report.createdAt || report.date_created))
+        .sort((a, b) => {
+          const dateA = new Date(a.created_at || a.createdAt || a.date_created);
+          const dateB = new Date(b.created_at || b.createdAt || b.date_created);
+          return dateB - dateA;
+        })
+        .slice(0, 3);
+
+      sortedReports.forEach((report, index) => {
+        activities.push({
+          key: `report-${report.id || index}`,
+          type: 'Scam Report',
+          description: `New scam report submitted`,
+          time: report.created_at || report.createdAt || report.date_created,
+          status: 'error',
+          icon: <ExclamationCircleOutlined />
+        });
+      });
+    }
+
 
     return activities
-      .sort((a, b) => new Date(b.time) - new Date(a.time))
-      .slice(0, 5);
+      .sort((a, b) => {
+        try {
+          const dateA = new Date(a.time);
+          const dateB = new Date(b.time);
+          return dateB - dateA;
+        } catch (e) {
+          return 0;
+        }
+      })
+      .slice(0, 4);
   };
 
   const activityColumns = [
@@ -210,10 +353,10 @@ const AdminDashboard = () => {
   ];
 
   useEffect(() => {
-    // Set client-side flag
+   
     setIsClient(true);
     
-    // Small delay to ensure localStorage is accessible
+   
     const timeoutId = setTimeout(() => {
       const authorized = checkAuthorization();
       setIsAuthorized(authorized);
@@ -230,7 +373,7 @@ const AdminDashboard = () => {
     return () => clearTimeout(timeoutId);
   }, []);
 
-  // Show loading while checking authorization
+  
   if (!isClient || !authChecked) {
     return (
       <div style={{ 

@@ -15,6 +15,9 @@ import {
 } from '@ant-design/icons';
 import AdminDashboard from './Dashboard';
 
+
+const API_BASE_URL = 'https://ndimboniapi.ini.rw';
+
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
 
