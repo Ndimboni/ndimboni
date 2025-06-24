@@ -84,8 +84,10 @@ const ModeratorDashboard = () => {
       console.log("Fetching data with headers:", headers);
 
       const [scamChecksResponse, reportsResponse] = await Promise.allSettled([
-        fetch("https://ndimboni.ini.rw/api/scam-check/all", { headers }),
-        fetch("https://ndimboni.ini.rw/api/scammer-reports/all", { headers }),
+        fetch("https://ndimboniapi.ini.rw/api/scam-check/all", { headers }),
+        fetch("https://ndimboniapi.ini.rw/api/scammer-reports/all", {
+          headers,
+        }),
       ]);
 
       let scamChecks = [];

@@ -40,7 +40,7 @@ const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 
-const API_BASE_URL = "https://ndimboni.ini.rw/api/scammer-reports";
+const API_BASE_URL = "https://ndimboniapi.ini.rw/api/scammer-reports";
 
 const ScammerType = {
   EMAIL: "email",
@@ -60,6 +60,7 @@ const ScammerStatus = {
 const ScammerReportPage = () => {
   const [reports, setReports] = useState([]);
   const [stats, setStats] = useState(null);
+  const [autoVerificationStats, setAutoVerificationStats] = useState(null);
   const [loading, setLoading] = useState(false);
   const [statsLoading, setStatsLoading] = useState(false);
 
@@ -165,9 +166,16 @@ const ScammerReportPage = () => {
   const fetchStats = async () => {
     try {
       setStatsLoading(true);
-      const response = await apiCall("/stats");
-      if (response.success) {
-        setStats(response.data);
+      const [statsResponse, autoVerifyResponse] = await Promise.all([
+        apiCall("/stats"),
+        apiCall("/auto-verification/stats"),
+      ]);
+      
+      if (statsResponse.success) {
+        setStats(statsResponse.data);
+      }
+      if (autoVerifyResponse.success) {
+        setAutoVerificationStats(autoVerifyResponse.data);
       }
     } catch (error) {
       console.error("Stats fetch error:", error);
@@ -441,11 +449,18 @@ const ScammerReportPage = () => {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      width: 120,
-      render: (status) => (
-        <Tag color={getStatusColor(status)}>
-          {status?.toUpperCase() || "PENDING"}
-        </Tag>
+      width: 150,
+      render: (status, record) => (
+        <Space direction="vertical" size="small">
+          <Tag color={getStatusColor(status)}>
+            {status?.toUpperCase() || "PENDING"}
+          </Tag>
+          {record.isAutoVerified && (
+            <Tag color="purple" size="small">
+              AUTO-VERIFIED
+            </Tag>
+          )}
+        </Space>
       ),
     },
     {
@@ -454,6 +469,17 @@ const ScammerReportPage = () => {
       key: "reportCount",
       width: 100,
       render: (count) => <Badge count={count || 1} showZero />,
+    },
+    {
+      title: "Source",
+      dataIndex: "source",
+      key: "source",
+      width: 100,
+      render: (source) => (
+        <Tag color="geekblue" size="small">
+          {(source || "WEB").toUpperCase()}
+        </Tag>
+      ),
     },
     {
       title: "Created",
@@ -554,6 +580,48 @@ const ScammerReportPage = () => {
           </Card>
         </Col>
       </Row>
+
+      {/* Auto-Verification Statistics */}
+      {autoVerificationStats && (
+        <Row gutter={[16, 16]} style={{ marginBottom: "24px" }}>
+          <Col xs={24}>
+            <Card title="Auto-Verification System" size="small">
+              <Row gutter={[16, 8]}>
+                <Col xs={12} sm={8} md={6}>
+                  <Statistic
+                    title="Auto-Verified"
+                    value={autoVerificationStats.autoVerifiedCount || 0}
+                    valueStyle={{ color: "#722ed1" }}
+                    loading={statsLoading}
+                    prefix={<CheckCircleOutlined />}
+                  />
+                </Col>
+                <Col xs={12} sm={8} md={6}>
+                  <Statistic
+                    title="Phone Threshold"
+                    value={autoVerificationStats.thresholds?.phone || 0}
+                    loading={statsLoading}
+                    suffix="reports"
+                  />
+                </Col>
+                <Col xs={12} sm={8} md={6}>
+                  <Statistic
+                    title="Email Threshold"
+                    value={autoVerificationStats.thresholds?.email || 0}
+                    loading={statsLoading}
+                    suffix="reports"
+                  />
+                </Col>
+                <Col xs={12} sm={8} md={6}>
+                  <Tag color={autoVerificationStats.enabled ? "green" : "red"}>
+                    {autoVerificationStats.enabled ? "ENABLED" : "DISABLED"}
+                  </Tag>
+                </Col>
+              </Row>
+            </Card>
+          </Col>
+        </Row>
+      )}
 
       {/* Main Table */}
       <Card>
@@ -914,6 +982,26 @@ const ScammerReportPage = () => {
                     <Text>
                       {new Date(selectedReport.lastReportedAt).toLocaleString()}
                     </Text>
+                  </List.Item>
+                )}
+                {selectedReport.isAutoVerified && (
+                  <List.Item>
+                    <Text strong>Auto-Verified:</Text>
+                    <Tag color="purple">
+                      Yes{" "}
+                      {selectedReport.autoVerifiedAt &&
+                        `(${new Date(
+                          selectedReport.autoVerifiedAt
+                        ).toLocaleString()})`}
+                    </Tag>
+                  </List.Item>
+                )}
+                {selectedReport.source && (
+                  <List.Item>
+                    <Text strong>Source:</Text>
+                    <Tag color="geekblue">
+                      {selectedReport.source.toUpperCase()}
+                    </Tag>
                   </List.Item>
                 )}
               </List>

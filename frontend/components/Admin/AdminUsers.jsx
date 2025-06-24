@@ -85,7 +85,7 @@ const AdminUsersPage = () => {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-        const response = await fetch("https://ndimboni.ini.rw/users", {
+        const response = await fetch("https://ndimboniapi.ini.rw/users", {
           headers: getAuthHeaders(),
           signal: controller.signal,
         });
@@ -130,7 +130,7 @@ const AdminUsersPage = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      const response = await fetch("https://ndimboni.ini.rw/auth/register", {
+      const response = await fetch("https://ndimboniapi.ini.rw/auth/register", {
         method: "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify(userData),
@@ -163,12 +163,15 @@ const AdminUsersPage = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      const response = await fetch(`https://ndimboni.ini.rw/users/${userId}`, {
-        method: "PUT",
-        headers: getAuthHeaders(),
-        body: JSON.stringify(userData),
-        signal: controller.signal,
-      });
+      const response = await fetch(
+        `https://ndimboniapi.ini.rw/users/${userId}`,
+        {
+          method: "PUT",
+          headers: getAuthHeaders(),
+          body: JSON.stringify(userData),
+          signal: controller.signal,
+        }
+      );
 
       clearTimeout(timeoutId);
 
@@ -196,11 +199,14 @@ const AdminUsersPage = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      const response = await fetch(`https://ndimboni.ini.rw/users/${userId}`, {
-        method: "DELETE",
-        headers: getAuthHeaders(),
-        signal: controller.signal,
-      });
+      const response = await fetch(
+        `https://ndimboniapi.ini.rw/users/${userId}`,
+        {
+          method: "DELETE",
+          headers: getAuthHeaders(),
+          signal: controller.signal,
+        }
+      );
 
       clearTimeout(timeoutId);
 

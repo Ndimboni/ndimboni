@@ -4,7 +4,7 @@ import { Modal as AntModal, Select, Input, Button, Space, message } from 'antd';
 
 const { TextArea } = Input;
 const { Option } = Select;
-const API_BASE_URL1 = 'https://ndimboni.ini.rw/api/scammer-reports';
+const API_BASE_URL1 = 'https://ndimboniapi.ini.rw/api/scammer-reports';
 
 const apiCalls = async (endpoint, options = {}) => {
   try {
@@ -23,7 +23,7 @@ const apiCalls = async (endpoint, options = {}) => {
     }
 
     console.log('API Call:', {
-  "https://ndimboni.ini.rw/
+      url: url,
       method: config.method,
       headers: config.headers,
       body: config.body
@@ -73,7 +73,7 @@ const Education = () => {
     const fetchResources = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://ndimboni.ini.rw/education-resources/published');
+        const response = await fetch('https://ndimboniapi.ini.rw/education-resources/published');
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -96,7 +96,7 @@ const Education = () => {
 
   useEffect(() => {
     let filtered = resources;
-"https://ndimboni.ini.rw/
+    
     if (searchTerm.trim()) {
       filtered = filtered.filter(resource =>
         resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||

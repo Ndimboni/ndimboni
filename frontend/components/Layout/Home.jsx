@@ -41,9 +41,9 @@ import { motion } from "framer-motion";
 const { Title, Paragraph, Text } = Typography;
 const { TextArea } = Input;
 
-const API_BASE_URL = "https://ndimboni.ini.rw/api/scam-check";
+const API_BASE_URL = "https://ndimboniapi.ini.rw/api/scam-check";
 
-const API_BASE_URL1 = "https://ndimboni.ini.rw/api/scammer-reports";
+const API_BASE_URL1 = "https://ndimboniapi.ini.rw/api/scammer-reports";
 
 const CheckStatus = {
   SAFE: "SAFE",
@@ -345,7 +345,7 @@ export default function Home() {
           extracted_urls: scanResults.extractedUrls || [],
           detected_patterns: result.detectedPatterns || [],
           source: data.data.source || "web",
-          
+
           // Comprehensive scan results
           extractedIdentifiers: {
             phones: extractedIdentifiers.phoneNumbers || [],
@@ -364,9 +364,10 @@ export default function Home() {
             phoneMatches: databaseMatches.phoneMatches || [],
             emailMatches: databaseMatches.emailMatches || [],
             urlMatches: databaseMatches.urlMatches || [],
-            totalMatches: (databaseMatches.phoneMatches?.length || 0) + 
-                         (databaseMatches.emailMatches?.length || 0) + 
-                         (databaseMatches.urlMatches?.length || 0),
+            totalMatches:
+              (databaseMatches.phoneMatches?.length || 0) +
+              (databaseMatches.emailMatches?.length || 0) +
+              (databaseMatches.urlMatches?.length || 0),
           },
           virusTotalResults: {
             urlResults: virusTotalResults.details || [],
@@ -1613,34 +1614,49 @@ export default function Home() {
                           <div className="space-y-3">
                             {checkResult.analysis && (
                               <div>
-                                <Text strong className="text-xs block mb-1">Overview:</Text>
+                                <Text strong className="text-xs block mb-1">
+                                  Overview:
+                                </Text>
                                 <Text className="text-xs leading-relaxed">
                                   {checkResult.analysis}
                                 </Text>
                               </div>
                             )}
-                            
+
                             {checkResult.aiAnalysis?.reasoning && (
                               <div>
-                                <Text strong className="text-xs block mb-1">AI Reasoning:</Text>
+                                <Text strong className="text-xs block mb-1">
+                                  AI Reasoning:
+                                </Text>
                                 <Text className="text-xs leading-relaxed">
                                   {checkResult.aiAnalysis.reasoning}
                                 </Text>
                               </div>
                             )}
 
-                            {checkResult.aiAnalysis?.finalScore !== undefined && (
+                            {checkResult.aiAnalysis?.finalScore !==
+                              undefined && (
                               <div className="grid grid-cols-2 gap-2">
                                 <div className="p-2 bg-blue-50 rounded">
-                                  <Text className="text-xs text-gray-600">AI Final Score</Text>
+                                  <Text className="text-xs text-gray-600">
+                                    AI Final Score
+                                  </Text>
                                   <Text strong className="text-sm">
-                                    {(checkResult.aiAnalysis.finalScore * 100).toFixed(1)}%
+                                    {(
+                                      checkResult.aiAnalysis.finalScore * 100
+                                    ).toFixed(1)}
+                                    %
                                   </Text>
                                 </div>
                                 <div className="p-2 bg-purple-50 rounded">
-                                  <Text className="text-xs text-gray-600">Intent Score</Text>
+                                  <Text className="text-xs text-gray-600">
+                                    Intent Score
+                                  </Text>
                                   <Text strong className="text-sm">
-                                    {(checkResult.aiAnalysis.intentScore * 100).toFixed(1)}%
+                                    {(
+                                      checkResult.aiAnalysis.intentScore * 100
+                                    ).toFixed(1)}
+                                    %
                                   </Text>
                                 </div>
                               </div>
@@ -1658,11 +1674,16 @@ export default function Home() {
                             <Text strong className="text-sm">
                               Extracted Information
                             </Text>
-                            {(checkResult.extractedIdentifiers?.phones?.length > 0 ||
-                              checkResult.extractedIdentifiers?.emails?.length > 0 ||
-                              checkResult.extractedIdentifiers?.urls?.length > 0 ||
-                              checkResult.extractedIdentifiers?.cryptoAddresses?.length > 0 ||
-                              checkResult.extractedIdentifiers?.socialHandles?.length > 0) && (
+                            {(checkResult.extractedIdentifiers?.phones?.length >
+                              0 ||
+                              checkResult.extractedIdentifiers?.emails?.length >
+                                0 ||
+                              checkResult.extractedIdentifiers?.urls?.length >
+                                0 ||
+                              checkResult.extractedIdentifiers?.cryptoAddresses
+                                ?.length > 0 ||
+                              checkResult.extractedIdentifiers?.socialHandles
+                                ?.length > 0) && (
                               <Tag color="blue" size="small" className="ml-2">
                                 Found
                               </Tag>
@@ -1671,91 +1692,172 @@ export default function Home() {
                         ),
                         children: (
                           <div className="space-y-3">
-                            {checkResult.extractedIdentifiers?.phones?.length > 0 && (
+                            {checkResult.extractedIdentifiers?.phones?.length >
+                              0 && (
                               <div>
                                 <div className="flex items-center mb-2">
                                   <PhoneOutlined className="text-blue-500 mr-2" />
-                                  <Text strong className="text-xs">Phone Numbers ({checkResult.extractedIdentifiers.phones.length})</Text>
+                                  <Text strong className="text-xs">
+                                    Phone Numbers (
+                                    {
+                                      checkResult.extractedIdentifiers.phones
+                                        .length
+                                    }
+                                    )
+                                  </Text>
                                 </div>
                                 <div className="space-y-1">
-                                  {checkResult.extractedIdentifiers.phones.map((phone, index) => (
-                                    <Text key={index} className="text-xs block pl-4" code>
-                                      {phone}
-                                    </Text>
-                                  ))}
+                                  {checkResult.extractedIdentifiers.phones.map(
+                                    (phone, index) => (
+                                      <Text
+                                        key={index}
+                                        className="text-xs block pl-4"
+                                        code
+                                      >
+                                        {phone}
+                                      </Text>
+                                    )
+                                  )}
                                 </div>
                               </div>
                             )}
 
-                            {checkResult.extractedIdentifiers?.emails?.length > 0 && (
+                            {checkResult.extractedIdentifiers?.emails?.length >
+                              0 && (
                               <div>
                                 <div className="flex items-center mb-2">
                                   <MailOutlined className="text-green-500 mr-2" />
-                                  <Text strong className="text-xs">Email Addresses ({checkResult.extractedIdentifiers.emails.length})</Text>
+                                  <Text strong className="text-xs">
+                                    Email Addresses (
+                                    {
+                                      checkResult.extractedIdentifiers.emails
+                                        .length
+                                    }
+                                    )
+                                  </Text>
                                 </div>
                                 <div className="space-y-1">
-                                  {checkResult.extractedIdentifiers.emails.map((email, index) => (
-                                    <Text key={index} className="text-xs block pl-4" code>
-                                      {email}
-                                    </Text>
-                                  ))}
+                                  {checkResult.extractedIdentifiers.emails.map(
+                                    (email, index) => (
+                                      <Text
+                                        key={index}
+                                        className="text-xs block pl-4"
+                                        code
+                                      >
+                                        {email}
+                                      </Text>
+                                    )
+                                  )}
                                 </div>
                               </div>
                             )}
 
-                            {checkResult.extractedIdentifiers?.urls?.length > 0 && (
+                            {checkResult.extractedIdentifiers?.urls?.length >
+                              0 && (
                               <div>
                                 <div className="flex items-center mb-2">
                                   <LinkOutlined className="text-orange-500 mr-2" />
-                                  <Text strong className="text-xs">URLs ({checkResult.extractedIdentifiers.urls.length})</Text>
+                                  <Text strong className="text-xs">
+                                    URLs (
+                                    {
+                                      checkResult.extractedIdentifiers.urls
+                                        .length
+                                    }
+                                    )
+                                  </Text>
                                 </div>
                                 <div className="space-y-1 max-h-24 overflow-y-auto">
-                                  {checkResult.extractedIdentifiers.urls.map((url, index) => (
-                                    <Text key={index} className="text-xs block pl-4 break-all" code>
-                                      {url.length > 50 ? url.substring(0, 50) + "..." : url}
-                                    </Text>
-                                  ))}
+                                  {checkResult.extractedIdentifiers.urls.map(
+                                    (url, index) => (
+                                      <Text
+                                        key={index}
+                                        className="text-xs block pl-4 break-all"
+                                        code
+                                      >
+                                        {url.length > 50
+                                          ? url.substring(0, 50) + "..."
+                                          : url}
+                                      </Text>
+                                    )
+                                  )}
                                 </div>
                               </div>
                             )}
 
-                            {checkResult.extractedIdentifiers?.cryptoAddresses?.length > 0 && (
+                            {checkResult.extractedIdentifiers?.cryptoAddresses
+                              ?.length > 0 && (
                               <div>
                                 <div className="flex items-center mb-2">
                                   <DollarOutlined className="text-yellow-500 mr-2" />
-                                  <Text strong className="text-xs">Crypto Addresses ({checkResult.extractedIdentifiers.cryptoAddresses.length})</Text>
+                                  <Text strong className="text-xs">
+                                    Crypto Addresses (
+                                    {
+                                      checkResult.extractedIdentifiers
+                                        .cryptoAddresses.length
+                                    }
+                                    )
+                                  </Text>
                                 </div>
                                 <div className="space-y-1">
-                                  {checkResult.extractedIdentifiers.cryptoAddresses.map((address, index) => (
-                                    <Text key={index} className="text-xs block pl-4 break-all" code>
-                                      {address.length > 40 ? address.substring(0, 40) + "..." : address}
-                                    </Text>
-                                  ))}
+                                  {checkResult.extractedIdentifiers.cryptoAddresses.map(
+                                    (address, index) => (
+                                      <Text
+                                        key={index}
+                                        className="text-xs block pl-4 break-all"
+                                        code
+                                      >
+                                        {address.length > 40
+                                          ? address.substring(0, 40) + "..."
+                                          : address}
+                                      </Text>
+                                    )
+                                  )}
                                 </div>
                               </div>
                             )}
 
-                            {checkResult.extractedIdentifiers?.socialHandles?.length > 0 && (
+                            {checkResult.extractedIdentifiers?.socialHandles
+                              ?.length > 0 && (
                               <div>
                                 <div className="flex items-center mb-2">
                                   <UserOutlined className="text-blue-400 mr-2" />
-                                  <Text strong className="text-xs">Social Handles ({checkResult.extractedIdentifiers.socialHandles.length})</Text>
+                                  <Text strong className="text-xs">
+                                    Social Handles (
+                                    {
+                                      checkResult.extractedIdentifiers
+                                        .socialHandles.length
+                                    }
+                                    )
+                                  </Text>
                                 </div>
                                 <div className="space-y-1">
-                                  {checkResult.extractedIdentifiers.socialHandles.map((handle, index) => (
-                                    <Text key={index} className="text-xs block pl-4" code>
-                                      {handle}
-                                    </Text>
-                                  ))}
+                                  {checkResult.extractedIdentifiers.socialHandles.map(
+                                    (handle, index) => (
+                                      <Text
+                                        key={index}
+                                        className="text-xs block pl-4"
+                                        code
+                                      >
+                                        {handle}
+                                      </Text>
+                                    )
+                                  )}
                                 </div>
                               </div>
                             )}
 
-                            {!(checkResult.extractedIdentifiers?.phones?.length > 0 ||
-                              checkResult.extractedIdentifiers?.emails?.length > 0 ||
-                              checkResult.extractedIdentifiers?.urls?.length > 0 ||
-                              checkResult.extractedIdentifiers?.cryptoAddresses?.length > 0 ||
-                              checkResult.extractedIdentifiers?.socialHandles?.length > 0) && (
+                            {!(
+                              checkResult.extractedIdentifiers?.phones?.length >
+                                0 ||
+                              checkResult.extractedIdentifiers?.emails?.length >
+                                0 ||
+                              checkResult.extractedIdentifiers?.urls?.length >
+                                0 ||
+                              checkResult.extractedIdentifiers?.cryptoAddresses
+                                ?.length > 0 ||
+                              checkResult.extractedIdentifiers?.socialHandles
+                                ?.length > 0
+                            ) && (
                               <Text className="text-xs text-gray-500">
                                 No identifiers extracted from the message.
                               </Text>
@@ -1775,7 +1877,8 @@ export default function Home() {
                             </Text>
                             {checkResult.scammerDbMatches?.totalMatches > 0 && (
                               <Tag color="red" size="small" className="ml-2">
-                                {checkResult.scammerDbMatches.totalMatches} Found
+                                {checkResult.scammerDbMatches.totalMatches}{" "}
+                                Found
                               </Tag>
                             )}
                           </div>
@@ -1784,52 +1887,102 @@ export default function Home() {
                           <div className="space-y-3">
                             {checkResult.scammerDbMatches?.totalMatches > 0 ? (
                               <>
-                                {checkResult.scammerDbMatches.phoneMatches?.length > 0 && (
+                                {checkResult.scammerDbMatches.phoneMatches
+                                  ?.length > 0 && (
                                   <div className="p-2 bg-red-50 rounded">
-                                    <Text strong className="text-xs text-red-800 block mb-1">
-                                      Phone Number Matches ({checkResult.scammerDbMatches.phoneMatches.length})
+                                    <Text
+                                      strong
+                                      className="text-xs text-red-800 block mb-1"
+                                    >
+                                      Phone Number Matches (
+                                      {
+                                        checkResult.scammerDbMatches
+                                          .phoneMatches.length
+                                      }
+                                      )
                                     </Text>
                                     <div className="space-y-1">
-                                      {checkResult.scammerDbMatches.phoneMatches.map((match, index) => (
-                                        <div key={index} className="text-xs">
-                                          <Text code>{match.identifier}</Text>
-                                          <Text className="ml-2 text-gray-600">- {match.description || 'Known scammer'}</Text>
-                                        </div>
-                                      ))}
+                                      {checkResult.scammerDbMatches.phoneMatches.map(
+                                        (match, index) => (
+                                          <div key={index} className="text-xs">
+                                            <Text code>{match.identifier}</Text>
+                                            <Text className="ml-2 text-gray-600">
+                                              -{" "}
+                                              {match.description ||
+                                                "Known scammer"}
+                                            </Text>
+                                          </div>
+                                        )
+                                      )}
                                     </div>
                                   </div>
                                 )}
 
-                                {checkResult.scammerDbMatches.emailMatches?.length > 0 && (
+                                {checkResult.scammerDbMatches.emailMatches
+                                  ?.length > 0 && (
                                   <div className="p-2 bg-red-50 rounded">
-                                    <Text strong className="text-xs text-red-800 block mb-1">
-                                      Email Matches ({checkResult.scammerDbMatches.emailMatches.length})
+                                    <Text
+                                      strong
+                                      className="text-xs text-red-800 block mb-1"
+                                    >
+                                      Email Matches (
+                                      {
+                                        checkResult.scammerDbMatches
+                                          .emailMatches.length
+                                      }
+                                      )
                                     </Text>
                                     <div className="space-y-1">
-                                      {checkResult.scammerDbMatches.emailMatches.map((match, index) => (
-                                        <div key={index} className="text-xs">
-                                          <Text code>{match.identifier}</Text>
-                                          <Text className="ml-2 text-gray-600">- {match.description || 'Known scammer'}</Text>
-                                        </div>
-                                      ))}
+                                      {checkResult.scammerDbMatches.emailMatches.map(
+                                        (match, index) => (
+                                          <div key={index} className="text-xs">
+                                            <Text code>{match.identifier}</Text>
+                                            <Text className="ml-2 text-gray-600">
+                                              -{" "}
+                                              {match.description ||
+                                                "Known scammer"}
+                                            </Text>
+                                          </div>
+                                        )
+                                      )}
                                     </div>
                                   </div>
                                 )}
 
-                                {checkResult.scammerDbMatches.urlMatches?.length > 0 && (
+                                {checkResult.scammerDbMatches.urlMatches
+                                  ?.length > 0 && (
                                   <div className="p-2 bg-red-50 rounded">
-                                    <Text strong className="text-xs text-red-800 block mb-1">
-                                      URL Matches ({checkResult.scammerDbMatches.urlMatches.length})
+                                    <Text
+                                      strong
+                                      className="text-xs text-red-800 block mb-1"
+                                    >
+                                      URL Matches (
+                                      {
+                                        checkResult.scammerDbMatches.urlMatches
+                                          .length
+                                      }
+                                      )
                                     </Text>
                                     <div className="space-y-1">
-                                      {checkResult.scammerDbMatches.urlMatches.map((match, index) => (
-                                        <div key={index} className="text-xs">
-                                          <Text code className="break-all">
-                                            {match.identifier.length > 40 ? match.identifier.substring(0, 40) + "..." : match.identifier}
-                                          </Text>
-                                          <Text className="ml-2 text-gray-600">- {match.description || 'Known malicious URL'}</Text>
-                                        </div>
-                                      ))}
+                                      {checkResult.scammerDbMatches.urlMatches.map(
+                                        (match, index) => (
+                                          <div key={index} className="text-xs">
+                                            <Text code className="break-all">
+                                              {match.identifier.length > 40
+                                                ? match.identifier.substring(
+                                                    0,
+                                                    40
+                                                  ) + "..."
+                                                : match.identifier}
+                                            </Text>
+                                            <Text className="ml-2 text-gray-600">
+                                              -{" "}
+                                              {match.description ||
+                                                "Known malicious URL"}
+                                            </Text>
+                                          </div>
+                                        )
+                                      )}
                                     </div>
                                   </div>
                                 )}
@@ -1852,8 +2005,10 @@ export default function Home() {
                             <Text strong className="text-sm">
                               URL Security Analysis
                             </Text>
-                            {(checkResult.virusTotalResults?.maliciousUrls > 0 ||
-                              checkResult.urlScanResults?.maliciousCount > 0) && (
+                            {(checkResult.virusTotalResults?.maliciousUrls >
+                              0 ||
+                              checkResult.urlScanResults?.maliciousCount >
+                                0) && (
                               <Tag color="red" size="small" className="ml-2">
                                 Threats Found
                               </Tag>
@@ -1864,38 +2019,70 @@ export default function Home() {
                           <div className="space-y-3">
                             {checkResult.virusTotalResults && (
                               <div>
-                                <Text strong className="text-xs block mb-2">VirusTotal Results:</Text>
+                                <Text strong className="text-xs block mb-2">
+                                  VirusTotal Results:
+                                </Text>
                                 <div className="grid grid-cols-3 gap-2">
                                   <div className="text-center p-2 bg-green-50 rounded">
-                                    <Text className="text-xs text-green-800">Safe</Text>
-                                    <Text strong className="block text-sm">{checkResult.virusTotalResults.safeUrls || 0}</Text>
+                                    <Text className="text-xs text-green-800">
+                                      Safe
+                                    </Text>
+                                    <Text strong className="block text-sm">
+                                      {checkResult.virusTotalResults.safeUrls ||
+                                        0}
+                                    </Text>
                                   </div>
                                   <div className="text-center p-2 bg-yellow-50 rounded">
-                                    <Text className="text-xs text-yellow-800">Suspicious</Text>
-                                    <Text strong className="block text-sm">{checkResult.virusTotalResults.suspiciousUrls || 0}</Text>
+                                    <Text className="text-xs text-yellow-800">
+                                      Suspicious
+                                    </Text>
+                                    <Text strong className="block text-sm">
+                                      {checkResult.virusTotalResults
+                                        .suspiciousUrls || 0}
+                                    </Text>
                                   </div>
                                   <div className="text-center p-2 bg-red-50 rounded">
-                                    <Text className="text-xs text-red-800">Malicious</Text>
-                                    <Text strong className="block text-sm">{checkResult.virusTotalResults.maliciousUrls || 0}</Text>
+                                    <Text className="text-xs text-red-800">
+                                      Malicious
+                                    </Text>
+                                    <Text strong className="block text-sm">
+                                      {checkResult.virusTotalResults
+                                        .maliciousUrls || 0}
+                                    </Text>
                                   </div>
                                 </div>
 
-                                {checkResult.virusTotalResults.urlResults?.length > 0 && (
+                                {checkResult.virusTotalResults.urlResults
+                                  ?.length > 0 && (
                                   <div className="mt-2 max-h-20 overflow-y-auto">
-                                    {checkResult.virusTotalResults.urlResults.map((result, index) => (
-                                      <div key={index} className="text-xs p-1 border-b">
-                                        <Text code className="break-all">
-                                          {result.url?.length > 40 ? result.url.substring(0, 40) + "..." : result.url}
-                                        </Text>
-                                        <Tag
-                                          color={result.status === 'safe' ? 'green' : result.status === 'malicious' ? 'red' : 'orange'}
-                                          size="small"
-                                          className="ml-2"
+                                    {checkResult.virusTotalResults.urlResults.map(
+                                      (result, index) => (
+                                        <div
+                                          key={index}
+                                          className="text-xs p-1 border-b"
                                         >
-                                          {result.status}
-                                        </Tag>
-                                      </div>
-                                    ))}
+                                          <Text code className="break-all">
+                                            {result.url?.length > 40
+                                              ? result.url.substring(0, 40) +
+                                                "..."
+                                              : result.url}
+                                          </Text>
+                                          <Tag
+                                            color={
+                                              result.status === "safe"
+                                                ? "green"
+                                                : result.status === "malicious"
+                                                ? "red"
+                                                : "orange"
+                                            }
+                                            size="small"
+                                            className="ml-2"
+                                          >
+                                            {result.status}
+                                          </Tag>
+                                        </div>
+                                      )
+                                    )}
                                   </div>
                                 )}
                               </div>
@@ -1903,26 +2090,46 @@ export default function Home() {
 
                             {checkResult.urlScanResults && (
                               <div>
-                                <Text strong className="text-xs block mb-2">URL Scan Results:</Text>
+                                <Text strong className="text-xs block mb-2">
+                                  URL Scan Results:
+                                </Text>
                                 <div className="grid grid-cols-3 gap-2">
                                   <div className="text-center p-2 bg-green-50 rounded">
-                                    <Text className="text-xs text-green-800">Safe</Text>
-                                    <Text strong className="block text-sm">{checkResult.urlScanResults.safeCount || 0}</Text>
+                                    <Text className="text-xs text-green-800">
+                                      Safe
+                                    </Text>
+                                    <Text strong className="block text-sm">
+                                      {checkResult.urlScanResults.safeCount ||
+                                        0}
+                                    </Text>
                                   </div>
                                   <div className="text-center p-2 bg-yellow-50 rounded">
-                                    <Text className="text-xs text-yellow-800">Suspicious</Text>
-                                    <Text strong className="block text-sm">{checkResult.urlScanResults.suspiciousCount || 0}</Text>
+                                    <Text className="text-xs text-yellow-800">
+                                      Suspicious
+                                    </Text>
+                                    <Text strong className="block text-sm">
+                                      {checkResult.urlScanResults
+                                        .suspiciousCount || 0}
+                                    </Text>
                                   </div>
                                   <div className="text-center p-2 bg-red-50 rounded">
-                                    <Text className="text-xs text-red-800">Malicious</Text>
-                                    <Text strong className="block text-sm">{checkResult.urlScanResults.maliciousCount || 0}</Text>
+                                    <Text className="text-xs text-red-800">
+                                      Malicious
+                                    </Text>
+                                    <Text strong className="block text-sm">
+                                      {checkResult.urlScanResults
+                                        .maliciousCount || 0}
+                                    </Text>
                                   </div>
                                 </div>
                               </div>
                             )}
 
-                            {!(checkResult.virusTotalResults?.urlResults?.length > 0 ||
-                              checkResult.urlScanResults?.results?.length > 0) && (
+                            {!(
+                              checkResult.virusTotalResults?.urlResults
+                                ?.length > 0 ||
+                              checkResult.urlScanResults?.results?.length > 0
+                            ) && (
                               <Text className="text-xs text-gray-500">
                                 No URLs found for security analysis.
                               </Text>
@@ -1942,63 +2149,100 @@ export default function Home() {
                             </Text>
                             {checkResult.intentAnalysis?.confidence && (
                               <Tag color="blue" size="small" className="ml-2">
-                                {(checkResult.intentAnalysis.confidence * 100).toFixed(0)}% confident
+                                {(
+                                  checkResult.intentAnalysis.confidence * 100
+                                ).toFixed(0)}
+                                % confident
                               </Tag>
                             )}
                           </div>
                         ),
                         children: (
                           <div className="space-y-3">
-                            {checkResult.intentAnalysis?.confidence !== undefined && (
+                            {checkResult.intentAnalysis?.confidence !==
+                              undefined && (
                               <div className="p-2 bg-blue-50 rounded">
-                                <Text strong className="text-xs block mb-1">Intent Confidence:</Text>
+                                <Text strong className="text-xs block mb-1">
+                                  Intent Confidence:
+                                </Text>
                                 <Progress
-                                  percent={Math.round(checkResult.intentAnalysis.confidence * 100)}
+                                  percent={Math.round(
+                                    checkResult.intentAnalysis.confidence * 100
+                                  )}
                                   size="small"
                                   strokeColor="#1890ff"
                                   showInfo={false}
                                 />
                                 <Text className="text-xs text-gray-600">
-                                  {(checkResult.intentAnalysis.confidence * 100).toFixed(1)}% confident
+                                  {(
+                                    checkResult.intentAnalysis.confidence * 100
+                                  ).toFixed(1)}
+                                  % confident
                                 </Text>
                               </div>
                             )}
 
-                            {checkResult.intentAnalysis?.alternativeIntents?.length > 0 && (
+                            {checkResult.intentAnalysis?.alternativeIntents
+                              ?.length > 0 && (
                               <div>
-                                <Text strong className="text-xs block mb-1">Alternative Intents:</Text>
+                                <Text strong className="text-xs block mb-1">
+                                  Alternative Intents:
+                                </Text>
                                 <div className="flex flex-wrap gap-1">
-                                  {checkResult.intentAnalysis.alternativeIntents.map((intent, index) => (
-                                    <Tag key={index} color="geekblue" size="small">
-                                      {intent.replace("_", " ")}
-                                    </Tag>
-                                  ))}
+                                  {checkResult.intentAnalysis.alternativeIntents.map(
+                                    (intent, index) => (
+                                      <Tag
+                                        key={index}
+                                        color="geekblue"
+                                        size="small"
+                                      >
+                                        {intent.replace("_", " ")}
+                                      </Tag>
+                                    )
+                                  )}
                                 </div>
                               </div>
                             )}
 
-                            {checkResult.intentAnalysis?.reasoningSteps?.length > 0 && (
+                            {checkResult.intentAnalysis?.reasoningSteps
+                              ?.length > 0 && (
                               <div>
-                                <Text strong className="text-xs block mb-1">Reasoning Steps:</Text>
+                                <Text strong className="text-xs block mb-1">
+                                  Reasoning Steps:
+                                </Text>
                                 <div className="space-y-1 max-h-16 overflow-y-auto">
-                                  {checkResult.intentAnalysis.reasoningSteps.map((step, index) => (
-                                    <Text key={index} className="text-xs block">
-                                      {index + 1}. {step}
-                                    </Text>
-                                  ))}
+                                  {checkResult.intentAnalysis.reasoningSteps.map(
+                                    (step, index) => (
+                                      <Text
+                                        key={index}
+                                        className="text-xs block"
+                                      >
+                                        {index + 1}. {step}
+                                      </Text>
+                                    )
+                                  )}
                                 </div>
                               </div>
                             )}
 
-                            {checkResult.intentAnalysis?.linguisticPatterns?.length > 0 && (
+                            {checkResult.intentAnalysis?.linguisticPatterns
+                              ?.length > 0 && (
                               <div>
-                                <Text strong className="text-xs block mb-1">Linguistic Patterns:</Text>
+                                <Text strong className="text-xs block mb-1">
+                                  Linguistic Patterns:
+                                </Text>
                                 <div className="flex flex-wrap gap-1">
-                                  {checkResult.intentAnalysis.linguisticPatterns.map((pattern, index) => (
-                                    <Tag key={index} color="purple" size="small">
-                                      {pattern.replace("_", " ")}
-                                    </Tag>
-                                  ))}
+                                  {checkResult.intentAnalysis.linguisticPatterns.map(
+                                    (pattern, index) => (
+                                      <Tag
+                                        key={index}
+                                        color="purple"
+                                        size="small"
+                                      >
+                                        {pattern.replace("_", " ")}
+                                      </Tag>
+                                    )
+                                  )}
                                 </div>
                               </div>
                             )}
@@ -2015,9 +2259,13 @@ export default function Home() {
                             <Text strong className="text-sm">
                               Detection Details
                             </Text>
-                            {(checkResult.warning_flags?.length > 0 || checkResult.detected_patterns?.length > 0) && (
+                            {(checkResult.warning_flags?.length > 0 ||
+                              checkResult.detected_patterns?.length > 0) && (
                               <Tag color="orange" size="small" className="ml-2">
-                                {(checkResult.warning_flags?.length || 0) + (checkResult.detected_patterns?.length || 0)} Items
+                                {(checkResult.warning_flags?.length || 0) +
+                                  (checkResult.detected_patterns?.length ||
+                                    0)}{" "}
+                                Items
                               </Tag>
                             )}
                           </div>
@@ -2026,31 +2274,52 @@ export default function Home() {
                           <div className="space-y-3">
                             {checkResult.warning_flags?.length > 0 && (
                               <div className="p-2 bg-orange-50 rounded">
-                                <Text strong className="text-xs text-orange-800 block mb-2">
-                                  Warning Flags ({checkResult.warning_flags.length})
+                                <Text
+                                  strong
+                                  className="text-xs text-orange-800 block mb-2"
+                                >
+                                  Warning Flags (
+                                  {checkResult.warning_flags.length})
                                 </Text>
                                 <div className="space-y-1">
-                                  {checkResult.warning_flags.map((flag, index) => (
-                                    <div key={index} className="flex items-start text-xs">
-                                      <ExclamationCircleOutlined className="text-orange-500 mr-2 text-xs mt-0.5 flex-shrink-0" />
-                                      <Text className="text-xs leading-relaxed">{flag}</Text>
-                                    </div>
-                                  ))}
+                                  {checkResult.warning_flags.map(
+                                    (flag, index) => (
+                                      <div
+                                        key={index}
+                                        className="flex items-start text-xs"
+                                      >
+                                        <ExclamationCircleOutlined className="text-orange-500 mr-2 text-xs mt-0.5 flex-shrink-0" />
+                                        <Text className="text-xs leading-relaxed">
+                                          {flag}
+                                        </Text>
+                                      </div>
+                                    )
+                                  )}
                                 </div>
                               </div>
                             )}
 
                             {checkResult.detected_patterns?.length > 0 && (
                               <div className="p-2 bg-blue-50 rounded">
-                                <Text strong className="text-xs text-blue-800 block mb-2">
-                                  Detected Patterns ({checkResult.detected_patterns.length})
+                                <Text
+                                  strong
+                                  className="text-xs text-blue-800 block mb-2"
+                                >
+                                  Detected Patterns (
+                                  {checkResult.detected_patterns.length})
                                 </Text>
                                 <div className="flex flex-wrap gap-1">
-                                  {checkResult.detected_patterns.map((pattern, index) => (
-                                    <Tag key={index} color="blue" size="small">
-                                      {pattern.replace("_", " ")}
-                                    </Tag>
-                                  ))}
+                                  {checkResult.detected_patterns.map(
+                                    (pattern, index) => (
+                                      <Tag
+                                        key={index}
+                                        color="blue"
+                                        size="small"
+                                      >
+                                        {pattern.replace("_", " ")}
+                                      </Tag>
+                                    )
+                                  )}
                                 </div>
                               </div>
                             )}
@@ -2073,12 +2342,19 @@ export default function Home() {
                           <div className="space-y-2">
                             {checkResult.recommendations?.length > 0 ? (
                               <div className="space-y-2">
-                                {checkResult.recommendations.map((rec, index) => (
-                                  <div key={index} className="flex items-start">
-                                    <CheckCircleOutlined className="text-green-500 mr-2 text-xs mt-0.5" />
-                                    <Text className="text-xs leading-relaxed">{rec}</Text>
-                                  </div>
-                                ))}
+                                {checkResult.recommendations.map(
+                                  (rec, index) => (
+                                    <div
+                                      key={index}
+                                      className="flex items-start"
+                                    >
+                                      <CheckCircleOutlined className="text-green-500 mr-2 text-xs mt-0.5" />
+                                      <Text className="text-xs leading-relaxed">
+                                        {rec}
+                                      </Text>
+                                    </div>
+                                  )
+                                )}
                               </div>
                             ) : (
                               <Text className="text-xs text-gray-500">
@@ -2086,18 +2362,29 @@ export default function Home() {
                               </Text>
                             )}
 
-                            {checkResult.aiAnalysis?.recommendations?.length > 0 && (
+                            {checkResult.aiAnalysis?.recommendations?.length >
+                              0 && (
                               <div className="mt-3 p-2 bg-green-50 rounded">
-                                <Text strong className="text-xs text-green-800 block mb-1">
+                                <Text
+                                  strong
+                                  className="text-xs text-green-800 block mb-1"
+                                >
                                   AI Recommendations:
                                 </Text>
                                 <div className="space-y-1">
-                                  {checkResult.aiAnalysis.recommendations.map((rec, index) => (
-                                    <div key={index} className="flex items-start">
-                                      <CheckCircleOutlined className="text-green-500 mr-2 text-xs mt-0.5" />
-                                      <Text className="text-xs leading-relaxed">{rec}</Text>
-                                    </div>
-                                  ))}
+                                  {checkResult.aiAnalysis.recommendations.map(
+                                    (rec, index) => (
+                                      <div
+                                        key={index}
+                                        className="flex items-start"
+                                      >
+                                        <CheckCircleOutlined className="text-green-500 mr-2 text-xs mt-0.5" />
+                                        <Text className="text-xs leading-relaxed">
+                                          {rec}
+                                        </Text>
+                                      </div>
+                                    )
+                                  )}
                                 </div>
                               </div>
                             )}
@@ -2111,7 +2398,8 @@ export default function Home() {
                   {checkResult.timestamp && (
                     <div className="text-center pt-2 border-t border-gray-200">
                       <Text type="secondary" className="text-xs">
-                        Analysis completed: {new Date(checkResult.timestamp).toLocaleString()}
+                        Analysis completed:{" "}
+                        {new Date(checkResult.timestamp).toLocaleString()}
                       </Text>
                     </div>
                   )}

@@ -72,7 +72,7 @@ const AdminLayout = ({ children, currentPage = "dashboard" }) => {
   const [profileLoading, setProfileLoading] = useState(false);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
 
-  const API_BASE_URL = "https://ndimboni.ini.rw";
+  const API_BASE_URL = "https://ndimboniapi.ini.rw";
 
   const getUserInitials = (name) => {
     return name

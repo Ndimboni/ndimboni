@@ -41,7 +41,7 @@ const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 
-const API_BASE_URL = "https://ndimboni.ini.rw/education-resources";
+const API_BASE_URL = "https://ndimboniapi.ini.rw/education-resources";
 
 const ResourceStatus = {
   DRAFT: "draft",

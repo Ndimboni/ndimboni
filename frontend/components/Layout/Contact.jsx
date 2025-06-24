@@ -147,7 +147,7 @@ const openSocialMedia = (platform) => {
       }
 
    
-      const response = await fetch('https://ndimboni.ini.rw/contact', {
+      const response = await fetch('https://ndimboniapi.ini.rw/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -156,7 +156,7 @@ const openSocialMedia = (platform) => {
       })
 
       if (!response.ok) {
-        const errorData = await respon"https://ndimboni.ini.rw/
+        const errorData = await response.json()
         throw new Error(errorData.message || 'Failed to submit contact form')
       }
 

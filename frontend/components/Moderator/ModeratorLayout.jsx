@@ -25,7 +25,7 @@ import {
 } from "@ant-design/icons";
 import ModeratorDashboard from "./Dashboard";
 
-const API_BASE_URL = "https://ndimboni.ini.rw";
+const API_BASE_URL = "https://ndimboniapi.ini.rw";
 
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
@@ -100,7 +100,7 @@ const ModeratorLayout = ({ children, currentPage = "dashboard" }) => {
         return;
       }
 
-      const response = await fetch("https://ndimboni.ini.rw/auth/profile", {
+      const response = await fetch("https://ndimboniapi.ini.rw/auth/profile", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

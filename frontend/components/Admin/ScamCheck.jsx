@@ -42,7 +42,7 @@ const { Option } = Select;
 const { RangePicker } = DatePicker;
 
 const API_BASE_URL =
-  process.env.PUBLIC_API_URL || "https://ndimboni.ini.rw/api/scam-check";
+  process.env.PUBLIC_API_URL || "https://ndimboniapi.ini.rw/api/scam-check";
 
 const CheckStatus = {
   SAFE: "SAFE",

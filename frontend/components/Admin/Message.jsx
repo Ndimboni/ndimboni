@@ -68,7 +68,7 @@ const ContactMessagesPage = () => {
   const [isClient, setIsClient] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
 
-  const API_BASE_URL = "https://ndimboni.ini.rw";
+  const API_BASE_URL = "https://ndimboniapi.ini.rw";
 
   const checkAuthorization = () => {
     if (typeof window === "undefined") return false;
