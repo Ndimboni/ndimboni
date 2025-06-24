@@ -15,6 +15,9 @@ import {
 } from '@ant-design/icons';
 import AdminDashboard from './Dashboard';
 
+
+const API_BASE_URL = 'https://ndimboniapi.ini.rw';
+
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
 
@@ -93,7 +96,7 @@ const ModeratorLayout = ({ children, currentPage = 'dashboard' }) => {
         return;
       }
 
-      const response = await fetch('https://ndimboni-digital-scam-protection.onrender.com/auth/profile', {
+      const response = await fetch('https://ndimboniapi.ini.rw/auth/profile', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

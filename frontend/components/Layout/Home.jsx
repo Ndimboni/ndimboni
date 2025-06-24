@@ -7,9 +7,9 @@ const { Title, Paragraph, Text } = Typography
 const { TextArea } = Input
 
 
-const API_BASE_URL = 'https://ndimboni-digital-scam-protection.onrender.com/api/scam-check'
+const API_BASE_URL = 'https://ndimboniapi.ini.rw/api/scam-check'
 
-const API_BASE_URL1 = 'https://ndimboni-digital-scam-protection.onrender.com/api/scammer-reports';
+const API_BASE_URL1 = 'https://ndimboniapi.ini.rw/api/scammer-reports';
 
 
 const CheckStatus = {

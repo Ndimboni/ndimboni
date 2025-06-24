@@ -47,7 +47,7 @@ const AdminUsersPage = () => {
     isChecking: true
   });
 
-  // Memoize authorization check
+ 
   const checkAuthorization = useCallback(() => {
     if (typeof window === 'undefined') return false;
     
@@ -66,7 +66,7 @@ const AdminUsersPage = () => {
     }
   }, []);
 
-  // Memoize auth headers
+ 
   const getAuthHeaders = useCallback(() => {
     if (typeof window === 'undefined') return {};
     
@@ -77,18 +77,18 @@ const AdminUsersPage = () => {
     };
   }, []);
 
-  // Optimized fetch with timeout and retry logic
+ 
   const fetchUsers = useCallback(async (retryCount = 0) => {
     if (!authState.isAuthorized && !authState.isChecking) return;
     
     try {
       setLoading(true);
       
-      // Add timeout to prevent hanging requests
+     
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 15000); 
       
-      const response = await fetch('https://ndimboni-digital-scam-protection.onrender.com/users', {
+      const response = await fetch('https://ndimboniapi.ini.rw/users', {
         headers: getAuthHeaders(),
         signal: controller.signal
       });
@@ -105,7 +105,7 @@ const AdminUsersPage = () => {
     } catch (error) {
       console.error('Error fetching users:', error);
       
-      // Retry logic for network errors (max 2 retries)
+     
       if (retryCount < 2 && (error.name === 'AbortError' || error.message.includes('fetch'))) {
         console.log(`Retrying fetch... Attempt ${retryCount + 1}`);
         setTimeout(() => fetchUsers(retryCount + 1), 2000);
@@ -123,13 +123,13 @@ const AdminUsersPage = () => {
     }
   }, [authState.isAuthorized, authState.isChecking, getAuthHeaders]);
 
-  // Create user with loading state
+ 
   const createUser = async (userData) => {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
       
-      const response = await fetch('https://ndimboni-digital-scam-protection.onrender.com/auth/register', {
+      const response = await fetch('https://ndimboniapi.ini.rw/auth/register', {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify(userData),
@@ -157,13 +157,13 @@ const AdminUsersPage = () => {
     }
   };
 
-  // Update user with timeout
+
   const updateUser = async (userId, userData) => {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
       
-      const response = await fetch(`https://ndimboni-digital-scam-protection.onrender.com/users/${userId}`, {
+      const response = await fetch(`https://ndimboniapi.ini.rw/users/${userId}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify(userData),
@@ -191,13 +191,13 @@ const AdminUsersPage = () => {
     }
   };
 
-  // Delete user with timeout
+  
   const deleteUser = async (userId) => {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
       
-      const response = await fetch(`https://ndimboni-digital-scam-protection.onrender.com/users/${userId}`, {
+      const response = await fetch(`https://ndimboniapi.ini.rw/users/${userId}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
         signal: controller.signal
@@ -211,7 +211,7 @@ const AdminUsersPage = () => {
       }
 
       message.success('User deleted successfully');
-      fetchUsers(); // Refresh the list
+      fetchUsers(); 
     } catch (error) {
       console.error('Error deleting user:', error);
       if (error.name === 'AbortError') {
@@ -222,7 +222,7 @@ const AdminUsersPage = () => {
     }
   };
 
-  // Handle form submission
+ 
   const handleSubmit = async (values) => {
     try {
       if (modalMode === 'add') {
@@ -236,11 +236,11 @@ const AdminUsersPage = () => {
       setSelectedUser(null);
       fetchUsers();
     } catch (error) {
-      // Error is already handled in create/update functions
+      
     }
   };
 
-  // Handle edit
+ 
   const handleEdit = useCallback((user) => {
     setSelectedUser(user);
     setModalMode('edit');
@@ -253,13 +253,13 @@ const AdminUsersPage = () => {
     setIsModalVisible(true);
   }, [form]);
 
-  // Handle view
+  
   const handleView = useCallback((user) => {
     setSelectedUser(user);
     setIsViewModalVisible(true);
   }, []);
 
-  // Handle add new user
+ 
   const handleAddNew = useCallback(() => {
     setSelectedUser(null);
     setModalMode('add');
@@ -267,7 +267,7 @@ const AdminUsersPage = () => {
     setIsModalVisible(true);
   }, [form]);
 
-  // Memoize filtered users for better performance
+  
   const filteredUsers = useMemo(() => {
     if (!searchText) return users;
     
@@ -277,7 +277,7 @@ const AdminUsersPage = () => {
     );
   }, [users, searchText]);
 
-  // Table columns with memoization
+ 
   const columns = useMemo(() => [
     {
       title: 'Name',
@@ -359,24 +359,23 @@ const AdminUsersPage = () => {
     },
   ], [handleView, handleEdit, deleteUser]);
 
-  // Optimized useEffect with single state update
   useEffect(() => {
     const initializeComponent = async () => {
-      // Check if we're on client side
+     
       if (typeof window === 'undefined') return;
       
       const isAuthorized = checkAuthorization();
       
-      // Single state update to prevent multiple re-renders
+     
       setAuthState({
         isClient: true,
         isAuthorized,
         isChecking: false
       });
       
-      // Fetch users immediately if authorized
+    
       if (isAuthorized) {
-        // Small delay to ensure state is updated
+      
         setTimeout(() => fetchUsers(), 100);
       } else {
         setLoading(false);
@@ -386,7 +385,7 @@ const AdminUsersPage = () => {
     initializeComponent();
   }, [checkAuthorization, fetchUsers]);
 
-  // Don't render until client-side
+ 
   if (!authState.isClient || authState.isChecking) {
     return (
       <div style={{ 

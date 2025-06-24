@@ -4,7 +4,7 @@ import { Modal as AntModal, Select, Input, Button, Space, message } from 'antd';
 
 const { TextArea } = Input;
 const { Option } = Select;
-const API_BASE_URL1 = 'https://ndimboni-digital-scam-protection.onrender.com/api/scammer-reports';
+const API_BASE_URL1 = 'https://ndimboniapi.ini.rw/api/scammer-reports';
 
 const apiCalls = async (endpoint, options = {}) => {
   try {
@@ -73,7 +73,7 @@ const Education = () => {
     const fetchResources = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://ndimboni-digital-scam-protection.onrender.com/education-resources/published');
+        const response = await fetch('https://ndimboniapi.ini.rw/education-resources/published');
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

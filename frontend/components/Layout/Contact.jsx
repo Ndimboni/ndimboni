@@ -147,7 +147,7 @@ const openSocialMedia = (platform) => {
       }
 
    
-      const response = await fetch('https://ndimboni-digital-scam-protection.onrender.com/contact', {
+      const response = await fetch('https://ndimboniapi.ini.rw/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

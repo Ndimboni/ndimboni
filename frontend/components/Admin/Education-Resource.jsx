@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import {
   Card,
@@ -41,7 +42,7 @@ const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 
-const API_BASE_URL = 'https://ndimboni-digital-scam-protection.onrender.com/education-resources';
+const API_BASE_URL = 'https://ndimboniapi.ini.rw/education-resources';
 
 const ResourceStatus = {
   DRAFT: 'draft',
@@ -64,7 +65,7 @@ const BlogManagementPage = () => {
   const [editMode, setEditMode] = useState(false);
   const [authError, setAuthError] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
-  const [uploadedImageUrl, setUploadedImageUrl] = useState('');
+  const [uploadedImageFile, setUploadedImageFile] = useState(null);
 
   const [pagination, setPagination] = useState({
     current: 1,
@@ -228,29 +229,26 @@ const BlogManagementPage = () => {
     }
   };
 
-  const uploadImage = async (file) => {
-    try {
-      const formData = new FormData();
-      formData.append('image', file);
-
-      const response = await apiCall('/upload-image', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (response && response.imageUrl) {
-        setUploadedImageUrl(response.imageUrl);
-        setBlogFormData(prev => ({ ...prev, imageUrl: response.imageUrl }));
-        message.success('Image uploaded successfully');
-        return response.imageUrl;
-      } else {
-        throw new Error('Invalid response from image upload');
-      }
-    } catch (error) {
-      console.error('Image upload error:', error);
-      message.error(`Failed to upload image: ${error.message}`);
-      throw error;
+  const handleImageUpload = (file) => {
+    const isImage = file.type.startsWith('image/');
+    if (!isImage) {
+      message.error('You can only upload image files!');
+      return false;
     }
+    
+    const isLt5M = file.size / 1024 / 1024 < 5;
+    if (!isLt5M) {
+      message.error('Image must be smaller than 5MB!');
+      return false;
+    }
+
+    // Create preview URL
+    const previewUrl = URL.createObjectURL(file);
+    setImagePreview(previewUrl);
+    setUploadedImageFile(file);
+    setBlogFormData(prev => ({ ...prev, imageUrl: '' })); // Clear URL when file is uploaded
+    
+    return false; // Prevent automatic upload
   };
 
   const submitBlog = async (formData) => {
@@ -300,7 +298,14 @@ const BlogManagementPage = () => {
         requestData.append('description', formData.description.trim());
         
         if (formData.url?.trim()) requestData.append('url', formData.url.trim());
-        if (formData.imageUrl) requestData.append('imageUrl', formData.imageUrl);
+        
+        // Handle image - either file upload or URL
+        if (uploadedImageFile) {
+          requestData.append('image', uploadedImageFile);
+        } else if (formData.imageUrl?.trim()) {
+          requestData.append('imageUrl', formData.imageUrl.trim());
+        }
+        
         if (formData.category?.trim()) requestData.append('category', formData.category.trim());
         if (formData.nextResourceId) requestData.append('nextResourceId', formData.nextResourceId);
         if (formData.parentId) requestData.append('parentId', formData.parentId);
@@ -318,7 +323,9 @@ const BlogManagementPage = () => {
         editMode,
         endpoint,
         method: requestOptions.method,
-        dataType: editMode ? 'JSON' : 'FormData'
+        dataType: editMode ? 'JSON' : 'FormData',
+        hasImageFile: !!uploadedImageFile,
+        hasImageUrl: !!formData.imageUrl
       });
 
       const response = await apiCall(endpoint, requestOptions);
@@ -387,7 +394,8 @@ const BlogManagementPage = () => {
       nextResourceId: blog.nextResourceId || '',
       parentId: blog.parentId || ''
     });
-    setUploadedImageUrl(blog.imageUrl || '');
+    setImagePreview(blog.imageUrl || '');
+    setUploadedImageFile(null);
     setBlogModalVisible(true);
   };
 
@@ -405,8 +413,13 @@ const BlogManagementPage = () => {
       parentId: ''
     });
     blogForm.resetFields();
-    setUploadedImageUrl('');
+    setUploadedImageFile(null);
     setImagePreview(null);
+    
+    // Clean up preview URL if it exists
+    if (imagePreview && imagePreview.startsWith('blob:')) {
+      URL.revokeObjectURL(imagePreview);
+    }
   };
 
   const getStatusColor = (status) => {
@@ -534,6 +547,14 @@ const BlogManagementPage = () => {
     }
   }, []);
 
+  // Cleanup preview URLs on unmount
+  useEffect(() => {
+    return () => {
+      if (imagePreview && imagePreview.startsWith('blob:')) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
 
   if (authError) {
     return (
@@ -743,24 +764,11 @@ const BlogManagementPage = () => {
                     listType="picture-card"
                     className="avatar-uploader"
                     showUploadList={false}
-                    beforeUpload={(file) => {
-                      const isImage = file.type.startsWith('image/');
-                      if (!isImage) {
-                        message.error('You can only upload image files!');
-                        return false;
-                      }
-                      const isLt5M = file.size / 1024 / 1024 < 5;
-                      if (!isLt5M) {
-                        message.error('Image must be smaller than 5MB!');
-                        return false;
-                      }
-                      uploadImage(file);
-                      return false;
-                    }}
+                    beforeUpload={handleImageUpload}
                   >
-                    {uploadedImageUrl ? (
+                    {(imagePreview || uploadedImageFile) ? (
                       <img
-                        src={uploadedImageUrl}
+                        src={imagePreview}
                         alt="blog"
                         style={{ width: '100%', height: '100px', objectFit: 'cover' }}
                       />
@@ -778,7 +786,10 @@ const BlogManagementPage = () => {
                   value={blogFormData.imageUrl}
                   onChange={(e) => {
                     setBlogFormData(prev => ({ ...prev, imageUrl: e.target.value }));
-                    setUploadedImageUrl(e.target.value);
+                    if (e.target.value) {
+                      setImagePreview(e.target.value);
+                      setUploadedImageFile(null); // Clear file when URL is provided
+                    }
                   }}
                   style={{ marginTop: '8px' }}
                 />
@@ -846,6 +857,7 @@ const BlogManagementPage = () => {
           </div>
         </Form>
       </Modal>
+
 
       {/* Details Drawer */}
       <Drawer
