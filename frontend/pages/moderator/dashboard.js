@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import ModeratorLayout from '../../components/Moderator/ModeratorLayout'
- import ModeratorDashboard from '../../components/Moderator/Dashboard' 
+import ModeratorDashboard from '../../components/Moderator/Dashboard' 
 
 export default function DashboardPage() {
   return (
@@ -13,7 +13,7 @@ export default function DashboardPage() {
       </Head>
       
       <ModeratorLayout>
-      <ModeratorDashboard /> 
+        <ModeratorDashboard />
       </ModeratorLayout>
     </>
   )
