@@ -950,7 +950,7 @@ const ScammerReportPage = () => {
       </Drawer>
       {/* Edit Report Modal */}
       <Modal
-        title="Edit Scammer Report"
+        title="Taking Decision on Report"
         open={editModalVisible}
         onCancel={() => {
           setEditModalVisible(false);

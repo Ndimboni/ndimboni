@@ -359,18 +359,6 @@ const ScamCheckPage = () => {
 
   const columns = [
     {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
-      width: 80,
-      ellipsis: true,
-      render: (id) => (
-        <Tooltip title={id}>
-          <Text code>{id.substring(0, 6)}...</Text>
-        </Tooltip>
-      ),
-    },
-    {
       title: "Message",
       dataIndex: ["result", "scanResults", "message"],
       key: "message",
@@ -461,7 +449,7 @@ const ScamCheckPage = () => {
       title: "Source",
       dataIndex: "source",
       key: "source",
-      width: 70,
+      width: 82,
       render: (source) => <Tag color="blue">{source || "web"}</Tag>,
     },
     {
