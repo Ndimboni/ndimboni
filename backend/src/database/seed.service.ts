@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { User } from '../entities/user.entity';
 import { UserRole } from '../common/interfaces/user.interface';
 import { AdminConfig } from '../common/interfaces/config.interface';
-import * as bcrypt from 'bcrypt';
+import * as bcryptjs from 'bcryptjs';
 import {
   EducationResource,
   ResourceStatus,
@@ -44,7 +44,7 @@ export class SeedService implements OnModuleInit {
       if (!existingAdmin) {
         this.logger.log('No admin user found. Creating default admin user...');
 
-        const hashedPassword = await bcrypt.hash(adminConfig.password, 10);
+        const hashedPassword = await bcryptjs.hash(adminConfig.password, 10);
 
         const adminUser = this.userRepository.create({
           email: adminConfig.email,
@@ -83,7 +83,10 @@ export class SeedService implements OnModuleInit {
           'No moderator user found. Creating default moderator user...',
         );
 
-        const hashedPassword = await bcrypt.hash(moderatorConfig.password, 10);
+        const hashedPassword = await bcryptjs.hash(
+          moderatorConfig.password,
+          10,
+        );
 
         const moderatorUser = this.userRepository.create({
           email: moderatorConfig.email,

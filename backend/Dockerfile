@@ -2,13 +2,14 @@
 # Using latest stable Node.js LTS and Alpine Linux for security and efficiency
 
 # Build stage
-FROM node:alpine AS builder
+FROM node:20-alpine AS builder
 
-# Install build dependencies
+# Install build dependencies for native modules (in case other deps need them)
 RUN apk add --no-cache \
     python3 \
     make \
     g++ \
+    libc6-compat \
     && ln -sf python3 /usr/bin/python
 
 # Set working directory
@@ -36,12 +37,12 @@ COPY src/ ./src/
 RUN pnpm run build
 
 # Remove dev dependencies to reduce image size
-RUN pnpm prune --prod
+RUN pnpm prune --prod 
 
 # Production stage
-FROM node:alpine AS production
+FROM node:20-alpine AS production
 
-# Install runtime dependencies for better security and functionality
+# Install minimal runtime dependencies
 RUN apk add --no-cache \
     dumb-init \
     curl \
@@ -59,6 +60,9 @@ COPY --from=builder --chown=backend:nodejs /app/dist ./dist
 COPY --from=builder --chown=backend:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=backend:nodejs /app/package.json ./
 COPY --from=builder --chown=backend:nodejs /app/healthcheck.js ./
+
+# Ensure correct ownership
+RUN chown -R backend:nodejs /app
 
 # Switch to non-root user
 USER backend

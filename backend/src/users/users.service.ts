@@ -8,7 +8,7 @@ import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { UserRole } from '../common/interfaces/user.interface';
 import { RegisterDto } from '../dto/auth.dto';
-import * as bcrypt from 'bcrypt';
+import * as bcryptjs from 'bcryptjs';
 
 @Injectable()
 export class UsersService {
@@ -74,7 +74,7 @@ export class UsersService {
       throw new ConflictException('User with this email already exists');
     }
 
-    const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+    const hashedPassword = await bcryptjs.hash(registerDto.password, 10);
     const newUser = this.userRepository.create({
       email: registerDto.email,
       name: registerDto.name,
@@ -97,7 +97,7 @@ export class UsersService {
     }
 
     if (updateData.password) {
-      updateData.password = await bcrypt.hash(updateData.password, 10);
+      updateData.password = await bcryptjs.hash(updateData.password, 10);
     }
 
     await this.userRepository.update(id, updateData);

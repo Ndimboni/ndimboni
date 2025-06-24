@@ -6,7 +6,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { UserRole } from '../common/interfaces/user.interface';
-import * as bcrypt from 'bcrypt';
+import * as bcryptjs from 'bcryptjs';
 import { Exclude } from 'class-transformer';
 
 @Entity('users')
@@ -40,6 +40,6 @@ export class User {
   updatedAt: Date;
 
   async validatePassword(password: string): Promise<boolean> {
-    return bcrypt.compare(password, this.password);
+    return bcryptjs.compare(password, this.password);
   }
 }
