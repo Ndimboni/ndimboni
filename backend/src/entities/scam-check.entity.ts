@@ -54,10 +54,10 @@ export class ScamCheck {
   })
   detectedIntent: IntentType;
 
-  @Column('float', { default: 0 })
+  @Column({ type: 'decimal', precision: 5, scale: 4, default: 0 })
   riskScore: number;
 
-  @Column('float', { default: 0 })
+  @Column({ type: 'decimal', precision: 5, scale: 4, default: 0 })
   confidence: number;
 
   @Column('text', { nullable: true })
@@ -69,7 +69,7 @@ export class ScamCheck {
   @Column('text', { nullable: true })
   urlScanResults: string | null; // JSON string of URL scan results
 
-  @Column('varchar', { length: 255, nullable: true })
+  @Column({ nullable: true })
   checkedBy: string | null; // User ID who performed the check
 
   @Column('varchar', { length: 45, nullable: true })

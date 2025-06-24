@@ -209,6 +209,18 @@ pnpm run start:dev
 
 2. **Configure Environment**:
 
+   **Option 1: Using DATABASE_URL (Recommended for production/cloud deployments)**
+
+   ```env
+   DB_TYPE=postgres
+   DATABASE_URL=postgresql://username:password@localhost:5432/ndimboni
+
+   # For cloud providers (e.g., Heroku, Railway, Supabase):
+   # DATABASE_URL=postgres://user:pass@host:port/dbname?sslmode=require
+   ```
+
+   **Option 2: Using individual components (Local development)**
+
    ```env
    DB_TYPE=postgres
    DB_HOST=localhost
@@ -216,7 +228,10 @@ pnpm run start:dev
    DB_USERNAME=your_username
    DB_PASSWORD=your_password
    DB_NAME=ndimboni
+   DB_SSL=false
    ```
+
+   **Note**: When `DATABASE_URL` is provided, it takes precedence over individual database configuration variables.
 
 3. **Run Migrations** (if needed):
 

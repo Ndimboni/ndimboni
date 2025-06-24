@@ -31,17 +31,34 @@ export default (): AppConfig => {
   let databaseConfig: DatabaseConfig;
 
   if (dbType === 'postgres' || dbType === 'postgresql') {
-    databaseConfig = {
-      ...baseConfig,
-      type: 'postgres',
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '5432', 10),
-      username: process.env.DB_USERNAME || 'postgres',
-      password: process.env.DB_PASSWORD || 'password',
-      database: process.env.DB_NAME || 'ndimboni',
-      ssl:
-        process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
-    };
+    // Check if DATABASE_URL is provided (for PostgreSQL)
+    if (process.env.DATABASE_URL) {
+      databaseConfig = {
+        ...baseConfig,
+        type: 'postgres',
+        url: process.env.DATABASE_URL,
+        // Extract database name from URL for compatibility, but url takes precedence
+        database: process.env.DB_NAME || 'ndimboni',
+        ssl:
+          process.env.DB_SSL === 'true' ||
+          process.env.DATABASE_URL?.includes('sslmode=require')
+            ? { rejectUnauthorized: false }
+            : false,
+      };
+    } else {
+      // Fall back to individual components
+      databaseConfig = {
+        ...baseConfig,
+        type: 'postgres',
+        host: process.env.DB_HOST || 'localhost',
+        port: parseInt(process.env.DB_PORT || '5432', 10),
+        username: process.env.DB_USERNAME || 'postgres',
+        password: process.env.DB_PASSWORD || 'password',
+        database: process.env.DB_NAME || 'ndimboni',
+        ssl:
+          process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+      };
+    }
   } else {
     // Default to SQLite
     databaseConfig = {

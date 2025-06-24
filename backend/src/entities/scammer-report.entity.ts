@@ -51,10 +51,10 @@ export class ScammerReport {
   })
   status: ScammerStatus;
 
-  @Column('varchar', { length: 255, nullable: true })
+  @Column({ nullable: true })
   reportedBy: string | null; // User ID who reported
 
-  @Column('varchar', { length: 255, nullable: true })
+  @Column({ nullable: true })
   verifiedBy: string | null; // Admin/moderator who verified
 
   @Column('varchar', { length: 45, nullable: true })
@@ -63,10 +63,10 @@ export class ScammerReport {
   @Column('text', { nullable: true })
   additionalInfo: string | null; // Additional information about the scammer
 
-  @Column('int', { default: 1 })
+  @Column({ type: 'integer', default: 1 })
   reportCount: number; // Number of times this scammer was reported
 
-  @Column('datetime', { nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   lastReportedAt: Date | null;
 
   @Column('varchar', { length: 50, default: 'web' })

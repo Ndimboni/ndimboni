@@ -1,5 +1,6 @@
 export interface DatabaseConfig {
   type: 'sqlite' | 'postgres';
+  url?: string; // Database URL support
   host?: string;
   port?: number;
   username?: string;

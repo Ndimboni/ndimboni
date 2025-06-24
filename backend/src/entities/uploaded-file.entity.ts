@@ -23,7 +23,7 @@ export class UploadedFile {
   @Column()
   mimeType: string;
 
-  @Column()
+  @Column({ type: 'bigint' })
   size: number;
 
   @Column()
