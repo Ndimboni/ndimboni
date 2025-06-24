@@ -697,16 +697,16 @@ const ScamCheckPage = () => {
         </div>
       </Modal>
 
-      {/* Details Drawer */}
+      {/* Details Drawer - Enhanced with Comprehensive Scan Results */}
       <Drawer
-        title="Scam Check Details"
+        title="Comprehensive Scam Check Details"
         placement="right"
-        width={600}
+        width={800}
         open={detailsDrawerVisible}
         onClose={() => setDetailsDrawerVisible(false)}
       >
         {selectedCheck && (
-          <div>
+          <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto" }}>
             <Card title="Basic Information" style={{ marginBottom: "16px" }}>
               <Row gutter={[16, 16]}>
                 <Col span={8}>
@@ -799,35 +799,458 @@ const ScamCheckPage = () => {
 
             <Card title="Message Content" style={{ marginBottom: "16px" }}>
               <Paragraph>
-                <Text>{selectedCheck.message}</Text>
+                <Text>{selectedCheck.result?.scanResults?.message || selectedCheck.message}</Text>
               </Paragraph>
             </Card>
 
-            {selectedCheck.result?.reasons?.length > 0 && (
-              <Card title="Detection Reasons" style={{ marginBottom: "16px" }}>
-                <List
-                  size="small"
-                  dataSource={selectedCheck.result.reasons}
-                  renderItem={(reason, index) => (
-                    <List.Item>
-                      <Text>{reason}</Text>
-                    </List.Item>
+            {/* Extracted Identifiers */}
+            {selectedCheck.result?.scanResults?.extractedIdentifiers && (
+              <Card title="Extracted Information" style={{ marginBottom: "16px" }}>
+                <Row gutter={[16, 16]}>
+                  {selectedCheck.result.scanResults.extractedIdentifiers.phoneNumbers?.length > 0 && (
+                    <Col span={24}>
+                      <Text strong>Phone Numbers ({selectedCheck.result.scanResults.extractedIdentifiers.phoneNumbers.length}):</Text>
+                      <div style={{ marginTop: 8 }}>
+                        {selectedCheck.result.scanResults.extractedIdentifiers.phoneNumbers.map((phone, index) => (
+                          <Tag key={index} color="blue" style={{ margin: 2 }}>
+                            {phone}
+                          </Tag>
+                        ))}
+                      </div>
+                    </Col>
                   )}
-                />
+
+                  {selectedCheck.result.scanResults.extractedIdentifiers.emails?.length > 0 && (
+                    <Col span={24}>
+                      <Text strong>Email Addresses ({selectedCheck.result.scanResults.extractedIdentifiers.emails.length}):</Text>
+                      <div style={{ marginTop: 8 }}>
+                        {selectedCheck.result.scanResults.extractedIdentifiers.emails.map((email, index) => (
+                          <Tag key={index} color="green" style={{ margin: 2 }}>
+                            {email}
+                          </Tag>
+                        ))}
+                      </div>
+                    </Col>
+                  )}
+
+                  {selectedCheck.result.scanResults.extractedIdentifiers.urls?.length > 0 && (
+                    <Col span={24}>
+                      <Text strong>URLs ({selectedCheck.result.scanResults.extractedIdentifiers.urls.length}):</Text>
+                      <div style={{ marginTop: 8, maxHeight: 100, overflowY: "auto" }}>
+                        {selectedCheck.result.scanResults.extractedIdentifiers.urls.map((url, index) => (
+                          <div key={index} style={{ margin: "4px 0" }}>
+                            <Text code style={{ fontSize: "12px", wordBreak: "break-all" }}>
+                              {url}
+                            </Text>
+                          </div>
+                        ))}
+                      </div>
+                    </Col>
+                  )}
+
+                  {selectedCheck.result.scanResults.extractedIdentifiers.cryptoAddresses?.length > 0 && (
+                    <Col span={24}>
+                      <Text strong>Crypto Addresses ({selectedCheck.result.scanResults.extractedIdentifiers.cryptoAddresses.length}):</Text>
+                      <div style={{ marginTop: 8 }}>
+                        {selectedCheck.result.scanResults.extractedIdentifiers.cryptoAddresses.map((address, index) => (
+                          <Text key={index} code style={{ display: "block", fontSize: "12px", margin: "4px 0", wordBreak: "break-all" }}>
+                            {address}
+                          </Text>
+                        ))}
+                      </div>
+                    </Col>
+                  )}
+
+                  {selectedCheck.result.scanResults.extractedIdentifiers.socialMediaHandles?.length > 0 && (
+                    <Col span={24}>
+                      <Text strong>Social Media Handles ({selectedCheck.result.scanResults.extractedIdentifiers.socialMediaHandles.length}):</Text>
+                      <div style={{ marginTop: 8 }}>
+                        {selectedCheck.result.scanResults.extractedIdentifiers.socialMediaHandles.map((handle, index) => (
+                          <Tag key={index} color="purple" style={{ margin: 2 }}>
+                            {handle}
+                          </Tag>
+                        ))}
+                      </div>
+                    </Col>
+                  )}
+                </Row>
               </Card>
             )}
 
-            {selectedCheck.result?.detectedPatterns?.length > 0 && (
-              <Card title="Detected Patterns" style={{ marginBottom: "16px" }}>
-                <Space wrap>
-                  {selectedCheck.result.detectedPatterns.map(
-                    (pattern, index) => (
-                      <Tag key={index} color="blue">
-                        {pattern}
-                      </Tag>
-                    )
+            {/* AI Analysis */}
+            {selectedCheck.result?.scanResults?.aiAnalysis && (
+              <Card title="AI Analysis" style={{ marginBottom: "16px" }}>
+                <Row gutter={[16, 16]}>
+                  <Col span={12}>
+                    <Text strong>Final Score:</Text>
+                    <div>
+                      <Progress
+                        percent={Math.round((selectedCheck.result.scanResults.aiAnalysis.finalScore || 0) * 100)}
+                        size="small"
+                        strokeColor="#722ed1"
+                      />
+                      <Text type="secondary">
+                        {((selectedCheck.result.scanResults.aiAnalysis.finalScore || 0) * 100).toFixed(1)}%
+                      </Text>
+                    </div>
+                  </Col>
+                  
+                  {selectedCheck.result.scanResults.aiAnalysis.intentScore && (
+                    <Col span={12}>
+                      <Text strong>Intent Score:</Text>
+                      <div>
+                        <Progress
+                          percent={Math.round((selectedCheck.result.scanResults.aiAnalysis.intentScore.score || 0) * 100)}
+                          size="small"
+                          strokeColor="#13c2c2"
+                        />
+                        <Text type="secondary">
+                          {((selectedCheck.result.scanResults.aiAnalysis.intentScore.score || 0) * 100).toFixed(1)}%
+                        </Text>
+                      </div>
+                    </Col>
                   )}
-                </Space>
+
+                  {selectedCheck.result.scanResults.aiAnalysis.recommendations?.length > 0 && (
+                    <Col span={24}>
+                      <Text strong>AI Recommendations:</Text>
+                      <List
+                        size="small"
+                        dataSource={selectedCheck.result.scanResults.aiAnalysis.recommendations}
+                        renderItem={(rec, index) => (
+                          <List.Item style={{ padding: "4px 0" }}>
+                            <CheckCircleOutlined style={{ color: "#52c41a", marginRight: 8 }} />
+                            <Text style={{ fontSize: "12px" }}>{rec}</Text>
+                          </List.Item>
+                        )}
+                      />
+                    </Col>
+                  )}
+                </Row>
+              </Card>
+            )}
+
+            {/* Database Matches */}
+            {selectedCheck.result?.scanResults?.databaseMatches && (
+              <Card title="Scammer Database Matches" style={{ marginBottom: "16px" }}>
+                {selectedCheck.result.scanResults.databaseMatches.scammerDbMatches?.length > 0 ? (
+                  <Alert
+                    message="Matches Found in Scammer Database"
+                    description={`${selectedCheck.result.scanResults.databaseMatches.scammerDbMatches.length} matches found`}
+                    type="error"
+                    showIcon
+                    style={{ marginBottom: 16 }}
+                  />
+                ) : (
+                  <Alert
+                    message="No Matches Found"
+                    description="No matches found in our scammer database"
+                    type="success"
+                    showIcon
+                    style={{ marginBottom: 16 }}
+                  />
+                )}
+
+                {(selectedCheck.result.scanResults.databaseMatches.phoneMatches?.length > 0 ||
+                  selectedCheck.result.scanResults.databaseMatches.emailMatches?.length > 0 ||
+                  selectedCheck.result.scanResults.databaseMatches.urlMatches?.length > 0) && (
+                  <Row gutter={[16, 16]}>
+                    {selectedCheck.result.scanResults.databaseMatches.phoneMatches?.length > 0 && (
+                      <Col span={24}>
+                        <Text strong style={{ color: "#ff4d4f" }}>Phone Number Matches:</Text>
+                        <List
+                          size="small"
+                          dataSource={selectedCheck.result.scanResults.databaseMatches.phoneMatches}
+                          renderItem={(match, index) => (
+                            <List.Item style={{ padding: "4px 0" }}>
+                              <Text code>{match.identifier}</Text>
+                              <Text type="secondary" style={{ marginLeft: 8 }}>
+                                - {match.description || 'Known scammer'}
+                              </Text>
+                            </List.Item>
+                          )}
+                        />
+                      </Col>
+                    )}
+
+                    {selectedCheck.result.scanResults.databaseMatches.emailMatches?.length > 0 && (
+                      <Col span={24}>
+                        <Text strong style={{ color: "#ff4d4f" }}>Email Matches:</Text>
+                        <List
+                          size="small"
+                          dataSource={selectedCheck.result.scanResults.databaseMatches.emailMatches}
+                          renderItem={(match, index) => (
+                            <List.Item style={{ padding: "4px 0" }}>
+                              <Text code>{match.identifier}</Text>
+                              <Text type="secondary" style={{ marginLeft: 8 }}>
+                                - {match.description || 'Known scammer'}
+                              </Text>
+                            </List.Item>
+                          )}
+                        />
+                      </Col>
+                    )}
+
+                    {selectedCheck.result.scanResults.databaseMatches.urlMatches?.length > 0 && (
+                      <Col span={24}>
+                        <Text strong style={{ color: "#ff4d4f" }}>URL Matches:</Text>
+                        <List
+                          size="small"
+                          dataSource={selectedCheck.result.scanResults.databaseMatches.urlMatches}
+                          renderItem={(match, index) => (
+                            <List.Item style={{ padding: "4px 0" }}>
+                              <Text code style={{ wordBreak: "break-all" }}>
+                                {match.identifier.length > 50 ? match.identifier.substring(0, 50) + "..." : match.identifier}
+                              </Text>
+                              <Text type="secondary" style={{ marginLeft: 8 }}>
+                                - {match.description || 'Known malicious URL'}
+                              </Text>
+                            </List.Item>
+                          )}
+                        />
+                      </Col>
+                    )}
+                  </Row>
+                )}
+              </Card>
+            )}
+
+            {/* URL Security Analysis */}
+            {(selectedCheck.result?.scanResults?.virusTotalResults || selectedCheck.result?.scanResults?.urlScanResults) && (
+              <Card title="URL Security Analysis" style={{ marginBottom: "16px" }}>
+                {selectedCheck.result.scanResults.virusTotalResults && (
+                  <div style={{ marginBottom: 16 }}>
+                    <Text strong>VirusTotal Results:</Text>
+                    <Row gutter={[8, 8]} style={{ marginTop: 8 }}>
+                      <Col span={6}>
+                        <div style={{ textAlign: "center", padding: 8, backgroundColor: "#f6ffed", borderRadius: 4 }}>
+                          <div style={{ color: "#52c41a", fontWeight: "bold" }}>
+                            {selectedCheck.result.scanResults.virusTotalResults.safeUrls || 0}
+                          </div>
+                          <div style={{ fontSize: 12 }}>Safe</div>
+                        </div>
+                      </Col>
+                      <Col span={6}>
+                        <div style={{ textAlign: "center", padding: 8, backgroundColor: "#fffbe6", borderRadius: 4 }}>
+                          <div style={{ color: "#faad14", fontWeight: "bold" }}>
+                            {selectedCheck.result.scanResults.virusTotalResults.suspiciousUrls || 0}
+                          </div>
+                          <div style={{ fontSize: 12 }}>Suspicious</div>
+                        </div>
+                      </Col>
+                      <Col span={6}>
+                        <div style={{ textAlign: "center", padding: 8, backgroundColor: "#fff2f0", borderRadius: 4 }}>
+                          <div style={{ color: "#ff4d4f", fontWeight: "bold" }}>
+                            {selectedCheck.result.scanResults.virusTotalResults.maliciousUrls || 0}
+                          </div>
+                          <div style={{ fontSize: 12 }}>Malicious</div>
+                        </div>
+                      </Col>
+                      <Col span={6}>
+                        <div style={{ textAlign: "center", padding: 8, backgroundColor: "#f6f6f6", borderRadius: 4 }}>
+                          <div style={{ color: "#666", fontWeight: "bold" }}>
+                            {selectedCheck.result.scanResults.virusTotalResults.totalUrls || 0}
+                          </div>
+                          <div style={{ fontSize: 12 }}>Total</div>
+                        </div>
+                      </Col>
+                    </Row>
+
+                    {selectedCheck.result.scanResults.virusTotalResults.details?.length > 0 && (
+                      <div style={{ marginTop: 16 }}>
+                        <Text strong>URL Details:</Text>
+                        <List
+                          size="small"
+                          dataSource={selectedCheck.result.scanResults.virusTotalResults.details}
+                          renderItem={(detail, index) => (
+                            <List.Item style={{ padding: "4px 0" }}>
+                              <Text code style={{ fontSize: 12, wordBreak: "break-all" }}>
+                                {detail.url?.length > 60 ? detail.url.substring(0, 60) + "..." : detail.url}
+                              </Text>
+                              <Tag 
+                                color={detail.isSafe ? 'green' : 'red'} 
+                                style={{ marginLeft: 8 }}
+                              >
+                                {detail.isSafe ? 'Safe' : 'Threat Detected'}
+                              </Tag>
+                            </List.Item>
+                          )}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {selectedCheck.result.scanResults.urlScanResults && (
+                  <div>
+                    <Text strong>Additional URL Scan Results:</Text>
+                    <Row gutter={[8, 8]} style={{ marginTop: 8 }}>
+                      <Col span={8}>
+                        <div style={{ textAlign: "center", padding: 8, backgroundColor: "#f6ffed", borderRadius: 4 }}>
+                          <div style={{ color: "#52c41a", fontWeight: "bold" }}>
+                            {selectedCheck.result.scanResults.urlScanResults.safeUrls || 0}
+                          </div>
+                          <div style={{ fontSize: 12 }}>Safe</div>
+                        </div>
+                      </Col>
+                      <Col span={8}>
+                        <div style={{ textAlign: "center", padding: 8, backgroundColor: "#fffbe6", borderRadius: 4 }}>
+                          <div style={{ color: "#faad14", fontWeight: "bold" }}>
+                            {selectedCheck.result.scanResults.urlScanResults.suspiciousUrls || 0}
+                          </div>
+                          <div style={{ fontSize: 12 }}>Suspicious</div>
+                        </div>
+                      </Col>
+                      <Col span={8}>
+                        <div style={{ textAlign: "center", padding: 8, backgroundColor: "#fff2f0", borderRadius: 4 }}>
+                          <div style={{ color: "#ff4d4f", fontWeight: "bold" }}>
+                            {selectedCheck.result.scanResults.urlScanResults.maliciousUrls || 0}
+                          </div>
+                          <div style={{ fontSize: 12 }}>Malicious</div>
+                        </div>
+                      </Col>
+                    </Row>
+                  </div>
+                )}
+              </Card>
+            )}
+
+            {/* Intent Analysis */}
+            {selectedCheck.result?.scanResults?.intentAnalysis && (
+              <Card title="Intent Analysis" style={{ marginBottom: "16px" }}>
+                <Row gutter={[16, 16]}>
+                  <Col span={24}>
+                    <Text strong>Detected Intent: </Text>
+                    <Tag color="blue">
+                      {selectedCheck.result.scanResults.intentAnalysis.detectedIntent?.replace("_", " ") || "Unknown"}
+                    </Tag>
+                  </Col>
+
+                  {selectedCheck.result.scanResults.intentAnalysis.confidence !== undefined && (
+                    <Col span={24}>
+                      <Text strong>Confidence:</Text>
+                      <Progress
+                        percent={Math.round((selectedCheck.result.scanResults.intentAnalysis.confidence || 0) * 100)}
+                        size="small"
+                        strokeColor="#1890ff"
+                        style={{ marginTop: 4 }}
+                      />
+                      <Text type="secondary">
+                        {((selectedCheck.result.scanResults.intentAnalysis.confidence || 0) * 100).toFixed(1)}% confident
+                      </Text>
+                    </Col>
+                  )}
+
+                  {selectedCheck.result.scanResults.intentAnalysis.alternativeIntents?.length > 0 && (
+                    <Col span={24}>
+                      <Text strong>Alternative Intents:</Text>
+                      <div style={{ marginTop: 8 }}>
+                        {selectedCheck.result.scanResults.intentAnalysis.alternativeIntents.map((intent, index) => (
+                          <Tag key={index} color="geekblue" style={{ margin: 2 }}>
+                            {intent.replace("_", " ")}
+                          </Tag>
+                        ))}
+                      </div>
+                    </Col>
+                  )}
+
+                  {selectedCheck.result.scanResults.intentAnalysis.linguisticPatterns?.length > 0 && (
+                    <Col span={24}>
+                      <Text strong>Linguistic Patterns:</Text>
+                      <div style={{ marginTop: 8 }}>
+                        {selectedCheck.result.scanResults.intentAnalysis.linguisticPatterns.map((pattern, index) => (
+                          <Tag key={index} color="purple" style={{ margin: 2 }}>
+                            {pattern.replace("_", " ")}
+                          </Tag>
+                        ))}
+                      </div>
+                    </Col>
+                  )}
+                </Row>
+              </Card>
+            )}
+
+            {/* Detection Details */}
+            {(selectedCheck.result?.reasons?.length > 0 || selectedCheck.result?.detectedPatterns?.length > 0) && (
+              <Card title="Detection Details" style={{ marginBottom: "16px" }}>
+                {selectedCheck.result.reasons?.length > 0 && (
+                  <div style={{ marginBottom: 16 }}>
+                    <Text strong>Detection Reasons:</Text>
+                    <List
+                      size="small"
+                      dataSource={selectedCheck.result.reasons}
+                      renderItem={(reason, index) => (
+                        <List.Item style={{ padding: "4px 0" }}>
+                          <ExclamationCircleOutlined style={{ color: "#faad14", marginRight: 8 }} />
+                          <Text style={{ fontSize: "12px" }}>{reason}</Text>
+                        </List.Item>
+                      )}
+                    />
+                  </div>
+                )}
+
+                {selectedCheck.result.detectedPatterns?.length > 0 && (
+                  <div>
+                    <Text strong>Detected Patterns:</Text>
+                    <div style={{ marginTop: 8 }}>
+                      {selectedCheck.result.detectedPatterns.map((pattern, index) => (
+                        <Tag key={index} color="blue" style={{ margin: 2 }}>
+                          {pattern.replace("_", " ")}
+                        </Tag>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </Card>
+            )}
+
+            {/* Metadata */}
+            {selectedCheck.result?.metadata && (
+              <Card title="Technical Information" style={{ marginBottom: "16px" }}>
+                <Row gutter={[16, 8]}>
+                  {selectedCheck.result.metadata.ipAddress && (
+                    <>
+                      <Col span={8}>
+                        <Text strong>IP Address:</Text>
+                      </Col>
+                      <Col span={16}>
+                        <Text code>{selectedCheck.result.metadata.ipAddress}</Text>
+                      </Col>
+                    </>
+                  )}
+
+                  {selectedCheck.result.metadata.userAgent && (
+                    <>
+                      <Col span={8}>
+                        <Text strong>User Agent:</Text>
+                      </Col>
+                      <Col span={16}>
+                        <Text code style={{ fontSize: 11, wordBreak: "break-all" }}>
+                          {selectedCheck.result.metadata.userAgent.length > 100 
+                            ? selectedCheck.result.metadata.userAgent.substring(0, 100) + "..."
+                            : selectedCheck.result.metadata.userAgent
+                          }
+                        </Text>
+                      </Col>
+                    </>
+                  )}
+
+                  <Col span={8}>
+                    <Text strong>Analysis Method:</Text>
+                  </Col>
+                  <Col span={16}>
+                    <Tag color="cyan">{selectedCheck.result.analysisMethod || "standard"}</Tag>
+                  </Col>
+
+                  <Col span={8}>
+                    <Text strong>Updated:</Text>
+                  </Col>
+                  <Col span={16}>
+                    <Text type="secondary">
+                      {new Date(selectedCheck.result.metadata.updatedAt || selectedCheck.updatedAt).toLocaleString()}
+                    </Text>
+                  </Col>
+                </Row>
               </Card>
             )}
           </div>
