@@ -14,6 +14,7 @@ import { ContactModule } from './contact/contact.module';
 import { TelegramBotModule } from './telegram-bot/telegram-bot.module';
 import { HttpSmsModule } from './http-sms/http-sms.module';
 import { CommonServicesModule } from './common/services/common-services.module';
+import { AutoVerificationModule } from './common/services/auto-verification.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import configuration from './config/configuration';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
@@ -37,6 +38,7 @@ import { EducationResourcesModule } from './education-resources/education-resour
     AuthzModule,
     UsersModule,
     CommonServicesModule,
+    AutoVerificationModule,
     ScamCheckModule,
     ScammerReportsModule,
     ContactModule,

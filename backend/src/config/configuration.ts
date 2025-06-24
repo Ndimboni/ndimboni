@@ -120,5 +120,33 @@ export default (): AppConfig => {
         10,
       ),
     },
+    autoVerification: {
+      enabled: process.env.AUTO_VERIFICATION_ENABLED === 'true',
+      phoneThreshold: parseInt(
+        process.env.AUTO_VERIFY_PHONE_THRESHOLD || '5',
+        10,
+      ),
+      emailThreshold: parseInt(
+        process.env.AUTO_VERIFY_EMAIL_THRESHOLD || '3',
+        10,
+      ),
+      socialMediaThreshold: parseInt(
+        process.env.AUTO_VERIFY_SOCIAL_MEDIA_THRESHOLD || '4',
+        10,
+      ),
+      websiteThreshold: parseInt(
+        process.env.AUTO_VERIFY_WEBSITE_THRESHOLD || '3',
+        10,
+      ),
+      otherThreshold: parseInt(
+        process.env.AUTO_VERIFY_OTHER_THRESHOLD || '5',
+        10,
+      ),
+      uniqueReportersRequired:
+        process.env.AUTO_VERIFY_UNIQUE_REPORTERS_REQUIRED !== 'false',
+      timePeriodHours: process.env.AUTO_VERIFY_TIME_PERIOD_HOURS
+        ? parseInt(process.env.AUTO_VERIFY_TIME_PERIOD_HOURS, 10)
+        : undefined,
+    },
   };
 };

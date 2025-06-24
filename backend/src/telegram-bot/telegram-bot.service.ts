@@ -247,6 +247,7 @@ For support, contact our team.
       } as Partial<ScamReport>);
 
       const saved = await this.scamReportRepository.save(report);
+      console.log(saved);
 
       // Use shared formatter for success message
       const successMessage =

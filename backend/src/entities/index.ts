@@ -7,5 +7,6 @@ export {
   ScammerType,
   ScammerStatus,
 } from './scammer-report.entity';
+export { ScammerReportInstance } from './scammer-report-instance.entity';
 export { Contact, ContactStatus, ContactCategory } from './contact.entity';
 export * from './education-resource.entity';

@@ -58,6 +58,17 @@ export interface TelegramConfig {
   autoDeleteDelay: number; // seconds to wait before deleting messages
 }
 
+export interface AutoVerificationConfig {
+  enabled: boolean;
+  phoneThreshold: number; // Number of reports required to auto-verify phone numbers
+  emailThreshold: number; // Number of reports required to auto-verify emails
+  socialMediaThreshold: number; // Number of reports required to auto-verify social media accounts
+  websiteThreshold: number; // Number of reports required to auto-verify websites
+  otherThreshold: number; // Number of reports required to auto-verify other types
+  uniqueReportersRequired: boolean; // Whether reports must come from different users
+  timePeriodHours?: number; // Time period to consider for auto-verification (optional)
+}
+
 export interface AppConfig {
   port: number;
   database: DatabaseConfig;
@@ -66,6 +77,7 @@ export interface AppConfig {
   upload: UploadConfig;
   cors: CorsConfig;
   admin: AdminConfig;
-  moderator: AdminConfig; // Add this line
+  moderator: AdminConfig;
   telegram: TelegramConfig;
+  autoVerification: AutoVerificationConfig;
 }

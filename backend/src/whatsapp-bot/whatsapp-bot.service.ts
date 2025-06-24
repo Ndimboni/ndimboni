@@ -6,6 +6,8 @@ import { User } from '../entities/user.entity';
 import { ScamCheckService } from '../scam-check/scam-check.service';
 import { WhatsappApiService } from './whatsapp-api.service';
 import { ScamAnalysisFormatterService } from '../common/services/scam-analysis-formatter.service';
+import { ScammerReportService } from '../scammer-reports/scammer-report.service';
+import { ScammerType } from '../entities/scammer-report.entity';
 
 @Injectable()
 export class WhatsappBotService {
@@ -19,6 +21,7 @@ export class WhatsappBotService {
     private scamCheckService: ScamCheckService,
     private whatsappApiService: WhatsappApiService,
     private scamAnalysisFormatterService: ScamAnalysisFormatterService,
+    private scammerReportService: ScammerReportService,
   ) {}
 
   async handleIncomingMessage(message: any): Promise<string> {
@@ -61,16 +64,18 @@ export class WhatsappBotService {
       text.trim().toLowerCase().includes('/scam')
     ) {
       const description = text.slice(7).trim();
-      const report = this.scamReportRepository.create({
-        title: 'WhatsApp Report',
-        description,
-        status: 'pending',
-        scamType: 'other',
-        reporterPhone: waId,
-      } as Partial<ScamReport>);
-      const saved = await this.scamReportRepository.save(report);
+
+      // Use ScammerReportService instead of direct repository
+      const result = await this.scammerReportService.createReport({
+        type: ScammerType.PHONE, // Assuming phone number reports from WhatsApp
+        identifier: waId,
+        description: description || 'WhatsApp scam report',
+        additionalInfo: `Reported via WhatsApp from ${waId}`,
+        source: 'whatsapp',
+      });
+
       reply = this.scamAnalysisFormatterService.formatReportSuccessResponse(
-        saved.id,
+        result.id,
         'whatsapp',
       );
       await this.whatsappApiService.sendMessage(waId, reply);

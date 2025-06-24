@@ -31,6 +31,7 @@ import {
   ScammerReportStats,
   SearchScammerRequest,
 } from './scammer-report.service';
+import { AutoVerificationService } from '../common/services/auto-verification.service';
 import {
   CreateScammerReportDto,
   CheckScammerDto,
@@ -75,7 +76,10 @@ export interface CheckScammerResponse {
 export class ScammerReportController {
   private readonly logger = new Logger(ScammerReportController.name);
 
-  constructor(private readonly scammerReportService: ScammerReportService) {}
+  constructor(
+    private readonly scammerReportService: ScammerReportService,
+    private readonly autoVerificationService: AutoVerificationService,
+  ) {}
 
   @Public()
   @Post('report')
@@ -603,6 +607,108 @@ export class ScammerReportController {
 
       throw new HttpException(
         'Failed to retrieve all scammer reports',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('auto-verification/stats')
+  @UseGuards(JwtAuthGuard, PolicyGuard)
+  @RequirePolicy(Action.READ, Resource.SCAM_REPORT)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get auto-verification statistics' })
+  @ApiResponse({
+    status: 200,
+    description: 'Auto-verification statistics retrieved successfully',
+  })
+  async getAutoVerificationStats(): Promise<{
+    success: boolean;
+    data: any;
+    message: string;
+  }> {
+    try {
+      const stats =
+        await this.autoVerificationService.getAutoVerificationStats();
+
+      return {
+        success: true,
+        data: stats,
+        message: 'Auto-verification statistics retrieved successfully',
+      };
+    } catch (error) {
+      this.logger.error('Error getting auto-verification stats:', error);
+
+      throw new HttpException(
+        'Failed to retrieve auto-verification statistics',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post('auto-verification/process')
+  @UseGuards(JwtAuthGuard, PolicyGuard)
+  @RequirePolicy(Action.UPDATE, Resource.SCAM_REPORT)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Manually trigger auto-verification process',
+    description:
+      'Admin/Moderator only - manually trigger the auto-verification process',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Auto-verification process triggered successfully',
+  })
+  async triggerAutoVerification(): Promise<{
+    success: boolean;
+    message: string;
+  }> {
+    try {
+      await this.autoVerificationService.processAutoVerification();
+
+      return {
+        success: true,
+        message: 'Auto-verification process triggered successfully',
+      };
+    } catch (error) {
+      this.logger.error('Error triggering auto-verification:', error);
+
+      throw new HttpException(
+        'Failed to trigger auto-verification process',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get(':id/auto-verification/check')
+  @UseGuards(JwtAuthGuard, PolicyGuard)
+  @RequirePolicy(Action.READ, Resource.SCAM_REPORT)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Check auto-verification status for a specific report',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Auto-verification status retrieved successfully',
+  })
+  async checkAutoVerificationStatus(@Param('id') id: string): Promise<{
+    success: boolean;
+    data: any;
+    message: string;
+  }> {
+    try {
+      const result =
+        await this.autoVerificationService.checkAutoVerification(id);
+
+      return {
+        success: true,
+        data: result,
+        message: 'Auto-verification status checked successfully',
+      };
+    } catch (error) {
+      this.logger.error('Error checking auto-verification status:', error);
+
+      throw new HttpException(
+        'Failed to check auto-verification status',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

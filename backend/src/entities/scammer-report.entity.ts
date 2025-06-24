@@ -5,9 +5,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  OneToMany,
   JoinColumn,
 } from 'typeorm';
 import { User } from './user.entity';
+import { ScammerReportInstance } from './scammer-report-instance.entity';
 
 export enum ScammerType {
   EMAIL = 'email',
@@ -71,6 +73,19 @@ export class ScammerReport {
 
   @Column('varchar', { length: 50, default: 'web' })
   source: string; // Source of the report (web, telegram, api, etc.)
+
+  @Column({ type: 'boolean', default: false })
+  isAutoVerified: boolean; // Whether this was auto-verified by the system
+
+  @Column({ type: 'timestamp', nullable: true })
+  autoVerifiedAt: Date | null; // When it was auto-verified
+
+  @OneToMany(
+    () => ScammerReportInstance,
+    (instance) => instance.scammerReport,
+    { cascade: true },
+  )
+  reportInstances: ScammerReportInstance[];
 
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'reportedBy' })

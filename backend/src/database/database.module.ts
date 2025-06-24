@@ -8,6 +8,7 @@ import {
   UploadedFile,
   ScamCheck,
   ScammerReport,
+  ScammerReportInstance,
   EducationResource,
 } from '../entities';
 import { SeedService } from './seed.service';
@@ -27,6 +28,7 @@ import { MigrationService } from './migration.service';
             UploadedFile,
             ScamCheck,
             ScammerReport,
+            ScammerReportInstance,
             EducationResource,
           ],
         } as TypeOrmModuleOptions;

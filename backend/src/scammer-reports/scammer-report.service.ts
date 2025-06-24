@@ -6,6 +6,8 @@ import {
   ScammerType,
   ScammerStatus,
 } from '../entities/scammer-report.entity';
+import { ScammerReportInstance } from '../entities/scammer-report-instance.entity';
+import { AutoVerificationService } from '../common/services/auto-verification.service';
 
 export interface CreateScammerReportRequest {
   type: ScammerType;
@@ -36,6 +38,8 @@ export interface ScammerReportResponse {
   reportCount: number;
   lastReportedAt?: Date;
   source: string;
+  isAutoVerified: boolean;
+  autoVerifiedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -66,6 +70,9 @@ export class ScammerReportService {
   constructor(
     @InjectRepository(ScammerReport)
     private readonly scammerReportRepository: Repository<ScammerReport>,
+    @InjectRepository(ScammerReportInstance)
+    private readonly reportInstanceRepository: Repository<ScammerReportInstance>,
+    private readonly autoVerificationService: AutoVerificationService,
   ) {}
 
   async createReport(
@@ -82,9 +89,31 @@ export class ScammerReportService {
           type: request.type,
           identifier: request.identifier.toLowerCase(),
         },
+        relations: ['reportInstances'],
       });
 
+      let scammerReport: ScammerReport;
+
       if (existingReport) {
+        // Check if this user has already reported this scammer (prevent duplicate reports)
+        if (request.reportedBy) {
+          const existingUserReport =
+            await this.reportInstanceRepository.findOne({
+              where: {
+                scammerReportId: existingReport.id,
+                reportedBy: request.reportedBy,
+              },
+            });
+
+          if (existingUserReport) {
+            this.logger.warn(
+              `User ${request.reportedBy} has already reported scammer ${existingReport.id}`,
+            );
+            // Return existing report without creating duplicate
+            return this.mapToResponse(existingReport);
+          }
+        }
+
         // Update existing report
         existingReport.reportCount += 1;
         existingReport.lastReportedAt = new Date();
@@ -96,29 +125,53 @@ export class ScammerReportService {
             existingInfo + '\n\n' + request.additionalInfo;
         }
 
-        const updatedReport =
-          await this.scammerReportRepository.save(existingReport);
-        this.logger.log(`Updated existing scammer report: ${updatedReport.id}`);
-        return this.mapToResponse(updatedReport);
+        scammerReport = await this.scammerReportRepository.save(existingReport);
+      } else {
+        // Create new report
+        const newReport = new ScammerReport();
+        newReport.type = request.type;
+        newReport.identifier = request.identifier.toLowerCase();
+        newReport.description = request.description;
+        newReport.additionalInfo = request.additionalInfo || null;
+        newReport.reportedBy = request.reportedBy || null;
+        newReport.ipAddress = request.ipAddress || null;
+        newReport.source = request.source || 'web';
+        newReport.lastReportedAt = new Date();
+
+        scammerReport = await this.scammerReportRepository.save(newReport);
       }
 
-      // Create new report
-      const scammerReport = new ScammerReport();
-      scammerReport.type = request.type;
-      scammerReport.identifier = request.identifier.toLowerCase();
-      scammerReport.description = request.description;
+      // Create report instance for this specific report
+      const reportInstance = new ScammerReportInstance();
+      reportInstance.scammerReportId = scammerReport.id;
+      reportInstance.reportedBy = request.reportedBy || null;
+      reportInstance.ipAddress = request.ipAddress || null;
+      reportInstance.description = request.description;
+      reportInstance.additionalInfo = request.additionalInfo || null;
+      reportInstance.source = request.source || 'web';
 
-      scammerReport.additionalInfo = request.additionalInfo || null;
-      scammerReport.reportedBy = request.reportedBy || null;
-      scammerReport.ipAddress = request.ipAddress || null;
-      scammerReport.source = request.source || 'web';
-      scammerReport.lastReportedAt = new Date();
+      await this.reportInstanceRepository.save(reportInstance);
 
-      const savedReport =
-        await this.scammerReportRepository.save(scammerReport);
+      // Check for auto-verification after creating the report instance
+      if (scammerReport.status === ScammerStatus.PENDING) {
+        const wasAutoVerified =
+          await this.autoVerificationService.autoVerifyReport(scammerReport.id);
 
-      this.logger.log(`Created new scammer report: ${savedReport.id}`);
-      return this.mapToResponse(savedReport);
+        if (wasAutoVerified) {
+          // Refresh the report to get updated status
+          const updatedReport = await this.scammerReportRepository.findOne({
+            where: { id: scammerReport.id },
+          });
+          if (updatedReport) {
+            scammerReport = updatedReport;
+          }
+        }
+      }
+
+      this.logger.log(
+        `${existingReport ? 'Updated existing' : 'Created new'} scammer report: ${scammerReport.id}`,
+      );
+      return this.mapToResponse(scammerReport);
     } catch (error) {
       this.logger.error('Error creating scammer report:', error);
       throw error;
@@ -383,6 +436,8 @@ export class ScammerReportService {
       reportCount: report.reportCount,
       lastReportedAt: report.lastReportedAt ?? undefined,
       source: report.source,
+      isAutoVerified: report.isAutoVerified,
+      autoVerifiedAt: report.autoVerifiedAt ?? undefined,
       createdAt: report.createdAt,
       updatedAt: report.updatedAt,
     };

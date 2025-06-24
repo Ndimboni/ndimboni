@@ -425,7 +425,7 @@ const ScamCheckPage = () => {
       width: 120,
       render: (intent) => (
         <Tag color={getIntentColor(intent)}>
-          {intent ? intent.replace('_', ' ') : "UNKNOWN"}
+          {intent ? intent.replace("_", " ") : "UNKNOWN"}
         </Tag>
       ),
     },
