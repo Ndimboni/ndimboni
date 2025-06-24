@@ -80,7 +80,7 @@ export class ScamCheckService {
 
       // Scan URLs if any found
       let urlScanResults: ScanSummary | null = null;
-      let riskScore = analysis.confidence;
+      let riskScore = analysis.aiAnalysis.finalScore || 0;
 
       if (extractedUrls.length > 0) {
         this.logger.log(`Scanning ${extractedUrls.length} URLs...`);
@@ -97,10 +97,10 @@ export class ScamCheckService {
           // Adjust risk score based on URL scan results
           if (scanSummary.maliciousUrls > 0) {
             riskScore = Math.max(riskScore, 0.9);
-            analysis.reasons.push('malicious_urls_detected');
+            analysis.reasons.push('Malicious URLs detected');
           } else if (scanSummary.suspiciousUrls > 0) {
             riskScore = Math.max(riskScore, 0.6);
-            analysis.reasons.push('suspicious_urls_detected');
+            analysis.reasons.push('Suspicious URLs detected');
           }
         } catch (urlError) {
           this.logger.warn('URL scanning failed or timed out:', urlError);
@@ -163,7 +163,7 @@ export class ScamCheckService {
         intentConfidence = analysis.confidence;
       }
 
-      // Save to database
+      // Save comprehensive scan results to database
       const scamCheck = new ScamCheck();
       scamCheck.message = request.message;
       scamCheck.extractedUrls =
@@ -177,6 +177,72 @@ export class ScamCheckService {
       scamCheck.urlScanResults = urlScanResults
         ? JSON.stringify(urlScanResults)
         : null;
+
+      // Store comprehensive AI analysis results
+      scamCheck.aiAnalysis = JSON.stringify({
+        finalScore: analysis.aiAnalysis?.finalScore || riskScore,
+        databaseScore: analysis.aiAnalysis?.databaseScore || {
+          ownDbScore: 0,
+          externalDbScore: 0,
+          finalDbScore: 0,
+          reasons: [],
+        },
+        intentScore: analysis.aiAnalysis?.intentScore || {
+          score: intentConfidence,
+          intent: detectedIntent,
+          confidence: intentConfidence,
+          reasons: [`Intent detected as ${detectedIntent}`],
+        },
+        hasLinks: extractedUrls.length > 0,
+        recommendations:
+          analysis.aiAnalysis?.recommendations || analysis.reasons,
+        extractedIdentifiers: analysis.aiAnalysis?.extractedIdentifiers || {
+          phoneNumbers: this.extractPhoneNumbers(request.message),
+          emails: this.extractEmails(request.message),
+          urls: extractedUrls,
+        },
+      });
+
+      // Store extracted identifiers separately for easier querying
+      scamCheck.extractedIdentifiers = JSON.stringify({
+        phoneNumbers: this.extractPhoneNumbers(request.message),
+        emails: this.extractEmails(request.message),
+        urls: extractedUrls,
+        socialMediaHandles: this.extractSocialMediaHandles(request.message),
+        cryptoAddresses: this.extractCryptoAddresses(request.message),
+      });
+
+      // Store database matches if any
+      scamCheck.databaseMatches = JSON.stringify({
+        scammerDbMatches: analysis.aiAnalysis?.databaseScore?.reasons || [],
+        phoneMatches: [], // Will be populated by scammer database service
+        emailMatches: [], // Will be populated by scammer database service
+        urlMatches: [], // Will be populated by URL scanning service
+      });
+
+      // Store VirusTotal results if available
+      if (urlScanResults) {
+        scamCheck.virusTotalResults = JSON.stringify({
+          totalUrls: urlScanResults.totalUrls,
+          safeUrls: urlScanResults.safeUrls || 0,
+          suspiciousUrls: urlScanResults.suspiciousUrls,
+          maliciousUrls: urlScanResults.maliciousUrls,
+          details: urlScanResults.results || [],
+        });
+      }
+
+      // Store detailed intent analysis
+      scamCheck.intentAnalysis = JSON.stringify({
+        detectedIntent,
+        confidence: intentConfidence,
+        alternativeIntents: [], // Could be populated by more sophisticated analysis
+        reasoningSteps: analysis.reasons.filter((reason) =>
+          reason.includes('intent'),
+        ),
+        linguisticPatterns: this.extractLinguisticPatterns(request.message),
+      });
+
+      scamCheck.analysisMethod = analysis.analysisMethod || 'enhanced';
       scamCheck.checkedBy = request.checkedBy || null;
       scamCheck.ipAddress = request.ipAddress || null;
       scamCheck.userAgent = request.userAgent || null;
@@ -353,6 +419,24 @@ export class ScamCheckService {
   }
 
   private mapToResponse(check: ScamCheck): ScamCheckResponse {
+    // Parse comprehensive scan results
+    const aiAnalysis = check.aiAnalysis ? JSON.parse(check.aiAnalysis) : null;
+    const extractedIdentifiers = check.extractedIdentifiers
+      ? JSON.parse(check.extractedIdentifiers)
+      : {};
+    const databaseMatches = check.databaseMatches
+      ? JSON.parse(check.databaseMatches)
+      : {};
+    const virusTotalResults = check.virusTotalResults
+      ? JSON.parse(check.virusTotalResults)
+      : null;
+    const intentAnalysis = check.intentAnalysis
+      ? JSON.parse(check.intentAnalysis)
+      : {};
+    const urlScanResults = check.urlScanResults
+      ? JSON.parse(check.urlScanResults)
+      : null;
+
     return {
       id: check.id,
       result: {
@@ -361,12 +445,58 @@ export class ScamCheckService {
           check.status === CheckStatus.SUSPICIOUS,
         confidence: check.confidence,
         riskScore: check.riskScore,
+        riskLevel:
+          check.riskScore >= 0.8
+            ? 'high'
+            : check.riskScore >= 0.5
+              ? 'medium'
+              : 'low',
         reasons: check.reasons ? JSON.parse(check.reasons) : [],
         detectedPatterns: check.detectedPatterns
           ? JSON.parse(check.detectedPatterns)
           : [],
         status: check.status,
-      } as RankingServiceResult & { status: CheckStatus },
+        detectedIntent: check.detectedIntent,
+        analysisMethod: check.analysisMethod,
+
+        // Comprehensive scan results
+        scanResults: {
+          message: check.message,
+          extractedUrls: check.extractedUrls
+            ? JSON.parse(check.extractedUrls)
+            : [],
+          extractedIdentifiers,
+          aiAnalysis,
+          databaseMatches,
+          virusTotalResults,
+          intentAnalysis,
+          urlScanResults,
+          linguisticPatterns: intentAnalysis.linguisticPatterns || [],
+        },
+
+        // User and metadata
+        metadata: {
+          checkedBy: check.checkedBy,
+          user: check.user
+            ? {
+                id: check.user.id,
+                email: check.user.email,
+                name: check.user.name,
+              }
+            : null,
+          ipAddress: check.ipAddress,
+          userAgent: check.userAgent,
+          source: check.source,
+          createdAt: check.createdAt,
+          updatedAt: check.updatedAt,
+        },
+      } as RankingServiceResult & {
+        status: CheckStatus;
+        detectedIntent: IntentType;
+        analysisMethod: string;
+        scanResults: any;
+        metadata: any;
+      },
       source: check.source,
       createdAt: check.createdAt,
     };
@@ -474,5 +604,105 @@ export class ScamCheckService {
         return false;
       }
     });
+  }
+
+  /**
+   * Extract phone numbers from message using regex patterns
+   */
+  private extractPhoneNumbers(message: string): string[] {
+    const phoneRegex =
+      /(?:\+\d{1,3}\s?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}/g;
+    const matches = message.match(phoneRegex);
+    return matches ? [...new Set(matches)] : [];
+  }
+
+  /**
+   * Extract email addresses from message using regex patterns
+   */
+  private extractEmails(message: string): string[] {
+    const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
+    const matches = message.match(emailRegex);
+    return matches ? [...new Set(matches)] : [];
+  }
+
+  /**
+   * Extract social media handles from message
+   */
+  private extractSocialMediaHandles(message: string): string[] {
+    const handles: string[] = [];
+
+    // Twitter/X handles
+    const twitterRegex = /@[A-Za-z0-9_]{1,15}/g;
+    const twitterMatches = message.match(twitterRegex);
+    if (twitterMatches) handles.push(...twitterMatches);
+
+    // Instagram handles
+    const instagramRegex = /instagram\.com\/([A-Za-z0-9_.]{1,30})/g;
+    const instagramMatches = message.match(instagramRegex);
+    if (instagramMatches) handles.push(...instagramMatches);
+
+    // Facebook handles
+    const facebookRegex = /facebook\.com\/([A-Za-z0-9.]{1,50})/g;
+    const facebookMatches = message.match(facebookRegex);
+    if (facebookMatches) handles.push(...facebookMatches);
+
+    return [...new Set(handles)];
+  }
+
+  /**
+   * Extract cryptocurrency addresses from message
+   */
+  private extractCryptoAddresses(message: string): string[] {
+    const addresses: string[] = [];
+
+    // Bitcoin addresses
+    const btcRegex =
+      /\b[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b|\bbc1[a-z0-9]{39,59}\b/g;
+    const btcMatches = message.match(btcRegex);
+    if (btcMatches) addresses.push(...btcMatches);
+
+    // Ethereum addresses
+    const ethRegex = /\b0x[a-fA-F0-9]{40}\b/g;
+    const ethMatches = message.match(ethRegex);
+    if (ethMatches) addresses.push(...ethMatches);
+
+    return [...new Set(addresses)];
+  }
+
+  /**
+   * Extract linguistic patterns that might indicate scam intent
+   */
+  private extractLinguisticPatterns(message: string): string[] {
+    const patterns: string[] = [];
+
+    // Urgency patterns
+    if (/urgent|immediately|asap|act now|limited time/i.test(message)) {
+      patterns.push('urgency_language');
+    }
+
+    // Money patterns
+    if (/\$\d+|money|cash|payment|transfer|wire/i.test(message)) {
+      patterns.push('financial_language');
+    }
+
+    // Authority patterns
+    if (/bank|government|police|irs|tax|authority/i.test(message)) {
+      patterns.push('authority_impersonation');
+    }
+
+    // Emotional manipulation
+    if (/help|emergency|sick|hospital|accident/i.test(message)) {
+      patterns.push('emotional_manipulation');
+    }
+
+    // Spelling/grammar issues (basic check)
+    const misspellings = message.match(
+      /\b(?:recieve|seperate|occured|neccessary|definately)\b/gi,
+    );
+    if (misspellings && misspellings.length > 0) {
+      patterns.push('poor_grammar_spelling');
+    }
+
+    return patterns;
   }
 }

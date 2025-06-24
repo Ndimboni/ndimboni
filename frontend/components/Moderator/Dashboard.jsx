@@ -67,8 +67,8 @@ const ModeratorDashboard = () => {
       console.log('Fetching data with headers:', headers);
 
       const [scamChecksResponse, reportsResponse] = await Promise.allSettled([
-        fetch('https://ndimboniapi.ini.rw/api/scam-check/all', { headers }),
-        fetch('https://ndimboniapi.ini.rw/api/scammer-reports/all', { headers })
+        fetch('https://ndimboni.ini.rw/api/scam-check/all', { headers }),
+        fetch('https://ndimboni.ini.rw/api/scammer-reports/all', { headers })
       ]);
 
       let scamChecks = [];
@@ -86,12 +86,12 @@ const ModeratorDashboard = () => {
           scamChecks = Object.values(scamChecksData).filter(item => item && typeof item === 'object');
         }
       } else {
-        console.error('Scam checks fetch failed:', scamChecksResponse.status === 'fulfilled' ? scamChecksResponse.value.status : scamChecksResponse.reason);
+        cons"https://ndimboni.ini.rw/ failed:', scamChecksResponse.status === 'fulfilled' ? scamChecksResponse.value.status : scamChecksResponse.reason);
       }
 
       let scammerReports = [];
       if (reportsResponse.status === 'fulfilled' && reportsResponse.value.ok) {
-        const reportsData = await reportsResponse.value.json();
+        cons"https://ndimboni.ini.rw/sResponse.value.json();
         console.log('Reports response:', reportsData);
         
         if (Array.isArray(reportsData)) {

@@ -40,9 +40,9 @@ const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 
-const API_BASE_URL = 'https://ndimboniapi.ini.rw/api/scammer-reports';
+const API_BASE_URL = 'https://ndimboni.ini.rw/api/scammer-reports';
 
-
+"https://ndimboni.ini.rw/
 const ScammerType = {
   EMAIL: 'email',
   PHONE: 'phone',

@@ -11,6 +11,9 @@ export class ScamAnalysisFormatterService {
     { result }: ScamCheckResponse,
     platform: 'telegram' | 'whatsapp' = 'telegram',
   ): string {
+    // Extract comprehensive scan results if available
+    const scanResults = (result as any).scanResults;
+
     // Format risk level with consistent logic
     let riskLabel = 'LOW RISK';
     let riskIcon = '✅';
@@ -39,7 +42,6 @@ export class ScamAnalysisFormatterService {
     // Format detected scam indicators
     let indicatorsText = '';
     if (result.reasons && result.reasons.length > 0) {
-      // Use consistent header format
       indicatorsText =
         platform === 'telegram'
           ? '\n\n🔍 <b>Detected Red Flags:</b>\n'
@@ -47,7 +49,6 @@ export class ScamAnalysisFormatterService {
 
       result.reasons.forEach((indicator: string, index: number) => {
         if (index < 5) {
-          // Limit to 5 indicators to avoid long messages
           indicatorsText += `${index + 1}. ${indicator}\n`;
         }
       });
@@ -57,14 +58,125 @@ export class ScamAnalysisFormatterService {
       }
     }
 
-    // Format scam type if detected (using aiAnalysis data if available)
+    // Format scam type/intent with more detail
     let scamTypeText = '';
-    const scamType = result.aiAnalysis?.intentScore?.intent;
-    if (scamType && scamType !== 'unknown' && scamType !== 'UNKNOWN') {
+    const detectedIntent = (result as any).detectedIntent;
+    const intentAnalysis = scanResults?.intentAnalysis;
+
+    if (
+      detectedIntent &&
+      detectedIntent !== 'unknown' &&
+      detectedIntent !== 'legitimate'
+    ) {
+      const intentName = detectedIntent.replace(/_/g, ' ').toUpperCase();
+      const confidence = intentAnalysis?.confidence
+        ? ` (${Math.round(intentAnalysis.confidence * 100)}% confidence)`
+        : '';
+
       scamTypeText =
         platform === 'telegram'
-          ? `\n📋 <b>Scam Type:</b> ${scamType.replace('_', ' ').toUpperCase()}\n`
-          : `\n📋 Scam Type: ${scamType.replace('_', ' ').toUpperCase()}\n`;
+          ? `\n📋 <b>Scam Type:</b> ${intentName}${confidence}\n`
+          : `\n📋 Scam Type: ${intentName}${confidence}\n`;
+    }
+
+    // Format extracted identifiers with details
+    let identifiersText = '';
+    const extractedIdentifiers = scanResults?.extractedIdentifiers;
+    if (extractedIdentifiers) {
+      const identifierTypes: string[] = [];
+
+      if (extractedIdentifiers.phoneNumbers?.length > 0) {
+        identifierTypes.push(
+          `📞 ${extractedIdentifiers.phoneNumbers.length} phone number(s)`,
+        );
+      }
+      if (extractedIdentifiers.emails?.length > 0) {
+        identifierTypes.push(
+          `📧 ${extractedIdentifiers.emails.length} email(s)`,
+        );
+      }
+      if (extractedIdentifiers.urls?.length > 0) {
+        identifierTypes.push(`🔗 ${extractedIdentifiers.urls.length} URL(s)`);
+      }
+      if (extractedIdentifiers.cryptoAddresses?.length > 0) {
+        identifierTypes.push(
+          `💰 ${extractedIdentifiers.cryptoAddresses.length} crypto address(es)`,
+        );
+      }
+      if (extractedIdentifiers.socialMediaHandles?.length > 0) {
+        identifierTypes.push(
+          `📱 ${extractedIdentifiers.socialMediaHandles.length} social handle(s)`,
+        );
+      }
+
+      if (identifierTypes.length > 0) {
+        identifiersText =
+          platform === 'telegram'
+            ? `\n🔍 <b>Found:</b> ${identifierTypes.join(', ')}\n`
+            : `\n🔍 Found: ${identifierTypes.join(', ')}\n`;
+      }
+    }
+
+    // Format URL scan results if available
+    let urlScanText = '';
+    const virusTotalResults = scanResults?.virusTotalResults;
+    if (virusTotalResults && virusTotalResults.totalUrls > 0) {
+      const { maliciousUrls, suspiciousUrls, safeUrls, totalUrls } =
+        virusTotalResults;
+
+      if (maliciousUrls > 0 || suspiciousUrls > 0) {
+        const status = maliciousUrls > 0 ? '🚨 DANGEROUS' : '⚠️ SUSPICIOUS';
+        urlScanText =
+          platform === 'telegram'
+            ? `\n🛡️ <b>URL Security Scan:</b> ${status}\n`
+            : `\n🛡️ URL Security Scan: ${status}\n`;
+        urlScanText += `• ${maliciousUrls} malicious, ${suspiciousUrls} suspicious, ${safeUrls} safe (of ${totalUrls} total)\n`;
+      } else if (safeUrls > 0) {
+        urlScanText =
+          platform === 'telegram'
+            ? `\n�️ <b>URL Security Scan:</b> ✅ All ${totalUrls} URLs appear safe\n`
+            : `\n🛡️ URL Security Scan: ✅ All ${totalUrls} URLs appear safe\n`;
+      }
+    }
+
+    // Format database matches if any
+    let databaseMatchText = '';
+
+    const databaseMatches = scanResults?.databaseMatches;
+    console.log('Database Matches:', databaseMatches);
+    if (
+      databaseMatches?.scammerDbMatches?.length > 0 &&
+      databaseMatches?.scammerDbMatches[0] != 'All URLs appear safe'
+    ) {
+      databaseMatchText =
+        platform === 'telegram'
+          ? `\n🗃️ <b>Database Check:</b> ⚠️ Found in scammer database\n`
+          : `\n🗃️ Database Check: ⚠️ Found in scammer database\n`;
+    }
+
+    // Format linguistic patterns
+    let linguisticText = '';
+    const linguisticPatterns = intentAnalysis?.linguisticPatterns;
+    if (linguisticPatterns && linguisticPatterns.length > 0) {
+      const patterns = linguisticPatterns
+        .slice(0, 3)
+        .map((pattern) => pattern.replace(/_/g, ' '))
+        .join(', ');
+
+      linguisticText =
+        platform === 'telegram'
+          ? `\n🧠 <b>Language Patterns:</b> ${patterns}\n`
+          : `\n🧠 Language Patterns: ${patterns}\n`;
+    }
+
+    // Format analysis method and processing info
+    let analysisMethodText = '';
+    const analysisMethod = (result as any).analysisMethod;
+    if (analysisMethod) {
+      analysisMethodText =
+        platform === 'telegram'
+          ? `\n⚙️ <b>Analysis Method:</b> ${analysisMethod.toUpperCase()}\n`
+          : `\n⚙️ Analysis Method: ${analysisMethod.toUpperCase()}\n`;
     }
 
     // Safety tips based on risk level
@@ -80,19 +192,21 @@ export class ScamAnalysisFormatterService {
       safetyTips += '• Report suspicious messages to authorities\n';
     }
 
-    // URL warning if suspicious links found (using aiAnalysis data)
+    // URL warning if suspicious links found
     let urlWarning = '';
-    const extractedUrls = result.aiAnalysis?.extractedIdentifiers?.urls;
-    if (extractedUrls && extractedUrls.length > 0) {
+    const extractedUrls = extractedIdentifiers?.urls;
+    if (extractedUrls && extractedUrls.length > 0 && result.riskScore >= 0.3) {
       urlWarning =
-        '\n\n⚠️ <b>Links Found:</b> Be extremely careful with any links in this message!';
+        platform === 'telegram'
+          ? '\n\n⚠️ <b>Links Found:</b> Be extremely careful with any links in this message!'
+          : '\n\n⚠️ Links Found: Be extremely careful with any links in this message!';
     }
 
     // Handle message truncation consistently
     const truncatedMessage =
       message.length > 100 ? `${message.substring(0, 100)}...` : message;
 
-    // Build response with consistent formatting using HTML for Telegram
+    // Build comprehensive response
     const messageFormat =
       platform === 'telegram'
         ? `📱 <b>Message Analyzed:</b>\n"${truncatedMessage}"`
@@ -108,11 +222,11 @@ export class ScamAnalysisFormatterService {
         ? `💡 <b>Recommendation:</b> ${recommendation}`
         : `💡 Recommendation: ${recommendation}`;
 
-    return `🔍 ${platform === 'telegram' ? '<b>Scam Analysis Results:</b>' : 'Scam Analysis Results:'}
+    return `🔍 ${platform === 'telegram' ? '<b>Comprehensive Scam Analysis:</b>' : 'Comprehensive Scam Analysis:'}
 
 ${messageFormat}
 
-${riskFormat}${scamTypeText}${indicatorsText}
+${riskFormat}${scamTypeText}${identifiersText}${urlScanText}${databaseMatchText}${linguisticText}${analysisMethodText}${indicatorsText}
 
 ${recommendationFormat}${safetyTips}${urlWarning}
 

@@ -17,9 +17,9 @@ const { TextArea } = Input
 const { Title, Paragraph, Text } = Typography
 
 
-const API_BASE_URL = 'https://ndimboniapi.ini.rw/api/scam-check'
+const API_BASE_URL = 'https://ndimboni.ini.rw/api/scam-check'
 
-const API_BASE_URL1 = 'https://ndimboniapi.ini.rw/api/scammer-reports';
+const API_BASE_URL1 = 'https://ndimboni.ini.rw/api/scammer-reports';
 
 
 const CheckStatus = {
@@ -33,11 +33,11 @@ const IntentType = {
   LEGITIMATE: 'LEGITIMATE',
   PHISHING: 'PHISHING',
   ROMANCE_SCAM: 'ROMANCE_SCAM',
-  INVESTMENT_SCAM: 'INVESTMENT_SCAM',
+  INVESTMENT_SCAM: 'INVESTMENT_S"https://ndimboni.ini.rw/
   LOTTERY_SCAM: 'LOTTERY_SCAM',
   MONEY_REQUEST: 'MONEY_REQUEST',
   UNKNOWN: 'UNKNOWN'
-}
+}"https://ndimboni.ini.rw/
 
 
 const ScammerType = {

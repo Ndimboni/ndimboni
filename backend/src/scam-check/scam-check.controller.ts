@@ -378,4 +378,169 @@ export class ScamCheckController {
       );
     }
   }
+
+  @Get('check/:id/details')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'Get detailed scam check results including all scan data',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Detailed check results retrieved successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Check not found',
+  })
+  @ApiBearerAuth()
+  async getCheckDetails(@Param() params: GetCheckByIdParamDto): Promise<{
+    success: boolean;
+    data: {
+      id: string;
+      message: string;
+      status: string;
+      riskScore: number;
+      confidence: number;
+      detectedIntent: string;
+      analysisMethod: string;
+      scanResults: any;
+      reasons: string[];
+      detectedPatterns: string[];
+      metadata: any;
+    };
+    message: string;
+  }> {
+    try {
+      const result = await this.scamCheckService.getCheckById(params.id);
+
+      if (!result) {
+        throw new HttpException('Check not found', HttpStatus.NOT_FOUND);
+      }
+
+      // Extract comprehensive details
+      const detailedResult = {
+        id: result.id,
+        message: (result.result as any).scanResults?.message || '',
+        status: (result.result as any).status,
+        riskScore: result.result.riskScore,
+        confidence: result.result.confidence,
+        detectedIntent: (result.result as any).detectedIntent,
+        analysisMethod: (result.result as any).analysisMethod,
+        scanResults: (result.result as any).scanResults,
+        reasons: result.result.reasons,
+        detectedPatterns: result.result.detectedPatterns,
+        metadata: (result.result as any).metadata,
+      };
+
+      return {
+        success: true,
+        data: detailedResult,
+        message: 'Detailed check results retrieved successfully',
+      };
+    } catch (error) {
+      this.logger.error('Error getting detailed check results:', error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        'Failed to retrieve detailed check results',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('admin/comprehensive-results')
+  @UseGuards(JwtAuthGuard, PolicyGuard)
+  @RequirePolicy(Action.READ, Resource.BOT_SETTINGS)
+  @ApiOperation({
+    summary: 'Get comprehensive scan results with all details (Admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Comprehensive scan results retrieved successfully',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions',
+  })
+  @ApiBearerAuth()
+  async getComprehensiveResults(@Query() query: GetAllChecksQueryDto): Promise<{
+    success: boolean;
+    data: any[];
+    total: number;
+    limit: number;
+    offset: number;
+    message: string;
+  }> {
+    try {
+      const fromDateObj = query.fromDate ? new Date(query.fromDate) : undefined;
+      const toDateObj = query.toDate ? new Date(query.toDate) : undefined;
+
+      const result = await this.scamCheckService.getAllChecks(
+        query.limit,
+        query.offset,
+        query.status as any,
+        query.intent as any,
+        fromDateObj,
+        toDateObj,
+      );
+
+      // Transform the results to include comprehensive scan data
+      const comprehensiveData = result.data.map((check) => {
+        const scanResult = check.result as any;
+        return {
+          id: check.id,
+          message: scanResult.scanResults?.message || '',
+          riskScore: check.result.riskScore,
+          riskLevel: scanResult.riskLevel || 'unknown',
+          confidence: check.result.confidence,
+          status: scanResult.status,
+          detectedIntent: scanResult.detectedIntent,
+          analysisMethod: scanResult.analysisMethod,
+
+          // Comprehensive scan details
+          extractedIdentifiers:
+            scanResult.scanResults?.extractedIdentifiers || {},
+          aiAnalysis: scanResult.scanResults?.aiAnalysis || {},
+          databaseMatches: scanResult.scanResults?.databaseMatches || {},
+          virusTotalResults: scanResult.scanResults?.virusTotalResults || {},
+          intentAnalysis: scanResult.scanResults?.intentAnalysis || {},
+          urlScanResults: scanResult.scanResults?.urlScanResults || {},
+          linguisticPatterns:
+            scanResult.scanResults?.intentAnalysis?.linguisticPatterns || [],
+
+          // Analysis details
+          reasons: check.result.reasons,
+          detectedPatterns: check.result.detectedPatterns,
+
+          // Metadata
+          source: check.source,
+          createdAt: check.createdAt,
+          metadata: scanResult.metadata || {},
+        };
+      });
+
+      return {
+        success: true,
+        data: comprehensiveData,
+        total: result.total,
+        limit: result.limit,
+        offset: result.offset,
+        message: 'Comprehensive scan results retrieved successfully',
+      };
+    } catch (error) {
+      this.logger.error('Error getting comprehensive results:', error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        'Failed to retrieve comprehensive results',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }

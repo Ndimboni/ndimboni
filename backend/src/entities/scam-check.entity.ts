@@ -69,6 +69,24 @@ export class ScamCheck {
   @Column('text', { nullable: true })
   urlScanResults: string | null; // JSON string of URL scan results
 
+  @Column('text', { nullable: true })
+  extractedIdentifiers: string | null; // JSON string of extracted phone numbers, emails, etc.
+
+  @Column('text', { nullable: true })
+  aiAnalysis: string | null; // JSON string of complete AI analysis results
+
+  @Column('text', { nullable: true })
+  databaseMatches: string | null; // JSON string of database matches
+
+  @Column('text', { nullable: true })
+  virusTotalResults: string | null; // JSON string of VirusTotal scan results
+
+  @Column('text', { nullable: true })
+  intentAnalysis: string | null; // JSON string of detailed intent analysis
+
+  @Column('varchar', { length: 20, default: 'web' })
+  analysisMethod: string; // Method used for analysis (ai, rule-based, enhanced, etc.)
+
   @Column({ nullable: true })
   checkedBy: string | null; // User ID who performed the check
 

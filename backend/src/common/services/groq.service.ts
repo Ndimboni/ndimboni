@@ -150,7 +150,7 @@ Provide your analysis in the specified JSON format.`;
 
     const lowerMessage = message.toLowerCase();
     let intent = IntentType.LEGITIMATE;
-    let confidence = 0.3; // Lower confidence for rule-based detection
+    const confidence = 0.3; // Lower confidence for rule-based detection
     let reasoning = 'Analyzed using rule-based fallback system';
     let isScam = false;
 

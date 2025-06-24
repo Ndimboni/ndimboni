@@ -71,9 +71,9 @@ const AdminDashboard = () => {
 
      
       const [usersResponse, scamChecksResponse, reportsResponse] = await Promise.allSettled([
-        fetch('https://ndimboniapi.ini.rw/users', { headers }),
-        fetch('https://ndimboniapi.ini.rw/api/scam-check/all', { headers }),
-        fetch('https://ndimboniapi.ini.rw/api/scammer-reports/all', { headers })
+        fetch('https://ndimboni.ini.rw/users', { headers }),
+        fetch('https://ndimboni.ini.rw/api/scam-check/all', { headers }),
+        fetch('https://ndimboni.ini.rw/api/scammer-reports/all', { headers })
       ]);
 
       
