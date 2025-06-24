@@ -41,7 +41,8 @@ const { TextArea } = Input;
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
-const API_BASE_URL = "https://ndimboni.ini.rw/api/scam-check";
+const API_BASE_URL =
+  process.env.PUBLIC_API_URL || "https://ndimboniapi.ini.rw/api/scam-check";
 
 const CheckStatus = {
   SAFE: "SAFE",
@@ -224,10 +225,7 @@ const ScamCheckPage = () => {
         params.append("toDate", appliedFilters.dateRange[1].toISOString());
       }
 
-      // Use comprehensive results endpoint for detailed scan information
-      const response = await apiCall(
-        `/admin/comprehensive-results?${params.toString()}`
-      );
+      const response = await apiCall(`/all?${params.toString()}`);
 
       if (response.success) {
         setChecks(response.data);
@@ -277,7 +275,7 @@ const ScamCheckPage = () => {
 
   const fetchCheckDetails = async (id) => {
     try {
-      const response = await apiCall(`/check/${id}/details`);
+      const response = await apiCall(`/check/${id}`);
 
       if (response.success) {
         setSelectedCheck(response.data);
@@ -384,25 +382,17 @@ const ScamCheckPage = () => {
       ),
     },
     {
-      title: "Risk Level",
-      dataIndex: "riskLevel",
-      key: "riskLevel",
-      width: 120,
-      render: (riskLevel) => {
-        const color =
-          riskLevel === "high"
-            ? "red"
-            : riskLevel === "medium"
-            ? "orange"
-            : "green";
-        return (
-          <Tag color={color}>{(riskLevel || "unknown").toUpperCase()}</Tag>
-        );
-      },
+      title: "Is Scam",
+      dataIndex: ["result", "isScam"],
+      key: "isScam",
+      width: 100,
+      render: (isScam) => (
+        <Tag color={isScam ? "red" : "green"}>{isScam ? "SCAM" : "SAFE"}</Tag>
+      ),
     },
     {
       title: "Status",
-      dataIndex: "status",
+      dataIndex: ["result", "status"],
       key: "status",
       width: 120,
       render: (status) => (
@@ -412,19 +402,21 @@ const ScamCheckPage = () => {
       ),
     },
     {
-      title: "Intent",
-      dataIndex: "detectedIntent",
-      key: "detectedIntent",
-      width: 140,
-      render: (intent) => (
-        <Tag color={getIntentColor(intent)}>
-          {(intent || "UNKNOWN").replace(/_/g, " ")}
-        </Tag>
+      title: "Confidence",
+      dataIndex: ["result", "confidence"],
+      key: "confidence",
+      width: 120,
+      render: (confidence) => (
+        <Progress
+          percent={Math.round((parseFloat(confidence) || 0) * 100)}
+          size="small"
+          strokeColor="#1890ff"
+        />
       ),
     },
     {
       title: "Risk Score",
-      dataIndex: "riskScore",
+      dataIndex: ["result", "riskScore"],
       key: "riskScore",
       width: 120,
       render: (score) => (
@@ -434,42 +426,6 @@ const ScamCheckPage = () => {
           strokeColor={score > 0.8 ? "red" : score > 0.5 ? "orange" : "green"}
         />
       ),
-    },
-    {
-      title: "Analysis Method",
-      dataIndex: "analysisMethod",
-      key: "analysisMethod",
-      width: 120,
-      render: (method) => (
-        <Tag color="purple">{(method || "UNKNOWN").toUpperCase()}</Tag>
-      ),
-    },
-    {
-      title: "Identifiers Found",
-      key: "identifiers",
-      width: 140,
-      render: (_, record) => {
-        // Try to get identifiers from different possible data paths
-        const identifiers =
-          record.extractedIdentifiers ||
-          record.result?.scanResults?.extractedIdentifiers ||
-          {};
-
-        const count =
-          (identifiers.phoneNumbers?.length || 0) +
-          (identifiers.emails?.length || 0) +
-          (identifiers.urls?.length || 0) +
-          (identifiers.cryptoAddresses?.length || 0) +
-          (identifiers.socialMediaHandles?.length || 0);
-
-        return count > 0 ? (
-          <Badge count={count} style={{ backgroundColor: "#52c41a" }}>
-            <Tag color="cyan">FOUND</Tag>
-          </Badge>
-        ) : (
-          <Tag color="gray">NONE</Tag>
-        );
-      },
     },
     {
       title: "Source",
@@ -491,7 +447,7 @@ const ScamCheckPage = () => {
       width: 120,
       render: (_, record) => (
         <Space size="small">
-          <Tooltip title="View Comprehensive Details">
+          <Tooltip title="View Details">
             <Button
               type="text"
               icon={<EyeOutlined />}
@@ -754,9 +710,9 @@ const ScamCheckPage = () => {
 
       {/* Details Drawer */}
       <Drawer
-        title="Comprehensive Scam Check Details"
+        title="Scam Check Details"
         placement="right"
-        width={800}
+        width={600}
         open={detailsDrawerVisible}
         onClose={() => setDetailsDrawerVisible(false)}
       >
@@ -858,515 +814,31 @@ const ScamCheckPage = () => {
               </Paragraph>
             </Card>
 
-            {/* Comprehensive Analysis Summary */}
-            {(selectedCheck.result?.reasons?.length > 0 ||
-              selectedCheck.result?.detectedPatterns?.length > 0) && (
-              <Card title="Analysis Summary" style={{ marginBottom: "16px" }}>
-                {selectedCheck.result.reasons?.length > 0 && (
-                  <div style={{ marginBottom: 16 }}>
-                    <Text strong>Detection Reasons:</Text>
-                    <List
-                      size="small"
-                      dataSource={selectedCheck.result.reasons}
-                      renderItem={(reason, index) => (
-                        <List.Item style={{ padding: '4px 0' }}>
-                          <Text>• {reason}</Text>
-                        </List.Item>
-                      )}
-                    />
-                  </div>
-                )}
-
-                {selectedCheck.result.detectedPatterns?.length > 0 && (
-                  <div>
-                    <Text strong>Detected Patterns:</Text>
-                    <div style={{ marginTop: 8 }}>
-                      <Space wrap>
-                        {selectedCheck.result.detectedPatterns.map((pattern, index) => (
-                          <Tag key={index} color="blue">
-                            {pattern}
-                          </Tag>
-                        ))}
-                      </Space>
-                    </div>
-                  </div>
-                )}
+            {selectedCheck.result?.reasons?.length > 0 && (
+              <Card title="Detection Reasons" style={{ marginBottom: "16px" }}>
+                <List
+                  size="small"
+                  dataSource={selectedCheck.result.reasons}
+                  renderItem={(reason, index) => (
+                    <List.Item>
+                      <Text>{reason}</Text>
+                    </List.Item>
+                  )}
+                />
               </Card>
             )}
 
-            {/* Comprehensive Scan Results */}
-            {(selectedCheck.result?.detectedIntent || selectedCheck.result?.analysisMethod) && (
-              <Card title="Intent Analysis" style={{ marginBottom: "16px" }}>
-                <Row gutter={[16, 16]}>
-                  <Col span={8}>
-                    <Text strong>Detected Intent:</Text>
-                  </Col>
-                  <Col span={16}>
-                    <Tag color={getIntentColor(selectedCheck.result?.detectedIntent)}>
-                      {(selectedCheck.result?.detectedIntent || "UNKNOWN").replace(
-                        /_/g,
-                        " "
-                      )}
-                    </Tag>
-                  </Col>
-
-                  <Col span={8}>
-                    <Text strong>Analysis Method:</Text>
-                  </Col>
-                  <Col span={16}>
-                    <Tag color="purple">
-                      {(
-                        selectedCheck.result?.analysisMethod || "UNKNOWN"
-                      ).toUpperCase()}
-                    </Tag>
-                  </Col>
-                </Row>
-              </Card>
-            )}
-
-            {/* Extracted Identifiers */}
-            {selectedCheck.result?.scanResults?.extractedIdentifiers && (
-              <Card
-                title="Extracted Identifiers"
-                style={{ marginBottom: "16px" }}
-              >
-                <Row gutter={[16, 16]}>
-                  {selectedCheck.result?.scanResults?.extractedIdentifiers.phoneNumbers?.length >
-                    0 && (
-                    <>
-                      <Col span={8}>
-                        <Text strong>Phone Numbers:</Text>
-                      </Col>
-                      <Col span={16}>
-                        <Space wrap>
-                          {selectedCheck.result.scanResults.extractedIdentifiers.phoneNumbers.map(
-                            (phone, index) => (
-                              <Tag key={index} color="orange">
-                                {phone}
-                              </Tag>
-                            )
-                          )}
-                        </Space>
-                      </Col>
-                    </>
+            {selectedCheck.result?.detectedPatterns?.length > 0 && (
+              <Card title="Detected Patterns" style={{ marginBottom: "16px" }}>
+                <Space wrap>
+                  {selectedCheck.result.detectedPatterns.map(
+                    (pattern, index) => (
+                      <Tag key={index} color="blue">
+                        {pattern}
+                      </Tag>
+                    )
                   )}
-
-                  {selectedCheck.result?.scanResults?.extractedIdentifiers.emails?.length > 0 && (
-                    <>
-                      <Col span={8}>
-                        <Text strong>Email Addresses:</Text>
-                      </Col>
-                      <Col span={16}>
-                        <Space wrap>
-                          {selectedCheck.result.scanResults.extractedIdentifiers.emails.map(
-                            (email, index) => (
-                              <Tag key={index} color="blue">
-                                {email}
-                              </Tag>
-                            )
-                          )}
-                        </Space>
-                      </Col>
-                    </>
-                  )}
-
-                  {selectedCheck.result?.scanResults?.extractedIdentifiers.urls?.length > 0 && (
-                    <>
-                      <Col span={8}>
-                        <Text strong>URLs:</Text>
-                      </Col>
-                      <Col span={16}>
-                        <Space wrap>
-                          {selectedCheck.result.scanResults.extractedIdentifiers.urls.map(
-                            (url, index) => (
-                              <Tag
-                                key={index}
-                                color="cyan"
-                                icon={<LinkOutlined />}
-                              >
-                                <a
-                                  href={url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  {url.length > 30
-                                    ? url.substring(0, 30) + "..."
-                                    : url}
-                                </a>
-                              </Tag>
-                            )
-                          )}
-                        </Space>
-                      </Col>
-                    </>
-                  )}
-
-                  {selectedCheck.result?.scanResults?.extractedIdentifiers.cryptoAddresses?.length >
-                    0 && (
-                    <>
-                      <Col span={8}>
-                        <Text strong>Crypto Addresses:</Text>
-                      </Col>
-                      <Col span={16}>
-                        <Space wrap>
-                          {selectedCheck.result.scanResults.extractedIdentifiers.cryptoAddresses.map(
-                            (address, index) => (
-                              <Tag key={index} color="gold">
-                                {address}
-                              </Tag>
-                            )
-                          )}
-                        </Space>
-                      </Col>
-                    </>
-                  )}
-
-                  {selectedCheck.result?.scanResults?.extractedIdentifiers.socialMediaHandles
-                    ?.length > 0 && (
-                    <>
-                      <Col span={8}>
-                        <Text strong>Social Media:</Text>
-                      </Col>
-                      <Col span={16}>
-                        <Space wrap>
-                          {selectedCheck.result.scanResults.extractedIdentifiers.socialMediaHandles.map(
-                            (handle, index) => (
-                              <Tag key={index} color="magenta">
-                                {handle}
-                              </Tag>
-                            )
-                          )}
-                        </Space>
-                      </Col>
-                    </>
-                  )}
-
-                  {/* Show "No identifiers found" message if no identifiers exist */}
-                  {(!selectedCheck.result?.scanResults?.extractedIdentifiers.phoneNumbers?.length &&
-                    !selectedCheck.result?.scanResults?.extractedIdentifiers.emails?.length &&
-                    !selectedCheck.result?.scanResults?.extractedIdentifiers.urls?.length &&
-                    !selectedCheck.result?.scanResults?.extractedIdentifiers.cryptoAddresses?.length &&
-                    !selectedCheck.result?.scanResults?.extractedIdentifiers.socialMediaHandles?.length) && (
-                    <Col span={24}>
-                      <Alert
-                        message="No Identifiers Found"
-                        description="No phone numbers, emails, URLs, crypto addresses, or social media handles were detected in this message."
-                        type="info"
-                        showIcon
-                      />
-                    </Col>
-                  )}
-                </Row>
-              </Card>
-            )}
-
-            {/* AI Analysis Results */}
-            {selectedCheck.result?.scanResults?.aiAnalysis && (
-              <Card title="AI Analysis" style={{ marginBottom: "16px" }}>
-                <Row gutter={[16, 16]}>
-                  <Col span={8}>
-                    <Text strong>Final Score:</Text>
-                  </Col>
-                  <Col span={16}>
-                    <Progress
-                      percent={Math.round(
-                        (parseFloat(selectedCheck.result.scanResults.aiAnalysis.finalScore) || 0) * 100
-                      )}
-                      size="small"
-                      strokeColor="#722ed1"
-                    />
-                    <Text type="secondary" style={{ marginLeft: 8 }}>
-                      {((parseFloat(selectedCheck.result.scanResults.aiAnalysis.finalScore) || 0) * 100).toFixed(1)}%
-                    </Text>
-                  </Col>
-
-                  {selectedCheck.result.scanResults.aiAnalysis.intentScore && (
-                    <>
-                      <Col span={8}>
-                        <Text strong>Intent Score:</Text>
-                      </Col>
-                      <Col span={16}>
-                        <Progress
-                          percent={Math.round(
-                            (parseFloat(selectedCheck.result.scanResults.aiAnalysis.intentScore.score) || 0) * 100
-                          )}
-                          size="small"
-                          strokeColor="#fa541c"
-                        />
-                        <Text type="secondary" style={{ marginLeft: 8 }}>
-                          {((parseFloat(selectedCheck.result.scanResults.aiAnalysis.intentScore.score) || 0) * 100).toFixed(1)}%
-                        </Text>
-                      </Col>
-
-                      <Col span={8}>
-                        <Text strong>Intent Classification:</Text>
-                      </Col>
-                      <Col span={16}>
-                        <Tag color={selectedCheck.result.scanResults.aiAnalysis.intentScore.intent === 'scam' ? 'red' : 'green'}>
-                          {(selectedCheck.result.scanResults.aiAnalysis.intentScore.intent || 'unknown').toUpperCase()}
-                        </Tag>
-                      </Col>
-                    </>
-                  )}
-
-                  {selectedCheck.result.scanResults.aiAnalysis.recommendations?.length > 0 && (
-                    <>
-                      <Col span={8}>
-                        <Text strong>Recommendations:</Text>
-                      </Col>
-                      <Col span={16}>
-                        <List
-                          size="small"
-                          dataSource={selectedCheck.result.scanResults.aiAnalysis.recommendations}
-                          renderItem={(rec, index) => (
-                            <List.Item style={{ padding: '4px 0' }}>
-                              <Text>{rec}</Text>
-                            </List.Item>
-                          )}
-                        />
-                      </Col>
-                    </>
-                  )}
-
-                  {selectedCheck.result.scanResults.aiAnalysis.intentScore?.reasons?.length > 0 && (
-                    <>
-                      <Col span={8}>
-                        <Text strong>AI Reasoning:</Text>
-                      </Col>
-                      <Col span={16}>
-                        <List
-                          size="small"
-                          dataSource={selectedCheck.result.scanResults.aiAnalysis.intentScore.reasons}
-                          renderItem={(reason, index) => (
-                            <List.Item style={{ padding: '4px 0' }}>
-                              <Text>{reason}</Text>
-                            </List.Item>
-                          )}
-                        />
-                      </Col>
-                    </>
-                  )}
-                </Row>
-              </Card>
-            )}
-
-            {/* Database Matches */}
-            {selectedCheck.result?.scanResults?.databaseMatches && (
-              <Card title="Database Matches" style={{ marginBottom: "16px" }}>
-                {selectedCheck.result.scanResults.databaseMatches.scammerDbMatches?.length > 0 ? (
-                  <div>
-                    <Alert
-                      message="Scammer Database Match Found"
-                      description="This message contains identifiers that match known scammers in our database."
-                      type="warning"
-                      showIcon
-                      style={{ marginBottom: 16 }}
-                    />
-                    <List
-                      size="small"
-                      dataSource={
-                        selectedCheck.result.scanResults.databaseMatches.scammerDbMatches
-                      }
-                      renderItem={(match, index) => (
-                        <List.Item>
-                          <Row style={{ width: "100%" }}>
-                            <Col span={8}>
-                              <Text strong>Match Type:</Text>
-                            </Col>
-                            <Col span={16}>
-                              <Tag color="red">
-                                {match.matchType || "IDENTIFIER"}
-                              </Tag>
-                            </Col>
-                          </Row>
-                        </List.Item>
-                      )}
-                    />
-                  </div>
-                ) : (
-                  <Alert
-                    message="No Database Matches"
-                    description="No matches found in scammer database."
-                    type="success"
-                    showIcon
-                  />
-                )}
-
-                {/* Additional database match details */}
-                <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-                  <Col span={8}>
-                    <Text strong>Phone Matches:</Text>
-                  </Col>
-                  <Col span={16}>
-                    <Badge count={selectedCheck.result.scanResults.databaseMatches.phoneMatches?.length || 0} style={{ backgroundColor: '#fa8c16' }} />
-                  </Col>
-
-                  <Col span={8}>
-                    <Text strong>Email Matches:</Text>
-                  </Col>
-                  <Col span={16}>
-                    <Badge count={selectedCheck.result.scanResults.databaseMatches.emailMatches?.length || 0} style={{ backgroundColor: '#fa8c16' }} />
-                  </Col>
-
-                  <Col span={8}>
-                    <Text strong>URL Matches:</Text>
-                  </Col>
-                  <Col span={16}>
-                    <Badge count={selectedCheck.result.scanResults.databaseMatches.urlMatches?.length || 0} style={{ backgroundColor: '#fa8c16' }} />
-                  </Col>
-                </Row>
-              </Card>
-            )}
-
-            {/* VirusTotal Results */}
-            {selectedCheck.result?.scanResults?.virusTotalResults && (
-              <Card title="URL Security Scan" style={{ marginBottom: "16px" }}>
-                <Row gutter={[16, 16]}>
-                  <Col span={8}>
-                    <Text strong>Total URLs:</Text>
-                  </Col>
-                  <Col span={16}>
-                    <Badge
-                      count={selectedCheck.result.scanResults.virusTotalResults.totalUrls}
-                      style={{ backgroundColor: "#1890ff" }}
-                    />
-                  </Col>
-
-                  <Col span={8}>
-                    <Text strong>Safe URLs:</Text>
-                  </Col>
-                  <Col span={16}>
-                    <Badge
-                      count={selectedCheck.result.scanResults.virusTotalResults.safeUrls}
-                      style={{ backgroundColor: "#52c41a" }}
-                    />
-                  </Col>
-
-                  <Col span={8}>
-                    <Text strong>Suspicious URLs:</Text>
-                  </Col>
-                  <Col span={16}>
-                    <Badge
-                      count={selectedCheck.result.scanResults.virusTotalResults.suspiciousUrls}
-                      style={{ backgroundColor: "#fa8c16" }}
-                    />
-                  </Col>
-
-                  <Col span={8}>
-                    <Text strong>Malicious URLs:</Text>
-                  </Col>
-                  <Col span={16}>
-                    <Badge
-                      count={selectedCheck.result.scanResults.virusTotalResults.maliciousUrls}
-                      style={{ backgroundColor: "#f5222d" }}
-                    />
-                  </Col>
-                </Row>
-
-                {(selectedCheck.result.scanResults.virusTotalResults.maliciousUrls > 0 || selectedCheck.result.scanResults.virusTotalResults.suspiciousUrls > 0) && (
-                  <Alert
-                    message="Dangerous URLs Detected"
-                    description="This message contains URLs that have been flagged as malicious or suspicious by security vendors."
-                    type="error"
-                    showIcon
-                    style={{ marginTop: 16 }}
-                  />
-                )}
-              </Card>
-            )}
-
-            {/* Intent Analysis Details */}
-            {selectedCheck.result?.scanResults?.intentAnalysis && (
-              <Card
-                title="Intent Analysis Details"
-                style={{ marginBottom: "16px" }}
-              >
-                <Row gutter={[16, 16]}>
-                  {selectedCheck.result.scanResults.intentAnalysis.confidence && (
-                    <>
-                      <Col span={8}>
-                        <Text strong>Intent Confidence:</Text>
-                      </Col>
-                      <Col span={16}>
-                        <Progress
-                          percent={Math.round(
-                            (parseFloat(
-                              selectedCheck.result.scanResults.intentAnalysis.confidence
-                            ) || 0) * 100
-                          )}
-                          size="small"
-                          strokeColor="#eb2f96"
-                        />
-                        <Text type="secondary" style={{ marginLeft: 8 }}>
-                          {(
-                            (parseFloat(
-                              selectedCheck.result.scanResults.intentAnalysis.confidence
-                            ) || 0) * 100
-                          ).toFixed(1)}
-                          %
-                        </Text>
-                      </Col>
-                    </>
-                  )}
-
-                  {selectedCheck.result.scanResults.intentAnalysis.linguisticPatterns?.length >
-                    0 && (
-                    <>
-                      <Col span={8}>
-                        <Text strong>Linguistic Patterns:</Text>
-                      </Col>
-                      <Col span={16}>
-                        <Space wrap>
-                          {selectedCheck.result.scanResults.intentAnalysis.linguisticPatterns.map(
-                            (pattern, index) => (
-                              <Tag key={index} color="geekblue">
-                                {pattern.replace(/_/g, " ")}
-                              </Tag>
-                            )
-                          )}
-                        </Space>
-                      </Col>
-                    </>
-                  )}
-
-                  {selectedCheck.result.scanResults.intentAnalysis.reasoningSteps?.length > 0 && (
-                    <>
-                      <Col span={8}>
-                        <Text strong>Reasoning Steps:</Text>
-                      </Col>
-                      <Col span={16}>
-                        <List
-                          size="small"
-                          dataSource={selectedCheck.result.scanResults.intentAnalysis.reasoningSteps}
-                          renderItem={(step, index) => (
-                            <List.Item style={{ padding: '4px 0' }}>
-                              <Text>{step}</Text>
-                            </List.Item>
-                          )}
-                        />
-                      </Col>
-                    </>
-                  )}
-
-                  {selectedCheck.result.scanResults.intentAnalysis.alternativeIntents?.length > 0 && (
-                    <>
-                      <Col span={8}>
-                        <Text strong>Alternative Intents:</Text>
-                      </Col>
-                      <Col span={16}>
-                        <Space wrap>
-                          {selectedCheck.result.scanResults.intentAnalysis.alternativeIntents.map(
-                            (intent, index) => (
-                              <Tag key={index} color="volcano">
-                                {intent.replace(/_/g, " ")}
-                              </Tag>
-                            )
-                          )}
-                        </Space>
-                      </Col>
-                    </>
-                  )}
-                </Row>
+                </Space>
               </Card>
             )}
           </div>

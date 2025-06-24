@@ -28,13 +28,13 @@ import {
   SendOutlined,
   PhoneOutlined,
   MailOutlined,
-  DollarCircleOutlined,
-  TwitterOutlined,
+  DollarOutlined,
   DatabaseOutlined,
-  ShieldOutlined,
+  SafetyOutlined,
   EyeOutlined,
-  BrainOutlined,
   InfoCircleOutlined,
+  SettingOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import { motion } from "framer-motion";
 
@@ -322,16 +322,17 @@ export default function Home() {
       if (data.success && data.data) {
         // Handle new backend response structure with comprehensive scan results
         const result = data.data.result || {};
-        const extractedIdentifiers = data.data.extractedIdentifiers || {};
-        const aiAnalysis = data.data.aiAnalysis || {};
-        const scammerDbMatches = data.data.scammerDbMatches || {};
-        const virusTotalResults = data.data.virusTotalResults || {};
-        const urlScanResults = data.data.urlScanResults || {};
-        const intentAnalysis = data.data.intentAnalysis || {};
+        const scanResults = result.scanResults || {};
+        const extractedIdentifiers = scanResults.extractedIdentifiers || {};
+        const aiAnalysis = scanResults.aiAnalysis || {};
+        const databaseMatches = scanResults.databaseMatches || {};
+        const virusTotalResults = scanResults.virusTotalResults || {};
+        const urlScanResults = scanResults.urlScanResults || {};
+        const intentAnalysis = scanResults.intentAnalysis || {};
 
         const transformedResult = {
           id: data.data.id,
-          message: data.data.message,
+          message: scanResults.message || data.data.message,
           isScam: result.isScam || false,
           status: result.status || CheckStatus.UNKNOWN,
           intent: result.detectedIntent || IntentType.UNKNOWN,
@@ -341,41 +342,43 @@ export default function Home() {
           warning_flags: result.reasons || [],
           recommendations: result.recommendations || [],
           timestamp: data.data.createdAt || new Date().toISOString(),
-          extracted_urls: result.extractedUrls || [],
+          extracted_urls: scanResults.extractedUrls || [],
           detected_patterns: result.detectedPatterns || [],
           source: data.data.source || "web",
           
           // Comprehensive scan results
           extractedIdentifiers: {
-            phones: extractedIdentifiers.phones || [],
+            phones: extractedIdentifiers.phoneNumbers || [],
             emails: extractedIdentifiers.emails || [],
             urls: extractedIdentifiers.urls || [],
             cryptoAddresses: extractedIdentifiers.cryptoAddresses || [],
-            socialHandles: extractedIdentifiers.socialHandles || [],
+            socialHandles: extractedIdentifiers.socialMediaHandles || [],
           },
           aiAnalysis: {
             finalScore: aiAnalysis.finalScore || 0,
-            intentScore: aiAnalysis.intentScore || 0,
+            intentScore: aiAnalysis.intentScore?.score || 0,
             recommendations: aiAnalysis.recommendations || [],
             reasoning: aiAnalysis.reasoning || "",
           },
           scammerDbMatches: {
-            phoneMatches: scammerDbMatches.phoneMatches || [],
-            emailMatches: scammerDbMatches.emailMatches || [],
-            urlMatches: scammerDbMatches.urlMatches || [],
-            totalMatches: scammerDbMatches.totalMatches || 0,
+            phoneMatches: databaseMatches.phoneMatches || [],
+            emailMatches: databaseMatches.emailMatches || [],
+            urlMatches: databaseMatches.urlMatches || [],
+            totalMatches: (databaseMatches.phoneMatches?.length || 0) + 
+                         (databaseMatches.emailMatches?.length || 0) + 
+                         (databaseMatches.urlMatches?.length || 0),
           },
           virusTotalResults: {
-            urlResults: virusTotalResults.urlResults || [],
+            urlResults: virusTotalResults.details || [],
             safeUrls: virusTotalResults.safeUrls || 0,
             suspiciousUrls: virusTotalResults.suspiciousUrls || 0,
             maliciousUrls: virusTotalResults.maliciousUrls || 0,
           },
           urlScanResults: {
             results: urlScanResults.results || [],
-            safeCount: urlScanResults.safeCount || 0,
-            suspiciousCount: urlScanResults.suspiciousCount || 0,
-            maliciousCount: urlScanResults.maliciousCount || 0,
+            safeCount: urlScanResults.safeUrls || 0,
+            suspiciousCount: urlScanResults.suspiciousUrls || 0,
+            maliciousCount: urlScanResults.maliciousUrls || 0,
           },
           intentAnalysis: {
             confidence: intentAnalysis.confidence || 0,
@@ -1600,7 +1603,7 @@ export default function Home() {
                         key: "analysis",
                         label: (
                           <div className="flex items-center">
-                            <BrainOutlined className="mr-2" />
+                            <SettingOutlined className="mr-2" />
                             <Text strong className="text-sm">
                               AI Analysis
                             </Text>
@@ -1719,7 +1722,7 @@ export default function Home() {
                             {checkResult.extractedIdentifiers?.cryptoAddresses?.length > 0 && (
                               <div>
                                 <div className="flex items-center mb-2">
-                                  <DollarCircleOutlined className="text-yellow-500 mr-2" />
+                                  <DollarOutlined className="text-yellow-500 mr-2" />
                                   <Text strong className="text-xs">Crypto Addresses ({checkResult.extractedIdentifiers.cryptoAddresses.length})</Text>
                                 </div>
                                 <div className="space-y-1">
@@ -1735,7 +1738,7 @@ export default function Home() {
                             {checkResult.extractedIdentifiers?.socialHandles?.length > 0 && (
                               <div>
                                 <div className="flex items-center mb-2">
-                                  <TwitterOutlined className="text-blue-400 mr-2" />
+                                  <UserOutlined className="text-blue-400 mr-2" />
                                   <Text strong className="text-xs">Social Handles ({checkResult.extractedIdentifiers.socialHandles.length})</Text>
                                 </div>
                                 <div className="space-y-1">
@@ -1766,7 +1769,7 @@ export default function Home() {
                         key: "database",
                         label: (
                           <div className="flex items-center">
-                            <ShieldOutlined className="mr-2" />
+                            <SafetyOutlined className="mr-2" />
                             <Text strong className="text-sm">
                               Scammer Database Matches
                             </Text>
