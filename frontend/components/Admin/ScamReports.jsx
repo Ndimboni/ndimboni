@@ -389,6 +389,28 @@ const ScammerReportPage = () => {
       ),
     },
     {
+      title: "Auto Verified",
+      dataIndex: "isAutoVerified",
+      key: "isAutoVerified",
+      width: 120,
+      render: (isAutoVerified) => (
+        <Tag color={isAutoVerified ? "purple" : "default"}>
+          {isAutoVerified ? "YES" : "NO"}
+        </Tag>
+      ),
+    },
+    {
+      title: "Source",
+      dataIndex: "source",
+      key: "source",
+      width: 100,
+      render: (source) => (
+        <Tag color="geekblue" size="small">
+          {(source || "WEB").toUpperCase()}
+        </Tag>
+      ),
+    },
+    {
       title: "Report Count",
       dataIndex: "reportCount",
       key: "reportCount",
@@ -841,6 +863,20 @@ const ScammerReportPage = () => {
                 <List.Item>
                   <Text strong>Report Count:</Text>
                   <Badge count={selectedReport.reportCount || 1} showZero />
+                </List.Item>
+                <List.Item>
+                  <Text strong>Auto Verified:</Text>
+                  <Tag
+                    color={selectedReport.isAutoVerified ? "purple" : "default"}
+                  >
+                    {selectedReport.isAutoVerified ? "YES" : "NO"}
+                  </Tag>
+                </List.Item>
+                <List.Item>
+                  <Text strong>Source:</Text>
+                  <Tag color="geekblue">
+                    {(selectedReport.source || "WEB").toUpperCase()}
+                  </Tag>
                 </List.Item>
                 <List.Item>
                   <Text strong>Created:</Text>

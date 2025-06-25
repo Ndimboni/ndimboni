@@ -464,6 +464,17 @@ const ScammerReportPage = () => {
       ),
     },
     {
+      title: "Auto Verified",
+      dataIndex: "isAutoVerified",
+      key: "isAutoVerified",
+      width: 120,
+      render: (isAutoVerified) => (
+        <Tag color={isAutoVerified ? "purple" : "default"}>
+          {isAutoVerified ? "YES" : "NO"}
+        </Tag>
+      ),
+    },
+    {
       title: "Report Count",
       dataIndex: "reportCount",
       key: "reportCount",
