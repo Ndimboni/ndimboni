@@ -249,6 +249,35 @@ For support, contact our team.
       const saved = await this.scamReportRepository.save(report);
       console.log(saved);
 
+      // Extract and save scammer identifiers from the report description
+      try {
+        const extractionResult =
+          await this.rankingService.extractAndSaveScammerIdentifiers(
+            description,
+            saved.id,
+            'telegram',
+            ctx.from?.id?.toString(),
+          );
+
+        this.logger.log(
+          `Extracted ${extractionResult.extractedCount} scammer identifiers from Telegram report ${saved.id}`,
+        );
+
+        if (extractionResult.extractedCount > 0) {
+          this.logger.log(
+            `Saved scammer reports: ${extractionResult.savedReports
+              .map((r) => `${r.type}:${r.identifier}`)
+              .join(', ')}`,
+          );
+        }
+      } catch (extractionError) {
+        this.logger.warn(
+          `Failed to extract scammer identifiers from Telegram report ${saved.id}:`,
+          extractionError,
+        );
+        // Don't fail the entire operation if extraction fails
+      }
+
       // Use shared formatter for success message
       const successMessage =
         this.scamAnalysisFormatterService.formatReportSuccessResponse(

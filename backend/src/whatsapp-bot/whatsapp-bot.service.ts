@@ -7,7 +7,7 @@ import { ScamCheckService } from '../scam-check/scam-check.service';
 import { WhatsappApiService } from './whatsapp-api.service';
 import { ScamAnalysisFormatterService } from '../common/services/scam-analysis-formatter.service';
 import { ScammerReportService } from '../scammer-reports/scammer-report.service';
-import { ScammerType } from '../entities/scammer-report.entity';
+import { RankingService } from '../scam-check/risk-score-ranking.service';
 
 @Injectable()
 export class WhatsappBotService {
@@ -22,6 +22,7 @@ export class WhatsappBotService {
     private whatsappApiService: WhatsappApiService,
     private scamAnalysisFormatterService: ScamAnalysisFormatterService,
     private scammerReportService: ScammerReportService,
+    private rankingService: RankingService,
   ) {}
 
   async handleIncomingMessage(message: any): Promise<string> {
@@ -65,21 +66,67 @@ export class WhatsappBotService {
     ) {
       const description = text.slice(7).trim();
 
-      // Use ScammerReportService instead of direct repository
-      const result = await this.scammerReportService.createReport({
-        type: ScammerType.PHONE, // Assuming phone number reports from WhatsApp
-        identifier: waId,
-        description: description || 'WhatsApp scam report',
-        additionalInfo: `Reported via WhatsApp from ${waId}`,
-        source: 'whatsapp',
-      });
+      try {
+        // Create a scam report first (consistent with Telegram bot)
+        const scamReport = this.scamReportRepository.create({
+          title: 'WhatsApp Report',
+          description: description || 'WhatsApp scam report',
+          status: 'pending' as any,
+          scamType: 'other' as any,
+          reporterPhone: waId,
+          additionalInfo: JSON.stringify({
+            reporterPhone: waId,
+            source: 'whatsapp',
+            originalMessage: text,
+          }),
+        } as Partial<ScamReport>);
 
-      reply = this.scamAnalysisFormatterService.formatReportSuccessResponse(
-        result.id,
-        'whatsapp',
-      );
-      await this.whatsappApiService.sendMessage(waId, reply);
-      return reply;
+        const savedScamReport =
+          await this.scamReportRepository.save(scamReport);
+        this.logger.log(`WhatsApp scam report created: ${savedScamReport.id}`);
+
+        // Extract and save scammer identifiers from the report description
+        try {
+          const extractionResult =
+            await this.rankingService.extractAndSaveScammerIdentifiers(
+              description || text,
+              savedScamReport.id,
+              'whatsapp',
+              waId,
+            );
+
+          this.logger.log(
+            `Extracted ${extractionResult.extractedCount} scammer identifiers from WhatsApp report ${savedScamReport.id}`,
+          );
+
+          if (extractionResult.extractedCount > 0) {
+            this.logger.log(
+              `Saved scammer reports: ${extractionResult.savedReports
+                .map((r) => `${r.type}:${r.identifier}`)
+                .join(', ')}`,
+            );
+          }
+        } catch (extractionError) {
+          this.logger.warn(
+            `Failed to extract scammer identifiers from WhatsApp report ${savedScamReport.id}:`,
+            extractionError,
+          );
+          // Don't fail the entire operation if extraction fails
+        }
+
+        reply = this.scamAnalysisFormatterService.formatReportSuccessResponse(
+          savedScamReport.id,
+          'whatsapp',
+        );
+        await this.whatsappApiService.sendMessage(waId, reply);
+        return reply;
+      } catch (error) {
+        this.logger.error('Error creating WhatsApp scam report:', error);
+        reply =
+          '❌ Sorry, there was an error submitting your report. Please try again later.';
+        await this.whatsappApiService.sendMessage(waId, reply);
+        return reply;
+      }
     }
 
     // Scam check for all other messages

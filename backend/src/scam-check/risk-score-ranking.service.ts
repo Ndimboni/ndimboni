@@ -165,7 +165,7 @@ export class RankingService {
    */
   async analyzeMessageFlowchart(
     text: string,
-    userId?: string,
+    _userId?: string,
   ): Promise<RankingServiceResult> {
     this.logger.log('Starting flowchart-based message analysis...');
 
@@ -624,5 +624,142 @@ export class RankingService {
     }
 
     return recommendations;
+  }
+
+  /**
+   * Extract identifiers from text and save them as scammer reports
+   * This method is used by bot services to automatically populate scammer database
+   */
+  async extractAndSaveScammerIdentifiers(
+    text: string,
+    reportId: string,
+    source: 'telegram' | 'whatsapp' | 'web',
+    reportedBy?: string,
+  ): Promise<{
+    extractedCount: number;
+    savedReports: Array<{
+      type: string;
+      identifier: string;
+      reportId: string;
+    }>;
+  }> {
+    this.logger.log(
+      `Extracting and saving scammer identifiers from ${source} report: ${reportId}`,
+    );
+
+    const extractedIdentifiers = this.extractIdentifiers(text);
+    const savedReports: Array<{
+      type: string;
+      identifier: string;
+      reportId: string;
+    }> = [];
+    let extractedCount = 0;
+
+    // Save phone numbers as scammer reports
+    for (const phone of extractedIdentifiers.phoneNumbers) {
+      try {
+        const scammerReport = await this.scammerReportService.createReport({
+          type: 'phone' as any, // ScammerType.PHONE
+          identifier: phone,
+          description: `Phone number extracted from scam report (${reportId})`,
+          additionalInfo: `Original message: "${text.substring(0, 200)}${
+            text.length > 200 ? '...' : ''
+          }"`,
+          reportedBy,
+          source,
+        });
+
+        savedReports.push({
+          type: 'phone',
+          identifier: phone,
+          reportId: scammerReport.id,
+        });
+        extractedCount++;
+
+        this.logger.log(
+          `Saved phone number ${phone} as scammer report: ${scammerReport.id}`,
+        );
+      } catch (error) {
+        this.logger.warn(`Failed to save phone number ${phone}:`, error);
+      }
+    }
+
+    // Save emails as scammer reports
+    for (const email of extractedIdentifiers.emails) {
+      try {
+        const scammerReport = await this.scammerReportService.createReport({
+          type: 'email' as any, // ScammerType.EMAIL
+          identifier: email,
+          description: `Email address extracted from scam report (${reportId})`,
+          additionalInfo: `Original message: "${text.substring(0, 200)}${
+            text.length > 200 ? '...' : ''
+          }"`,
+          reportedBy,
+          source,
+        });
+
+        savedReports.push({
+          type: 'email',
+          identifier: email,
+          reportId: scammerReport.id,
+        });
+        extractedCount++;
+
+        this.logger.log(
+          `Saved email ${email} as scammer report: ${scammerReport.id}`,
+        );
+      } catch (error) {
+        this.logger.warn(`Failed to save email ${email}:`, error);
+      }
+    }
+
+    // Save URLs as website scammer reports
+    for (const url of extractedIdentifiers.urls) {
+      try {
+        // Extract domain from URL for cleaner identifier
+        let domain = url;
+        try {
+          const urlObj = new URL(url);
+          domain = urlObj.hostname;
+        } catch (_urlError) {
+          // If URL parsing fails, use the original URL
+          this.logger.debug(`Could not parse URL ${url}, using as-is`);
+        }
+
+        const scammerReport = await this.scammerReportService.createReport({
+          type: 'website' as any, // ScammerType.WEBSITE
+          identifier: domain,
+          description: `Website/URL extracted from scam report (${reportId})`,
+          additionalInfo: `Full URL: ${url}\nOriginal message: "${text.substring(
+            0,
+            200,
+          )}${text.length > 200 ? '...' : ''}"`,
+          reportedBy,
+          source,
+        });
+
+        savedReports.push({
+          type: 'website',
+          identifier: domain,
+          reportId: scammerReport.id,
+        });
+        extractedCount++;
+
+        this.logger.log(
+          `Saved website ${domain} as scammer report: ${scammerReport.id}`,
+        );
+      } catch (error) {
+        this.logger.warn(`Failed to save URL ${url}:`, error);
+      }
+    }
+
+    this.logger.log(
+      `Extraction complete for report ${reportId}: ${extractedCount} identifiers saved from ${source}`,
+    );
+
+    return {
+      extractedCount,
+      savedReports,
+    };
   }
 }
