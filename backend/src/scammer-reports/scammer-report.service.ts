@@ -93,6 +93,7 @@ export class ScammerReportService {
       });
 
       let scammerReport: ScammerReport;
+      console.log('Existing report found:', existingReport);
 
       if (existingReport) {
         // Check if this user has already reported this scammer (prevent duplicate reports)

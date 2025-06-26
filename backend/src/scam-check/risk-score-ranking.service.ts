@@ -42,7 +42,7 @@ export interface RankingServiceResult {
   confidence: number;
   reasons: string[];
   detectedPatterns: string[];
-  analysisMethod?: 'ai' | 'rule-based' | 'enhanced' | 'flowchart';
+  analysisMethod?: 'ai' | 'rule-based' | 'enhanced' | 'AI and database';
   aiAnalysis: FinalAnalysis;
 }
 
@@ -258,7 +258,7 @@ export class RankingService {
         confidence: Math.min(finalScore + 0.1, 1), // Slightly higher confidence for comprehensive analysis
         reasons: allReasons,
         detectedPatterns: [], // Can be filled from intent analysis if needed
-        analysisMethod: 'flowchart',
+        analysisMethod: 'AI and database',
         aiAnalysis: finalAnalysis,
       };
     } catch (error) {
@@ -271,7 +271,7 @@ export class RankingService {
         confidence: 0,
         reasons: ['Analysis failed - unable to determine risk'],
         detectedPatterns: [],
-        analysisMethod: 'flowchart',
+        analysisMethod: 'AI and database',
         aiAnalysis: {
           finalScore: 0,
           databaseScore: {
@@ -655,6 +655,24 @@ export class RankingService {
     }> = [];
     let extractedCount = 0;
 
+    // Helper function to check if a string is a valid UUID
+    const isValidUUID = (str: string): boolean => {
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      return uuidRegex.test(str);
+    };
+
+    // Only use reportedBy if it's a valid UUID (actual user ID from users table)
+    // For bot users (Telegram/WhatsApp), we don't have user records, so pass undefined
+    const validReportedBy =
+      reportedBy && isValidUUID(reportedBy) ? reportedBy : undefined;
+
+    // Include bot user identifier in additionalInfo instead
+    const botUserInfo =
+      reportedBy && !isValidUUID(reportedBy)
+        ? `\nBot User ID: ${reportedBy}`
+        : '';
+
     // Save phone numbers as scammer reports
     for (const phone of extractedIdentifiers.phoneNumbers) {
       try {
@@ -664,8 +682,8 @@ export class RankingService {
           description: `Phone number extracted from scam report (${reportId})`,
           additionalInfo: `Original message: "${text.substring(0, 200)}${
             text.length > 200 ? '...' : ''
-          }"`,
-          reportedBy,
+          }"${botUserInfo}`,
+          reportedBy: validReportedBy,
           source,
         });
 
@@ -693,8 +711,8 @@ export class RankingService {
           description: `Email address extracted from scam report (${reportId})`,
           additionalInfo: `Original message: "${text.substring(0, 200)}${
             text.length > 200 ? '...' : ''
-          }"`,
-          reportedBy,
+          }"${botUserInfo}`,
+          reportedBy: validReportedBy,
           source,
         });
 
@@ -733,8 +751,8 @@ export class RankingService {
           additionalInfo: `Full URL: ${url}\nOriginal message: "${text.substring(
             0,
             200,
-          )}${text.length > 200 ? '...' : ''}"`,
-          reportedBy,
+          )}${text.length > 200 ? '...' : ''}"${botUserInfo}`,
+          reportedBy: validReportedBy,
           source,
         });
 
