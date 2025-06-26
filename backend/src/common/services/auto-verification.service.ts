@@ -38,7 +38,6 @@ export class AutoVerificationService {
         socialMediaThreshold: 4,
         websiteThreshold: 3,
         otherThreshold: 5,
-        uniqueReportersRequired: true,
       };
   }
 
@@ -56,7 +55,6 @@ export class AutoVerificationService {
 
     const scammerReport = await this.scammerReportRepository.findOne({
       where: { id: scammerReportId },
-      relations: ['reportInstances'],
     });
 
     if (!scammerReport) {
@@ -78,56 +76,23 @@ export class AutoVerificationService {
     }
 
     const threshold = this.getThresholdForType(scammerReport.type);
-    let reportInstances = scammerReport.reportInstances || [];
+    const currentCount = scammerReport.reportCount;
 
-    if (this.autoVerificationConfig.timePeriodHours) {
-      const cutoffDate = new Date();
-      cutoffDate.setHours(
-        cutoffDate.getHours() - this.autoVerificationConfig.timePeriodHours,
-      );
-
-      reportInstances = reportInstances.filter(
-        (instance) => instance.createdAt >= cutoffDate,
-      );
-    }
-
-    const currentCount = reportInstances.length;
-    let uniqueReportersCount: number | undefined;
-
-    if (this.autoVerificationConfig.uniqueReportersRequired) {
-      const uniqueReporters = new Set(
-        reportInstances
-          .filter((instance) => instance.reportedBy)
-          .map((instance) => instance.reportedBy),
-      );
-      uniqueReportersCount = uniqueReporters.size;
-
-      if (uniqueReportersCount < threshold) {
-        return {
-          shouldVerify: false,
-          threshold,
-          currentCount,
-          uniqueReportersCount,
-          reason: `Not enough unique reporters (${uniqueReportersCount}/${threshold})`,
-        };
-      }
-    } else {
-      if (currentCount < threshold) {
-        return {
-          shouldVerify: false,
-          threshold,
-          currentCount,
-          reason: `Not enough reports (${currentCount}/${threshold})`,
-        };
-      }
+    // Simple check: if reportCount exceeds threshold, auto-verify
+    if (currentCount >= threshold) {
+      return {
+        shouldVerify: true,
+        threshold,
+        currentCount,
+        reason: `Report count threshold met (${currentCount}/${threshold})`,
+      };
     }
 
     return {
-      shouldVerify: true,
+      shouldVerify: false,
       threshold,
       currentCount,
-      uniqueReportersCount,
-      reason: 'Threshold met for auto-verification',
+      reason: `Not enough reports (${currentCount}/${threshold})`,
     };
   }
 
@@ -149,15 +114,15 @@ export class AutoVerificationService {
           status: ScammerStatus.VERIFIED,
           isAutoVerified: true,
           autoVerifiedAt: new Date(),
-          verifiedBy: 'system',
+          // Don't set verifiedBy for auto-verification since we don't have a system user UUID
+          // verifiedBy should remain null for auto-verified reports
         },
       );
 
       if (result.affected && result.affected > 0) {
         this.logger.log(
           `Auto-verified scammer report ${scammerReportId} - ` +
-            `${verificationResult.currentCount} reports, ` +
-            `${verificationResult.uniqueReportersCount || 'N/A'} unique reporters`,
+            `${verificationResult.currentCount}/${verificationResult.threshold} reports`,
         );
         return true;
       }
@@ -185,7 +150,6 @@ export class AutoVerificationService {
           status: ScammerStatus.PENDING,
           isAutoVerified: false,
         },
-        relations: ['reportInstances'],
       });
 
       let verifiedCount = 0;
@@ -226,8 +190,6 @@ export class AutoVerificationService {
     thresholds: Record<ScammerType, number>;
     autoVerifiedCount: number;
     pendingReports: number;
-    uniqueReportersRequired: boolean;
-    timePeriodHours?: number;
   }> {
     const autoVerifiedCount = await this.scammerReportRepository.count({
       where: { isAutoVerified: true },
@@ -249,9 +211,6 @@ export class AutoVerificationService {
       },
       autoVerifiedCount,
       pendingReports,
-      uniqueReportersRequired:
-        this.autoVerificationConfig.uniqueReportersRequired,
-      timePeriodHours: this.autoVerificationConfig.timePeriodHours,
     };
   }
 }

@@ -65,7 +65,7 @@ export interface AutoVerificationConfig {
   socialMediaThreshold: number; // Number of reports required to auto-verify social media accounts
   websiteThreshold: number; // Number of reports required to auto-verify websites
   otherThreshold: number; // Number of reports required to auto-verify other types
-  uniqueReportersRequired: boolean; // Whether reports must come from different users
+  uniqueReportersRequired?: boolean; // Whether reports must come from different users (optional)
   timePeriodHours?: number; // Time period to consider for auto-verification (optional)
 }
 
