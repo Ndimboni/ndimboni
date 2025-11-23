@@ -11,26 +11,25 @@ import {
 const { Footer: AntFooter } = Layout
 const { Title, Text, Paragraph } = Typography
 
+import { siteConfig } from '../../config/site'
+
 const Footer = () => {
   const currentYear = new Date().getFullYear()
 
-  const quickLinks = [
-    { title: 'Home', href: '/' },
-    { title: 'About Us', href: '/about' },
-    { title: 'Contact', href: '/contact' },
-    { title: 'Report', href: '/report' },
-  ]
+  const quickLinks = siteConfig.navItems.map(item => ({
+    title: item.label,
+    href: item.href
+  }))
 
   const socialLinks = [
-    { icon: <GithubOutlined />, href: 'https://github.com/GabrielDushime', label: 'GitHub' },
-    { icon: <LinkedinOutlined />, href: 'https://linkedin.com', label: 'LinkedIn' },
-    { icon: <TwitterOutlined />, href: 'https://twitter.com', label: 'Twitter' },
+    { icon: <TwitterOutlined />, href: siteConfig.socials.twitter, label: 'Twitter' },
+    { icon: <LinkedinOutlined />, href: siteConfig.socials.linkedin, label: 'LinkedIn' },
   ]
 
   const contactInfo = [
-    { icon: <MailOutlined />, text: 'admin@ndimboni.com', href: 'mailto:project@university.edu' },
-    { icon: <PhoneOutlined />, text: '+250 783447260 / 784310609', href: 'tel:+250XXXXXXXXX' },
-    { icon: <EnvironmentOutlined />, text: 'Kigali, Rwanda', href: '#' },
+    { icon: <MailOutlined />, text: siteConfig.contact.email, href: `mailto:${siteConfig.contact.email}` },
+    { icon: <PhoneOutlined />, text: siteConfig.contact.phone, href: `tel:${siteConfig.contact.phone}` },
+    { icon: <EnvironmentOutlined />, text: siteConfig.contact.address, href: '#' },
   ]
 
   const techStack = [
@@ -47,12 +46,10 @@ const Footer = () => {
           {/* Company Info */}
           <Col xs={24} sm={12} lg={6}>
             <Title level={4} className="text-white mb-4">
-              Ndimboni
+              {siteConfig.name}
             </Title>
             <Paragraph className="text-white text-opacity-90 mb-4">
-              An interactive web 
-              platform powered by Artificial Intelligence to detect and combat digital scams. 
-              Built with Next.js and modern development practices.
+              {siteConfig.description}
             </Paragraph>
             <div className="flex space-x-4">
               {socialLinks.map((social, index) => (
@@ -131,7 +128,7 @@ const Footer = () => {
         {/* Copyright Section */}
         <div className="copyright">
           <span>
-            © {currentYear} Ndimboni. All rights reserved. | 
+            © {currentYear} {siteConfig.name}. All rights reserved. | 
            
             University Of Rwanda
           </span>

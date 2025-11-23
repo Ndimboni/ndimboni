@@ -29,6 +29,7 @@ const ContactCategory = {
   OTHER: 'other'
 }
 
+import { siteConfig } from '../../config/site'
 export default function ContactPage() {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -44,28 +45,28 @@ export default function ContactPage() {
     {
       icon: <MailOutlined className="text-2xl" />,
       title: 'Email Us',
-      content: 'support@ndimboni.rw',
+      content: siteConfig.contact.email,
       subtitle: 'Get support within 24 hrs',
       color: '#2980B9'
     },
     {
       icon: <PhoneOutlined className="text-2xl" />,
       title: 'Call Us',
-      content: '+250 783 447 260',
+      content: siteConfig.contact.phone,
       subtitle: 'Mon-Fri, 8AM-6PM EAT',
       color: '#1A5276'
     },
     {
       icon: <EnvironmentOutlined className="text-2xl" />,
       title: 'Visit Us',
-      content: 'Kigali, Rwanda',
+      content: siteConfig.contact.address,
       subtitle: 'University of Rwanda CST-Campus',
       color: '#2980B9'
     },
     {
       icon: <WhatsAppOutlined className="text-2xl" />,
       title: 'WhatsApp',
-      content: '+250 784 310 609',
+      content: siteConfig.contact.phone, // Assuming same phone for now, or add whatsapp to config
       subtitle: 'Quick scam reporting',
       color: '#25D366'
     }
@@ -74,10 +75,10 @@ export default function ContactPage() {
 
 const openSocialMedia = (platform) => {
   const socialLinks = {
-    twitter: 'https://twitter.com',
-    linkedin: 'https://linkedin.com',
-    whatsapp: 'https://wa.me/250784310609',
-    github: 'https://github.com/GabrielDushime'
+    twitter: siteConfig.socials.twitter,
+    linkedin: siteConfig.socials.linkedin,
+    whatsapp: `https://wa.me/${siteConfig.contact.phone.replace(/[^0-9]/g, '')}`,
+    github: `https://github.com/${siteConfig.contact.phone.replace(/[^0-9]/g, '')}`
   }
   
   if (socialLinks[platform]) {
@@ -201,7 +202,7 @@ const openSocialMedia = (platform) => {
               </div>
               
               <Title level={1} className="mb-6" style={{ fontSize: '2.2rem', fontWeight: 'bold', color: '#1A5276' }}>
-                Contact <span style={{ color: '#2980B9' }}>Ndimboni</span>
+                Contact <span style={{ color: '#2980B9' }}>{siteConfig.name}</span>
               </Title>
               
               <Paragraph className="text-lg mb-8 leading-relaxed" style={{ color: '#1A5276' }}>

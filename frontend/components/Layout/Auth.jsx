@@ -10,8 +10,10 @@ import {
   EyeTwoTone,
 } from "@ant-design/icons";
 import { motion } from "framer-motion";
+import { siteConfig } from '../../config/site'
 
 const { Title, Paragraph, Text } = Typography;
+
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -142,7 +144,7 @@ export default function AuthPage() {
                 className="text-xl lg:text-2xl font-bold mb-3"
                 style={{ color: "#1A5276" }}
               >
-                Welcome to <span style={{ color: "#2980B9" }}>Ndimboni</span>
+                Welcome to <span style={{ color: "#2980B9" }}>{siteConfig.name}</span>
               </Title>
 
               <Paragraph
@@ -238,7 +240,7 @@ export default function AuthPage() {
                   </Title>
                   <Text className="text-[#2980B9] text-sm">
                     {isLogin
-                      ? "Welcome back to Ndimboni"
+                      ? `Welcome back to ${siteConfig.name}`
                       : "Join the digital protection community"}
                   </Text>
                 </div>

@@ -7,6 +7,8 @@ import { useRouter } from 'next/router'
 
 const { Header: AntHeader } = Layout
 
+import { siteConfig } from '../../config/site'
+
 const Header = () => {
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -22,38 +24,22 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const menuItems = [
-    {
-      key: 'home',
-      icon: <HomeOutlined />,
-      label: <Link href="/">Home</Link>,
-      href: '/'
-    },
-    {
-      key: 'about',
-      icon: <UserOutlined />,
-      label: <Link href="/about">About</Link>,
-      href: '/about'
-    },
-    {
-      key: 'contact',
-      icon: <MailOutlined />,
-      label: <Link href="/contact">Contact</Link>,
-      href: '/contact'
-    },
-    {
-      key: 'report',
-      icon: <AuditOutlined />,
-      label: <Link href="/report">Report</Link>,
-      href: '/report'
-    },
+  const menuItems = siteConfig.navItems.map(item => ({
+    key: item.label.toLowerCase(),
+    icon: item.label === 'Home' ? <HomeOutlined /> : 
+          item.label === 'About' ? <UserOutlined /> :
+          item.label === 'Contact' ? <MailOutlined /> :
+          item.label === 'Report Scam' ? <AuditOutlined /> : <UserOutlined />,
+    label: <Link href={item.href}>{item.label}</Link>,
+    href: item.href
+  })).concat([
     {
       key: 'auth',
       icon: <LogoutOutlined />,
       label: <Link href="/auth">Login</Link>,
       href: '/auth'
-    },
-  ]
+    }
+  ])
 
   const showMobileMenu = () => {
     setMobileMenuVisible(true)
@@ -87,10 +73,10 @@ const Header = () => {
           <div className="logo">
             <Image
               src="/images/ndimboni_logo.svg" 
-              alt="Project Logo"
+              alt={`${siteConfig.name} Logo`}
               width={60}
               height={60}
-              className="ndimboni-logo"
+              className="app-logo"
               onError={(e) => {
                 e.target.style.display = 'none'
               }}
@@ -101,7 +87,7 @@ const Header = () => {
           <div className="movingTextContainer hidden md:block ml-4">
             <div className="movingText">
               <h1 className="animate-moving-text text-white text-lg font-bold">
-                🛡️ Ndimboni - Digital Scam Protection Platform
+                🛡️ {siteConfig.name} - {siteConfig.tagline}
               </h1>
             </div>
           </div>
@@ -109,7 +95,7 @@ const Header = () => {
           {/* Static Title for Mobile screens only */}
           <div className="block md:hidden ml-14">
             <h1 className="text-white text-lg font-bold">
-              Ndimboni Platform
+              {siteConfig.name}
             </h1>
           </div>
         </div>

@@ -59,12 +59,14 @@ const EducationResource = () => (
   </div>
 );
 
+import { siteConfig } from '../../config/site';
+
 const AdminLayout = ({ children, currentPage = "dashboard" }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [userName, setUserName] = useState("Admin User");
-  const [userEmail, setUserEmail] = useState("admin@ndimboni.com");
+  const [userEmail, setUserEmail] = useState(siteConfig.contact.email);
   const [userRole, setUserRole] = useState("admin");
   const [selectedKey, setSelectedKey] = useState(currentPage);
   const [profileModalVisible, setProfileModalVisible] = useState(false);
@@ -158,7 +160,7 @@ const AdminLayout = ({ children, currentPage = "dashboard" }) => {
 
     const storedUserName = localStorage.getItem("user_name") || "Admin User";
     const storedUserEmail =
-      localStorage.getItem("user_email") || "admin@ndimboni.com";
+      localStorage.getItem("user_email") || siteConfig.contact.email;
     const storedUserRole = localStorage.getItem("user_role") || "admin";
 
     setUserName(storedUserName);

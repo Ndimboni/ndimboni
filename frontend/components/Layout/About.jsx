@@ -17,6 +17,8 @@ import { motion } from 'framer-motion'
 
 const { Title, Paragraph, Text } = Typography
 
+import { siteConfig } from '../../config/site'
+
 export default function About() {
   const [mounted, setMounted] = useState(false)
 
@@ -46,7 +48,7 @@ export default function About() {
     },
     {
       title: 'Platform Development',
-      description: 'Built the Ndimboni platform using React Native, FastAPI, and advanced AI algorithms for scam detection',
+      description: `Built the ${siteConfig.name} platform using React Native, FastAPI, and advanced AI algorithms for scam detection`,
       date: '2024 '
     },
     {
@@ -84,12 +86,10 @@ export default function About() {
                   transition={{ duration: 0.8 }}
                 >
                   <Title level={1} className="mb-6" style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#2980B9' }}>
-                    About <span style={{ color: '#1A5276' }}>Ndimboni</span>
+                    About <span style={{ color: '#1A5276' }}>{siteConfig.name}</span>
                   </Title>
                   <Paragraph className="text-lg mb-8 leading-relaxed" style={{ color: '#1A5276' }}>
-                    Ndimboni is an innovative AI-powered platform specifically designed to combat digital scams in Rwanda. 
-                    Our comprehensive solution combines machine learning detection, interactive educational simulations, 
-                    and centralized reporting to protect Rwandans from the growing threat of cyber fraud.
+                    {siteConfig.description}
                   </Paragraph>
                   <Space size="large" className="flex flex-col sm:flex-row">
                     <Button
@@ -213,7 +213,7 @@ export default function About() {
                       <Title level={3} style={{ color: '#1A5276' }}>Our Solution</Title>
                     </div>
                     <Paragraph className="text-base leading-relaxed" style={{ color: '#1A5276' }}>
-                      Ndimboni integrates AI-powered scam detection using machine learning and NLP, interactive 
+                      {siteConfig.name} integrates AI-powered scam detection using machine learning and NLP, interactive 
                       educational simulations to raise awareness, and a centralized reporting system. Our platform 
                       is specifically tailored for the Rwandan context with local language support and cultural relevance.
                     </Paragraph>
@@ -312,93 +312,48 @@ export default function About() {
             </motion.div>
 
             <Row gutter={[32, 32]} justify="center">
-              <Col xs={24} md={12}>
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
-                  viewport={{ once: true }}
-                  whileHover={{ y: -5 }}
-                >
-                  <Card
-                    className="text-center h-full"
-                    style={{
-                      borderRadius: '20px',
-                      backgroundColor: '#FFFFFF',
-                      border: '1px solid rgba(174, 214, 241, 0.3)',
-                      boxShadow: '0 4px 10px rgba(26, 82, 118, 0.2)'
-                    }}
+              {siteConfig.team.map((member, index) => (
+                <Col xs={24} md={12} key={index}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                    viewport={{ once: true }}
+                    whileHover={{ y: -5 }}
                   >
-                    <div className="mb-6">
-                      <div 
-                        className="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center"
-                        style={{ backgroundColor: '#2980B9' }}
-                      >
-                        <UserOutlined className="text-3xl text-white" />
-                      </div>
-                      <Title level={4} style={{ color: '#1A5276' }}>MUNEZERO BAGIRA Sostene</Title>
-                      <Text className="block mb-2" style={{ color: '#2980B9', fontSize: '1rem', fontWeight: 600 }}>
-                        AI/ML Engineer & Backend Developer
-                      </Text>
-                       <Text className="block mb-2" style={{ color: '#2980B9', fontSize: '1rem', fontWeight: 600 }}>
-                        (Full Stack Engineer)
-                      </Text>
-                      <Text className="block mb-4" style={{ color: '#1A5276' }}>
-                        Phone: +250784310609
-                      </Text>
-                      <Paragraph className="text-sm" style={{ color: '#1A5276' }}>
-                        Specializes in machine learning algorithms, AI-powered scam detection systems, and FastAPI backend development. 
-                        Focuses on implementing NLP and anomaly detection for cybersecurity applications.
-                      </Paragraph>
-                    </div>
-                  </Card>
-                </motion.div>
-              </Col>
-              <Col xs={24} md={12}>
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.1 }}
-                  viewport={{ once: true }}
-                  whileHover={{ y: -5 }}
-                >
-                  <Card
-                    className="text-center h-full"
-                    style={{
-                      borderRadius: '20px',
-                      backgroundColor: '#FFFFFF',
-                      border: '1px solid rgba(174, 214, 241, 0.3)',
-                      boxShadow: '0 4px 10px rgba(26, 82, 118, 0.2)'
-                    }}
-                  >
-                    <div className="mb-6">
-                      <div 
-                        className="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center"
-                        style={{ backgroundColor: '#2980B9' }}
-                      >
-                        <CodeOutlined className="text-3xl text-white" />
-                      </div>
-                      <Title level={4} style={{ color: '#1A5276' }}>DUSHIME Gabriel</Title>
-                      <Text className="block mb-2" style={{ color: '#2980B9', fontSize: '1rem', fontWeight: 600 }}>
-                        Frontend Engineer & UX Designer
-                      </Text>
+                    <Card
+                      className="text-center h-full"
+                      style={{
+                        borderRadius: '20px',
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid rgba(174, 214, 241, 0.3)',
+                        boxShadow: '0 4px 10px rgba(26, 82, 118, 0.2)'
+                      }}
+                    >
+                      <div className="mb-6">
+                        <div 
+                          className="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center"
+                          style={{ backgroundColor: '#2980B9' }}
+                        >
+                          {member.image ? (
+                            <img src={member.image} alt={member.name} className="w-full h-full rounded-full object-cover" />
+                          ) : (
+                            <UserOutlined className="text-3xl text-white" />
+                          )}
+                        </div>
+                        <Title level={4} style={{ color: '#1A5276' }}>{member.name}</Title>
                         <Text className="block mb-2" style={{ color: '#2980B9', fontSize: '1rem', fontWeight: 600 }}>
-                        (Full Stack Engineer)
-                      </Text>
-                      <Text className="block mb-4" style={{ color: '#1A5276' }}>
-                        Phone: +250783447260
-                      </Text>
-                      <Paragraph className="text-sm" style={{ color: '#1A5276' }}>
-                        Expert in React Native cross-platform development and creating intuitive user interfaces. 
-                        Specializes in designing interactive educational simulations and user-friendly reporting systems.
-                      </Paragraph>
-                    </div>
-                  </Card>
-                </motion.div>
-              </Col>
+                          {member.role}
+                        </Text>
+                        <Paragraph className="text-sm" style={{ color: '#1A5276' }}>
+                          {member.bio}
+                        </Paragraph>
+                      </div>
+                    </Card>
+                  </motion.div>
+                </Col>
+              ))}
             </Row>
-
-           
           </div>
         </section>
 

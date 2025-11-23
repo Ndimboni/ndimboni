@@ -1,23 +1,25 @@
 import Head from 'next/head'
 import Layout from '../components/Layout/Layout'
-import ReportPage from '@/components/Layout/Report'
+import Report from '@/components/Layout/Report'
+import { siteConfig } from '../config/site'
 
-export default function Report() {
+export default function ReportPage() {
   return (
     <Layout>
       <Head>
-        <title>Report Scams - Ndimboni Digital Platform</title>
-        <meta name="description" content="Report digital scams and fraudulent activities to help protect the Rwandan digital community. Confidential reporting system for phishing, investment scams, identity theft, and more." />
-        <meta name="keywords" content="report scams, digital fraud, phishing, cybersecurity, Rwanda, scam reporting, fraud prevention" />
-        <meta property="og:title" content="Report Scams - Ndimboni Digital Platform" />
-        <meta property="og:description" content="Help protect Rwanda's digital community by reporting scams and fraudulent activities through our secure reporting system." />
+        <title>Report Scams - {siteConfig.name}</title>
+        <meta name="description" content="Report suspicious numbers, links, or messages to help protect the community." />
+        <meta name="keywords" content="report scam, fraud reporting, scammer alert, rwanda scam report, digital safety" />
+        <meta property="og:title" content={`Report Scams - ${siteConfig.name}`} />
+        <meta property="og:description" content="Report suspicious numbers, links, or messages to help protect the community." />
         <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://ndimboni.com/report" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Report Scams - Ndimboni Digital Platform" />
-        <meta name="twitter:description" content="Secure and confidential scam reporting system for Rwanda's digital protection." />
+        <meta name="twitter:title" content={`Report Scams - ${siteConfig.name}`} />
+        <meta name="twitter:description" content="Report suspicious numbers, links, or messages to help protect the community." />
         <link rel="canonical" href="https://ndimboni.com/report" />
       </Head>
-      <ReportPage />
+      <Report />
     </Layout>
   )
 }

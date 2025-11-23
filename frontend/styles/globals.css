@@ -143,7 +143,7 @@ p, span, div, a, button, input, textarea, select,
   
 }
 
-/* Logo styles for Ndimboni header */
+/* Logo styles for App header */
 .logo {
   width: 60px;
   height: 60px;
@@ -155,7 +155,7 @@ p, span, div, a, button, input, textarea, select,
   
 }
 
-.ndimboni-logo {
+.app-logo {
   width: 60px !important;
   height: 60px !important;
   border-radius: 50%;
@@ -167,7 +167,7 @@ p, span, div, a, button, input, textarea, select,
   object-fit: cover;
 }
 
-.ndimboni-logo:hover {
+.app-logo:hover {
   box-shadow: 0 0 15px rgba(41, 128, 185, 0.5);
   transform: scale(1.05);
   border-color: #85C1E9;
@@ -183,7 +183,7 @@ p, span, div, a, button, input, textarea, select,
   }
 }
 
-.ndimboni-logo.animate-glow {
+.app-logo.animate-glow {
   animation: logoGlow 2s ease-in-out infinite;
 }
 

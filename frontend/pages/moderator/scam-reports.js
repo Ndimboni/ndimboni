@@ -1,20 +1,16 @@
 // pages/admin/scam-report.js
 import Head from 'next/head'
-import ModeratorLayout from '../../components/Moderator/ModeratorLayout'
-import ScammerReportPage from '../../components/Moderator/ScamReports'
+import ModeratorLayout from '@/components/Moderator/ModeratorLayout'
+import ScamReports from '@/components/Moderator/ScamReports'
+import { siteConfig } from '../../config/site'
 
-export default function ScamReportPage() {
+export default function ScamReportsPage() {
   return (
-    <>
+    <ModeratorLayout>
       <Head>
-        <title>Scam Reports - Ndimboni Digital Scam Protection</title>
-        <meta name="description" content="Manage and review reported scammers and fraudulent activities" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
+        <title>Scam Reports - {siteConfig.name}</title>
       </Head>
-      <ModeratorLayout>
-        <ScammerReportPage />
-      </ModeratorLayout>
-    </>
+      <ScamReports />
+    </ModeratorLayout>
   )
 }

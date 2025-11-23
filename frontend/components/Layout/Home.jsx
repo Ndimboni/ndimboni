@@ -69,6 +69,7 @@ const ScammerType = {
   WEBSITE: "website",
   OTHER: "other",
 };
+import { siteConfig } from '../../config/site'
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -493,17 +494,13 @@ export default function Home() {
                       color: "#2980B9",
                     }}
                   >
-                    <span style={{ color: "#1A5276" }}>Ndimboni</span> - Combat
-                    Digital Scams
+                    <span style={{ color: "#1A5276" }}>{siteConfig.name}</span> - {siteConfig.tagline}
                   </Title>
                   <Paragraph
                     className="text-base mb-8 leading-relaxed"
                     style={{ color: "#1A5276" }}
                   >
-                    An AI-powered interactive web and mobile platform designed
-                    to detect, report, and educate users about digital scams in
-                    Rwanda. Protecting citizens from phishing, identity theft,
-                    and fraudulent activities.
+                    {siteConfig.description}
                   </Paragraph>
                   <Space size="large" className="flex flex-col sm:flex-row">
                     <Button
@@ -746,7 +743,7 @@ export default function Home() {
                 Revolutionizing Digital Safety
               </Title>
               <Paragraph className="text-lg text-[#1A5276] max-w-4xl mx-auto leading-relaxed opacity-90">
-                Ndimboni combines cutting-edge artificial intelligence,
+                {siteConfig.name} combines cutting-edge artificial intelligence,
                 comprehensive education, and community-driven reporting to
                 create Rwanda's most advanced defense against digital scams.
               </Paragraph>
@@ -890,7 +887,7 @@ export default function Home() {
         </section>
 
         {/* Research Team Section */}
-        <section className="py-10" style={{ backgroundColor: "#f8f9fa" }}>
+        {/* <section className="py-10" style={{ backgroundColor: "#f8f9fa" }}>
           <div className="container mx-auto px-6">
             <motion.div
               initial={{ opacity: 0, y: 50 }}
@@ -932,7 +929,7 @@ export default function Home() {
                     className="text-base max-w-3xl mx-auto mb-12"
                     style={{ color: "#5d6d7e" }}
                   >
-                    Ndimboni developed by Computer and Software Engineers under
+                    {siteConfig.name} developed by Computer and Software Engineers under
                     expert supervision.
                   </Paragraph>
                 </div>
@@ -1092,7 +1089,7 @@ export default function Home() {
               </Card>
             </motion.div>
           </div>
-        </section>
+        </section> */}
 
         {/* Call to Action Section */}
         <section
@@ -1161,10 +1158,12 @@ export default function Home() {
                     >
                       Join thousands of Rwandans using{" "}
                       <span
-                        className="font-semibold"
-                        style={{ color: "#2980B9" }}
+                        style={{
+                          color: "#2980B9",
+                          fontWeight: "bold",
+                        }}
                       >
-                        Ndimboni
+                        {siteConfig.name}
                       </span>{" "}
                       to stay safe online. Report scams, learn protection
                       strategies, and contribute to a safer digital Rwanda.
