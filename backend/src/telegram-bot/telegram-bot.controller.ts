@@ -115,7 +115,6 @@ export class TelegramBotController {
       this.scammerReportService.getStats(),
     ]);
 
-    // Filter stats by source to only include Telegram-originated data
     const telegramCheckStats = {
       ...checkStats,
       recentChecks: checkStats.recentChecks.filter(

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hoaxchange</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <div class="logo-circle">
+                    <span class="logo-icon">🛡️</span>
+                </div>
+                <h1>Hoaxchange</h1>
+            </div>
+        </header>
+
+        <!-- Login View -->
+        <div id="login-view" class="view">
+            <h2>Welcome Back</h2>
+            <p class="subtitle">Sign in to access protection</p>
+            <form id="login-form">
+                <div class="form-group">
+                    <input type="email" id="email" placeholder="Email Address" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" id="login-btn">Sign In</button>
+                <div id="login-error" class="error-message"></div>
+            </form>
+        </div>
+
+        <!-- Main View -->
+        <div id="main-view" class="view hidden">
+            <div class="user-info">
+                <span id="user-name">User</span>
+                <button id="logout-btn" class="btn-text">Logout</button>
+            </div>
+
+            <div class="action-card">
+                <h3>Current Page</h3>
+                <button id="check-page-btn" class="btn btn-primary btn-block">
+                    <span class="icon">🔍</span> Scan Current URL
+                </button>
+            </div>
+
+            <div class="divider"><span>OR</span></div>
+
+            <div class="action-card">
+                <h3>Manual Check</h3>
+                <textarea id="manual-input" placeholder="Paste a message, link, or email content here..." rows="3"></textarea>
+                <button id="check-manual-btn" class="btn btn-secondary btn-block">Check Text</button>
+            </div>
+            <div id="main-error" class="error-message"></div>
+        </div>
+
+        <!-- Results View -->
+        <div id="results-view" class="view hidden">
+            <button id="back-btn" class="btn-text">← Back</button>
+            
+            <div id="result-content">
+                <div class="status-icon" id="status-icon"></div>
+                <h2 id="status-text"></h2>
+                
+                <div class="score-container">
+                    <div class="score-circle">
+                        <span id="risk-score">0</span>%
+                        <span class="score-label">Risk</span>
+                    </div>
+                </div>
+
+                <div class="details-card">
+                    <h4>Analysis</h4>
+                    <p id="analysis-text"></p>
+                </div>
+
+                <div class="details-card hidden" id="reasons-container">
+                    <h4>Warning Flags</h4>
+                    <ul id="reasons-list"></ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="hidden">
+            <div class="spinner"></div>
+            <p>Analyzing...</p>
+        </div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>

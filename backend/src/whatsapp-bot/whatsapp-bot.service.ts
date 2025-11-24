@@ -27,7 +27,6 @@ export class WhatsappBotService {
 
   async handleIncomingMessage(message: any): Promise<string> {
     this.logger.log(`Received WhatsApp message: ${JSON.stringify(message)}`);
-    // Extract message text and sender from WhatsApp webhook payload
     let text = '';
     let waId = '';
     if (
@@ -59,10 +58,10 @@ export class WhatsappBotService {
       return reply;
     }
 
-    // If user wants to report a scam (simple keyword-based trigger, e.g. starts with 'report:')
     if (
       text.trim().toLowerCase().includes('/report') ||
-      text.trim().toLowerCase().includes('/scam')
+      text.trim().toLowerCase().includes('/scam') ||
+      text.trim().toLowerCase().includes('/raporo')
     ) {
       const description = text.slice(7).trim();
 
@@ -85,7 +84,6 @@ export class WhatsappBotService {
           await this.scamReportRepository.save(scamReport);
         this.logger.log(`WhatsApp scam report created: ${savedScamReport.id}`);
 
-        // Extract and save scammer identifiers from the report description
         try {
           const extractionResult =
             await this.rankingService.extractAndSaveScammerIdentifiers(
@@ -129,13 +127,11 @@ export class WhatsappBotService {
       }
     }
 
-    // Scam check for all other messages
     const result = await this.scamCheckService.checkMessage({
       message: text,
       source: 'whatsapp',
     });
 
-    // Use shared formatter for analysis response
     reply = this.scamAnalysisFormatterService.formatScamAnalysisResponse(
       text,
       result,

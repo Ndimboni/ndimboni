@@ -36,7 +36,6 @@ export class WhatsappBotController {
     @Req() req: any,
     @Res() res: Response,
   ) {
-    // WhatsApp webhook payload is in update
     try {
       const result = await this.whatsappWebhookService.processUpdate(update);
       return res.status(200).json({ message: result });

@@ -1,0 +1,7 @@
+{
+	"dependencies": {
+		"expo-task-manager": "^13.1.6",
+		"expo-background-fetch": "^13.1.6",
+		"expo-sqlite": "^15.2.14"
+	}
+}

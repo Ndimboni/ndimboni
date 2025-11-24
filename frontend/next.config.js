@@ -1,8 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'export',
+  // distDir: 'dist',
   reactStrictMode: true,
   experimental: {
     esmExternals: 'loose',
+  },
+  images:{
+    unoptimized:true
   },
   transpilePackages: [
     'antd',

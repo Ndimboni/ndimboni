@@ -29,8 +29,8 @@ import { EducationResourcesModule } from './education-resources/education-resour
     }),
     ThrottlerModule.forRoot([
       {
-        ttl: 60000, // 1 minute
-        limit: 100, // 100 requests per minute
+        ttl: 60000,
+        limit: 100,
       },
     ]),
     DatabaseModule,

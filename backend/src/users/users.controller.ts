@@ -25,7 +25,7 @@ import { UserIdParamDto, UpdateUserDto } from '../dto/users.dto';
 
 @ApiTags('users')
 @Controller('users')
-@UseGuards(PolicyGuard) // JWT guard is now global, only need policy guard
+@UseGuards(PolicyGuard)
 @ApiBearerAuth()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

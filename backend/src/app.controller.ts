@@ -5,7 +5,7 @@ import { Public } from './common/decorators/public.decorator';
 
 @ApiTags('application')
 @Controller()
-@Public() // Make the entire controller public (health checks shouldn't require auth)
+@Public()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 

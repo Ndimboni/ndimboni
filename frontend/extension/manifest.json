@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Hoaxchange - Scam Detector",
+  "version": "1.0",
+  "description": "Your Shield Against Digital Fraud. Check URLs and messages for malicious intent.",
+  "permissions": ["activeTab", "storage"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/favicon-16x16.png",
+      "32": "icons/favicon-32x32.png"
+    }
+  },
+  "icons": {
+    "16": "icons/favicon-16x16.png",
+    "32": "icons/favicon-32x32.png"
+  }
+}

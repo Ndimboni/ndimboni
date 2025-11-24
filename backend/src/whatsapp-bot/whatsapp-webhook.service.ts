@@ -11,7 +11,6 @@ export class WhatsappWebhookService {
     this.logger.log(
       `Processing WhatsApp webhook update: ${JSON.stringify(update)}`,
     );
-    // Forward to bot service for handling
     return this.whatsappBotService.handleIncomingMessage(update);
   }
 }
